@@ -1,0 +1,49 @@
+[global]
+# info = [ {tag="mameversion", value="0229"} ]
+mraauthor=["jotego"]
+
+[features]
+beta = true
+# qsound=true
+# debug=true
+
+[parse]
+sourcefile="shaolins.cpp"
+
+[buttons]
+core=2 # max number of buttons supported by the core
+
+[rbf]
+name="jtkicker"
+
+[dipsw]
+delete = [ "Unused", "Unknown" ]
+# base = 16
+
+[ROM]
+# values starting with $ refer to macro definitions in the .def file
+# or arguments passed to mame2mra
+regions = [
+    { name="maincpu"        },
+    { name="gfx1"           }, # start=$GFX1_START
+    { name="gfx2"           }, # start=$GFX2_START
+    { name="proms"          },
+]
+# { name="myregion", reorder=[3,2,1,0] } # reorder files inside a region
+order = [
+    "maincpu", "gfx1", "gfx2", "proms"
+]
+
+splits = [
+    { machine="riotcity", region="sprites", offset=0x100000 },
+    { machine="goldnaxe", region="sprites", offset=0x100000 },
+    { setname="eswat",    region="sprites", offset=0x100000 },
+    { setname="eswatj",   region="sprites", offset=0x100000 },
+    { setname="eswatu",   region="sprites", offset=0x100000 },
+    { machine="mvp",      region="sprites", offset=0x100000 },
+    { machine="ultracin", region="sprites", offset=0x100000 },
+    # Do not split
+    { setname="eswatj1",  offset=0 },
+    { setname="eswatj1d", offset=0 },
+    { setname="mvpj",     offset=0 },
+]

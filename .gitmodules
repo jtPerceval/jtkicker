@@ -1,0 +1,6 @@
+[submodule "modules/jt89"]
+	path = modules/jt89
+	url = git@github.com:jotego/jt89.git
+[submodule "modules/jtframe"]
+	path = modules/jtframe
+	url = git@github.com:jotego/jtframe.git
