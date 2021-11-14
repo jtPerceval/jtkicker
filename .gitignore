@@ -27,3 +27,4 @@ macros.f
 core.def
 jtsim.f
 jtsim_vhdl.f
+mame.xml

@@ -22,16 +22,28 @@ module jtkicker_video(
 
     input               pxl_cen,
     input               pxl2_cen,
+
     // VRAM             
+    input         [2:0] pal_sel,
+
+    // PROMs
+    input         [3:0] prog_data,
+    input         [7:0] prog_addr,
+    input         [2:0] prog_en,
 
     output              LVBL,
     output              V16,
+    output              LHBL_dly,
     output              LVBL_dly,
-    output              HVBL_dly
+    output        [3:0] red,
+    output        [3:0] green,
+    output        [3:0] blue
 );
 
 wire       LHBL;
 wire [8:0] vdump, vrender, hdump;
+wire [3:0] obj_pxl, scr_pxl;
+
 
 assign V16 = vdump[4];
 
@@ -64,6 +76,30 @@ jtframe_vtimer #(
     .LVBL       ( LVBL      ),
     .HS         (           ),
     .VS         (           )
+);
+
+jtkicker_colmix u_colmix(
+    .clk        ( clk       ),
+
+    .pxl_cen    ( pxl_cen   ),
+    .pal_sel    ( pal_sel   ),
+
+    // video inputs
+    .obj_pxl    ( obj_pxl   ),
+    .scr_pxl    ( scr_pxl   ),
+    .LHBL       ( LHBL      ),
+    .LVBL       ( LVBL      ),
+
+    // PROMs
+    .prog_data  ( prog_data ),
+    .prog_addr  ( prog_addr ),
+    .prog_en    ( prog_en   ),
+
+    .red        ( red       ),
+    .green      ( green     ),
+    .blue       ( blue      ),
+    .LHBL_dly   ( LHBL_dly  ),
+    .LVBL_dly   ( LVBL_dly  )
 );
 
 endmodule

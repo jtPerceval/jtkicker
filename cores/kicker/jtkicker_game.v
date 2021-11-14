@@ -97,6 +97,7 @@ wire [ 7:0] gfx_dout, pal_dout, cpu_dout;
 assign prog_rd    = 0;
 assign dwnld_busy = downloading;
 assign { dipsw_c, dipsw_b, dipsw_a } = dipsw[19:0];
+assign dip_flip = ~flip;
 
 jtframe_frac_cen #(.W(3)) u_cen (
     .clk    ( clk       ),
@@ -148,7 +149,7 @@ u_dwnld(
 );
 
 `ifndef NOMAIN
-jtflane_main u_main(
+jtkicker_main u_main(
     .clk            ( clk24         ),        // 24 MHz
     .rst            ( rst24         ),
     .cpu4_cen       ( cpu4_cen      ),
@@ -167,6 +168,7 @@ jtflane_main u_main(
     .joystick2      ( joystick2     ),
     .service        ( service       ),
     // GFX
+    .flip           ( flip          ),
     .gfx_addr       ( cpu_addr      ),
     .cpu_dout       ( cpu_dout      ),
     .cpu_rnw        ( cpu_rnw       ),
@@ -193,8 +195,7 @@ assign main_cs = 0;
 `endif
 
 `ifndef NOVIDEO
-jtlabrun_video #(.GAME(1))
-u_video (
+jtkicker_video u_video (
     .rst            ( rst           ),
     .clk            ( clk           ),
     .clk24          ( clk24         ),
@@ -206,7 +207,7 @@ u_video (
     .LVBL_dly       ( LVBL_dly      ),
     .HS             ( HS            ),
     .VS             ( VS            ),
-    .flip           ( dip_flip      ),
+    .flip           ( flip          ),
     .dip_pause      ( dip_pause     ),
     .start_button   ( &start_button ),
     // PROMs
@@ -214,16 +215,12 @@ u_video (
     .prog_addr      ( prog_addr[8:0]),
     .prog_data      ( prog_data[3:0]),
     // GFX - CPU interface
-    .cpu_irqn       ( cpu_irqn      ),
-    .cpu_nmin       ( cpu_nmin      ),
     .gfx_cs         ( gfx_cs        ),
-    .pal_cs         ( pal_cs        ),
     .cpu_rnw        ( cpu_rnw       ),
     .cpu_cen        ( cpu_cen       ),
     .cpu_addr       ( cpu_addr      ),
     .cpu_dout       ( cpu_dout      ),
     .gfx_dout       ( gfx_dout      ),
-    .pal_dout       ( pal_dout      ),
     // SDRAM
     .gfx_addr       (  gfx_addr     ),
     .gfx_data       (  gfx_data     ),
@@ -232,9 +229,9 @@ u_video (
     // pixels
     .red            ( red           ),
     .green          ( green         ),
-    .blue           ( blue          ),
+    .blue           ( blue          )
     // Test
-    .gfx_en         ( gfx_en        )
+    //.gfx_en         ( gfx_en        )
 );
 `endif
 
