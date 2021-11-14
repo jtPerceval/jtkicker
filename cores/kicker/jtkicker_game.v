@@ -83,15 +83,7 @@ wire [17:0] gfx_addr;
 
 wire [ 7:0] main_data;
 wire [16:0] main_addr;
-wire        cen12, cen3, cen1p5, prom_we;
-
-wire [ 7:0] pcma_dout, pcmb_dout, pcmc_dout, pcmd_dout;
-wire        pcma_cs, pcma_ok,
-            pcmb_cs, pcmb_ok,
-            pcmc_cs, pcmc_ok,
-            pcmd_cs, pcmd_ok;
-wire [16:0] pcma_addr, pcmb_addr;
-wire [18:0] pcmc_addr, pcmd_addr;
+wire [ 2:0] cen_base;
 
 wire [ 7:0] dipsw_a, dipsw_b;
 wire [ 3:0] dipsw_c;
@@ -99,30 +91,45 @@ wire        LHBL, LVBL;
 
 wire [13:0] cpu_addr;
 wire        gfx_irqn, gfx_romcs, pal_cs;
-wire        cpu_cen, cpu_rnw, cpu_irqn, cpu_nmin;
+wire        cpu4_cen, cpu_cen, cpu_rnw, cpu_irqn, cpu_nmin;
 wire [ 7:0] gfx_dout, pal_dout, cpu_dout;
 
 assign prog_rd    = 0;
 assign dwnld_busy = downloading;
 assign { dipsw_c, dipsw_b, dipsw_a } = dipsw[19:0];
 
-
-jtframe_cen24 u_cen(
-    .clk        ( clk24         ),    // 24 MHz
-    .cen12      ( cen12         ),
-    .cen8       (               ),
-    .cen6       (               ),
-    .cen4       (               ),
-    .cen3       ( cen3          ),
-    .cen3q      (               ), // 1/4 advanced with respect to cen3
-    .cen1p5     ( cen1p5        ),
-    // 180 shifted signals
-    .cen12b     (               ),
-    .cen6b      (               ),
-    .cen3b      (               ),
-    .cen3qb     (               ),
-    .cen1p5b    (               )
+jtframe_frac_cen #(.W(3)) u_cen (
+    .clk    ( clk       ),
+    .n      ( 10'd16    ),
+    .m      ( 10'd125   ),
+    .cen    ( cen_base  ),
+    .cenb   (           ) // 180 shifted
 );
+
+jtframe_crossclk_cen u_cpu_cen(
+    .clk_in     ( clk       ),
+    .cen_in     ( pxl_cen   ),
+    .clk_out    ( clk24     ),
+    .cen_out    ( cpu4_cen  )   // 6MHz
+);
+
+jtframe_crossclk_cen u_ti1_cen(
+    .clk_in     ( clk       ),
+    .cen_in     ( pxl2_cen  ),
+    .clk_out    ( clk24     ),
+    .cen_out    ( ti1_cen   )   // 3MHz
+);
+
+jtframe_crossclk_cen u_ti2_cen(
+    .clk_in     ( clk       ),
+    .cen_in     (cen_base[2]),
+    .clk_out    ( clk24     ),
+    .cen_out    ( ti2_cen   )   // 1.5MHz
+);
+
+
+assign pxl_cen  = cen_base[0]; // ~6MHz
+assign pxl2_cen = cen_base[1]; // ~3MHz
 
 jtframe_dwnld #(.PROM_START(PROM_START),.SWAB(1))
 u_dwnld(
@@ -144,9 +151,10 @@ u_dwnld(
 jtflane_main u_main(
     .clk            ( clk24         ),        // 24 MHz
     .rst            ( rst24         ),
-    .cen12          ( cen12         ),
-    .cen3           ( cen3          ),
+    .cpu4_cen       ( cpu4_cen      ),
     .cpu_cen        ( cpu_cen       ),
+    .ti1_cen        ( ti1_cen       ),
+    .ti2_cen        ( ti2_cen       ),
     // ROM
     .rom_addr       ( main_addr     ),
     .rom_cs         ( main_cs       ),
@@ -169,27 +177,6 @@ jtflane_main u_main(
 
     .gfx_dout       ( gfx_dout      ),
     .pal_dout       ( pal_dout      ),
-
-    // PCM sound
-    .pcma_addr      ( pcma_addr     ),
-    .pcma_dout      ( pcma_dout     ),
-    .pcma_cs        ( pcma_cs       ),
-    .pcma_ok        ( pcma_ok       ),
-
-    .pcmb_addr      ( pcmb_addr     ),
-    .pcmb_dout      ( pcmb_dout     ),
-    .pcmb_cs        ( pcmb_cs       ),
-    .pcmb_ok        ( pcmb_ok       ),
-
-    .pcmc_addr      ( pcmc_addr     ),
-    .pcmc_dout      ( pcmc_dout     ),
-    .pcmc_cs        ( pcmc_cs       ),
-    .pcmc_ok        ( pcmc_ok       ),
-
-    .pcmd_addr      ( pcmd_addr     ),
-    .pcmd_dout      ( pcmd_dout     ),
-    .pcmd_cs        ( pcmd_cs       ),
-    .pcmd_ok        ( pcmd_ok       ),
 
     // DIP switches
     .dip_pause      ( dip_pause     ),

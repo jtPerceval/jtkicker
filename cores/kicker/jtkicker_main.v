@@ -19,9 +19,10 @@
 module jtkicker_main(
     input               rst,
     input               clk,        // 24 MHz
-    input               cen12,
-    input               cen3,
-    output              cpu_cen,
+    input               cpu4_cen,   // 6 MHz
+    output              cpu_cen,    // Q clock
+    input               ti1_cen,
+    input               ti2_cen,
     // ROM
     output reg  [16:0]  rom_addr,
     output reg          rom_cs,
@@ -33,19 +34,20 @@ module jtkicker_main(
     input       [ 5:0]  joystick1,
     input       [ 5:0]  joystick2,
     input               service,
+
     // GFX
-    output      [10:0]  gfx_addr,
+    output      [10:0]  vram_addr,
     output      [10:0]  obj_addr,
     output              cpu_rnw,
     output      [ 7:0]  cpu_dout,
-    input               gfx_irqn,
-    input               gfx_nmin,
+    output      [ 2:0]  pal_sel,
+    input               LVBL,
+    input               V16,
     output reg          gfx_cs,
-    input               pal_cs,
     output reg          flip,
 
-    input      [7:0]    gfx_dout,
-    input      [7:0]    pal_dout,
+    input      [7:0]    vram_dout,
+    input      [7:0]    oram_dout,
     // DIP switches
     input               dip_pause,
     input      [7:0]    dipsw_a,
@@ -67,7 +69,7 @@ wire        VMA;
 
 assign irq_trigger = ~gfx_irqn & dip_pause;
 assign cpu_rnw     = RnW;
-assign gfx_addr    = A[10:0];
+assign vram_addr    = A[10:0];
 assign obj_addr    = { A[11], A[9:0] };
 assign sample      = 0;
 
@@ -101,13 +103,11 @@ always @(posedge clk) begin
         2: cabinet <= {2'b11, joystick1[5:4], joystick1[2], joystick1[3], joystick1[0], joystick1[1]};
         3: cabinet <= { ~3'd0, start_button, service, coin_input };
     endcase
-    cpu_din <= rom_cs ? rom_data  :
-               ram_cs ? ram_dout  :
-               pal_cs ? pal_dout  :     // pal_cs has priority over gfx_cs
-               gfx_cs ? gfx_dout  :
-               in_cs  ? cabinet   :
-               sys_cs ? sys_dout  :
-               prot_cs? prot_dout : 8'hff;
+    cpu_din <= rom_cs  ? rom_data  :
+               vram_cs ? ram_dout  :
+               gfx_cs  ? gfx_dout  :
+               in_cs   ? cabinet   :
+               sys_cs  ? sys_dout  : 8'hff;
 end
 
 always @(posedge clk) begin
@@ -162,7 +162,7 @@ end
 jt89 u_ti1(
     .rst    ( rst           ),
     .clk    ( clk           ),
-    .clk_en ( cen_ti1       ),
+    .clk_en ( ti1_cen       ),
     .wr_n   ( rdy1 & ~ti1_cs),
     .ce_n   ( ~ti1_cs       ),
     .din    ( ti1_data      ),
@@ -173,7 +173,7 @@ jt89 u_ti1(
 jt89 u_ti2(
     .rst    ( rst           ),
     .clk    ( clk           ),
-    .clk_en ( cen_ti2       ),
+    .clk_en ( ti2_cen       ),
     .wr_n   ( rdy2 & ~ti2_cs),
     .ce_n   ( ~ti2_cs       ),
     .din    ( ti2_data      ),
