@@ -52,27 +52,6 @@ module jtkicker_main(
     input      [7:0]    dipsw_b,
     input      [3:0]    dipsw_c,
 
-    // ADPCM ROM
-    output       [16:0] pcma_addr,
-    input        [ 7:0] pcma_dout,
-    output              pcma_cs,
-    input               pcma_ok,
-
-    output       [16:0] pcmb_addr,
-    input        [ 7:0] pcmb_dout,
-    output              pcmb_cs,
-    input               pcmb_ok,
-
-    output       [18:0] pcmc_addr,
-    input        [ 7:0] pcmc_dout,
-    output              pcmc_cs,
-    input               pcmc_ok,
-
-    output       [18:0] pcmd_addr,
-    input        [ 7:0] pcmd_dout,
-    output              pcmd_cs,
-    input               pcmd_ok,
-
     // Sound
     output signed [15:0] snd,
     output               sample,
@@ -202,7 +181,7 @@ jt89 u_ti2(
     .ready  ( rdy2          )
 );
 
-jtframe_sys6809 #(.RAM_AW(11)) u_cpu(
+jtframe_sys6809 #(.RAM_AW(0)) u_cpu(
     .rstn       ( ~rst      ),
     .clk        ( clk       ),
     .cen        ( cen12     ),   // This is normally the input clock to the CPU
@@ -210,9 +189,9 @@ jtframe_sys6809 #(.RAM_AW(11)) u_cpu(
 
     // Interrupts
     .nIRQ       ( irq_n     ),
-    .nFIRQ      ( 1'b1      ),
-    .nNMI       ( nmi_n     ),
-    .irq_ack    ( irq_ack   ),
+    .nFIRQ      ( nmi_n     ),
+    .nNMI       ( 1'b1      ),
+    .irq_ack    (           ),
     // Bus sharing
     .bus_busy   ( 1'b0      ),
     .waitn      (           ),
@@ -220,11 +199,11 @@ jtframe_sys6809 #(.RAM_AW(11)) u_cpu(
     .A          ( A         ),
     .RnW        ( RnW       ),
     .VMA        ( VMA       ),
-    .ram_cs     ( ram_cs    ),
+    .ram_cs     ( 1'b0      ),
     .rom_cs     ( rom_cs    ),
     .rom_ok     ( rom_ok    ),
     // Bus multiplexer is external
-    .ram_dout   ( ram_dout  ),
+    .ram_dout   (           ),
     .cpu_dout   ( cpu_dout  ),
     .cpu_din    ( cpu_din   )
 );
