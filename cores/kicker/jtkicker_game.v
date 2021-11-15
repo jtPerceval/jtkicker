@@ -48,7 +48,7 @@ module jtkicker_game(
     input   [24:0]  ioctl_addr,
     input   [ 7:0]  ioctl_dout,
     input           ioctl_wr,
-    output  [21:0]  prog_addr,
+    output reg [21:0] prog_addr,
     output  [ 7:0]  prog_data,
     output  [ 1:0]  prog_mask,
     output          prog_we,
@@ -128,9 +128,18 @@ jtframe_crossclk_cen u_ti2_cen(
     .cen_out    ( ti2_cen   )   // 1.5MHz
 );
 
+wire [21:0] pre_prog;
 
 assign pxl_cen  = cen_base[0]; // ~6MHz
 assign pxl2_cen = cen_base[1]; // ~3MHz
+
+always @(*) begin
+    prog_addr = pre_prog;
+    if( ioctl_addr > SCR_START && ioctl_addr<OBJ_START ) begin
+        prog_addr[0]   = pre_prog[3];
+        prog_addr[3:1] = pre_prog[2:0];
+    end
+end
 
 jtframe_dwnld #(.PROM_START(PROM_START),.SWAB(1))
 u_dwnld(
@@ -139,7 +148,7 @@ u_dwnld(
     .ioctl_addr     ( ioctl_addr    ),
     .ioctl_dout     ( ioctl_dout    ),
     .ioctl_wr       ( ioctl_wr      ),
-    .prog_addr      ( prog_addr     ),
+    .prog_addr      ( pre_addr      ),
     .prog_data      ( prog_data     ),
     .prog_mask      ( prog_mask     ), // active low
     .prog_we        ( prog_we       ),

@@ -44,7 +44,7 @@ wire [7:0] pal_addr;
 reg  [4:0] mux;
 wire       obj_blank = obj_pxl[3:0]==0;
 
-assign pal_addr = { pal_sel, mux}
+assign pal_addr = { pal_sel, mux};
 
 always @(posedge clk) if(pxl_cen) begin
     mux[4]   <= obj_blank;

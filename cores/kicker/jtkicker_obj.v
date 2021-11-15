@@ -14,9 +14,9 @@
 
     Author: Jose Tejada Gomez. Twitter: @topapate
     Version: 1.0
-    Date: 14-11-2021 */
+    Date: 15-11-2021 */
 
-module jtkicker_scroll(
+module jtkicker_obj(
     input               rst,
     input               clk,        // 48 MHz
     input               clk24,      // 24 MHz
@@ -26,10 +26,12 @@ module jtkicker_scroll(
 
     // CPU interface
     input        [10:0] cpu_addr,
-    input         [7:0] cpu_dout,
-    input               vram_we,
+    input         [7:0] cpu_din,
+    input               obj1_cs,
+    input               obj2_cs,
+    input               cpu_rnw,
     input               vscr_cs,
-    output        [7:0] vram_dout,
+    output        [7:0] obj_dout,
     output        [7:0] vscr_dout,
 
     // video inputs
@@ -49,22 +51,21 @@ module jtkicker_scroll(
     input        [31:0] rom_data,
     input               rom_ok,
 
-    output        [3:0] pxl
+    output        [3:0] pxl,
 );
 
-wire [ 7:0] code, attr, vram_high, vram_low, pal_addr;
+wire [ 7:0] code, attr, vram_high, vram_low;
 wire [ 3:0] pal_msb;
-wire [ 1:0] code_msb;
 reg  [31:0] pxl_data;
-wire [ 9:0] rd_addr;
+wire [ 9:0] scan_addr;
 reg  [ 7:0] hdf, vpos, vscr;
 reg         cur_hf;
-wire        vram_we_low, vram_we_high;
-wire        vflip, hflip;
+wire        vram_we_low, vram_high;
+wire        vflip;
 
-assign vram_we_low  = vram_we & ~cpu_addr[10];
-assign vram_we_high = vram_we &  cpu_addr[10];
-assign vram_dout    = cpu_addr[10] ? vram_high : vram_low;
+assign obj_dout = obj1_cs ? obj1_dout : obj2_dout;
+assign obj1_we  = obj1_cs & ~cpu_rnw;
+assign obj2_we  = obj2_cs & ~cpu_rnw;
 
 assign vflip = attr[5];
 assign hflip = attr[4];
@@ -72,13 +73,13 @@ assign code_msb = attr[7:6];
 assign pal_msb  = attr[3:0];
 
 always @(*) begin
-    hdf = {8{flip}} ^ hdump[7:0];
+    hdf = {8{flip}} ^ hdump;
 end
 
-assign rom_addr = { code_msb, code, vscr[2:0]^{3{vflip}} }; // 2+8+3=13 bits
-assign rd_addr  = { vscr[7:3], hdf[7:3] }; // 5+5 = 10
+assign rom_addr = { code, vscr[2:0]^{3{vflip}} }; // 2+8+3=13 bits
+assign pxl      = cur_hf ? pxl_data[3:0] : pxl_data[31:28];
+assign scan_addr  = { vscr[7:3], hdf[7:3] }; // 5+5 = 10
 assign vscr_dout= vscr;
-assign pal_addr = { pal_msb, cur_hf ? pxl_data[3:0] : pxl_data[31:28] };
 
 // scroll register in custom chip 085
 always @(posedge clk, posedge rst) begin
@@ -115,12 +116,12 @@ jtframe_dual_ram u_low(
     .clk0   ( clk24         ),
     .data0  ( cpu_dout      ),
     .addr0  ( cpu_addr[9:0] ),
-    .we0    ( vram_we_low   ),
-    .q0     ( vram_low      ),
+    .we0    ( obj1_we       ),
+    .q0     ( obj1_dout     ),
     // Port 1
     .clk1   ( clk           ),
     .data1  (               ),
-    .addr1  ( rd_addr       ),
+    .addr1  ( scan_addr     ),
     .we1    ( 1'b0          ),
     .q1     ( code          )
 );
@@ -130,12 +131,12 @@ jtframe_dual_ram u_high(
     .clk0   ( clk24         ),
     .data0  ( cpu_dout      ),
     .addr0  ( cpu_addr[9:0] ),
-    .we0    ( vram_we_high  ),
-    .q0     ( vram_high     ),
+    .we0    ( obj2_we       ),
+    .q0     ( obj2_dout     ),
     // Port 1
     .clk1   ( clk           ),
     .data1  (               ),
-    .addr1  ( rd_addr       ),
+    .addr1  ( scan_addr     ),
     .we1    ( 1'b0          ),
     .q1     ( attr          )
 );
@@ -143,7 +144,7 @@ jtframe_dual_ram u_high(
 jtframe_prom #(
     .dw ( 4     ),
     .aw ( 8     )
-//    simfile = "477j09.b8",
+//    simfile = "477j08.f16",
 ) u_palette(
     .clk    ( clk       ),
     .cen    ( pxl_cen   ),
@@ -151,7 +152,7 @@ jtframe_prom #(
     .wr_addr( prog_addr ),
     .we     ( prog_en   ),
 
-    .rd_addr( pal_addr  ),
+    .scan_addr( pal_addr  ),
     .q      ( pxl       )
 );
 

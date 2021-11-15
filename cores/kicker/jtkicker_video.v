@@ -19,17 +19,32 @@
 module jtkicker_video(
     input               rst,
     input               clk,        // 48 MHz
+    input               clk24,      // 24 MHz
 
     input               pxl_cen,
     input               pxl2_cen,
 
-    // VRAM             
+    // configuration
     input         [2:0] pal_sel,
+    input               flip,
+
+    // CPU interface
+    input        [10:0] cpu_addr,
+    input         [7:0] cpu_dout,
+    input               vram_we,
+    input               vscr_cs,
+    output        [7:0] vram_dout,
+    output        [7:0] vscr_dout,
 
     // PROMs
     input         [3:0] prog_data,
-    input         [7:0] prog_addr,
-    input         [2:0] prog_en,
+    input        [10:0] prog_addr,
+    input               prom_en,
+
+    // Scroll
+    output       [12:0] scr_addr,
+    input        [31:0] scr_data,
+    input               scr_ok,
 
     output              LVBL,
     output              V16,
@@ -43,9 +58,14 @@ module jtkicker_video(
 wire       LHBL;
 wire [8:0] vdump, vrender, hdump;
 wire [3:0] obj_pxl, scr_pxl;
-
+reg  [4:0] prom_we;
 
 assign V16 = vdump[4];
+
+always @* begin
+    prom_we = 0;
+    prom_we[ prog_addr[10:8] ] = prom_en;
+end
 
 // The original counter keeps hdump[7] high
 // while hdump[8] is hight (i.e. during HBLANK)
@@ -78,6 +98,42 @@ jtframe_vtimer #(
     .VS         (           )
 );
 
+jtkicker_scroll u_scroll(
+    .rst        ( rst       ),
+    .clk        ( clk       ),
+    .clk24      ( clk24     ),
+
+    .pxl_cen    ( pxl_cen   ),
+    .pal_sel    ( pal_sel   ),
+
+    // CPU interface
+    .cpu_addr   ( cpu_addr  ),
+    .cpu_dout    ( cpu_dout   ),
+    .vram_we    ( vram_we   ),
+    .vscr_cs    ( vscr_cs   ),
+    .vram_dout  ( vram_dout ),
+    .vscr_dout  ( vscr_dout ),
+
+    // video inputs
+    .LHBL       ( LHBL      ),
+    .LVBL       ( LVBL      ),
+    .vdump      ( vdump[7:0]),
+    .hdump      ( hdump     ),
+    .flip       ( flip      ),
+
+    // PROMs
+    .prog_data  ( prog_data ),
+    .prog_addr  ( prog_addr[7:0] ),
+    .prog_en    ( prom_we[3]),
+
+    // SDRAM
+    .rom_addr   ( scr_addr  ),
+    .rom_data   ( scr_data  ),
+    .rom_ok     ( scr_ok    ),
+
+    .pxl        ( scr_pxl   )
+);
+
 jtkicker_colmix u_colmix(
     .clk        ( clk       ),
 
@@ -92,8 +148,8 @@ jtkicker_colmix u_colmix(
 
     // PROMs
     .prog_data  ( prog_data ),
-    .prog_addr  ( prog_addr ),
-    .prog_en    ( prog_en   ),
+    .prog_addr  (prog_addr[7:0]),
+    .prog_en    (prom_we[2:0]),
 
     .red        ( red       ),
     .green      ( green     ),

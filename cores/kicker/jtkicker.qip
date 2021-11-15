@@ -1,0 +1,22 @@
+set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) jtkicker_game.v      ]
+set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) jtkicker_main.v      ]
+set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) jtkicker_video.v     ]
+set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) jtkicker_scroll.v    ]
+
+# M6809
+set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) ../../../modules/jtframe/hdl/cpu/mc6809i.v     ]
+set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) ../../../modules/jtframe/hdl/cpu/jtframe_sys6809.v     ]
+
+# Clocking
+set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) ../../modules/jtframe/hdl/clocking/jtframe_frac_cen.v   ]
+
+# Video
+set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) ../../modules/jtframe/hdl/video/jtframe_vtimer.v        ]
+set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) ../../modules/jtframe/hdl/ram/jtframe_obj_buffer.v        ]
+set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) ../../modules/jtframe/hdl/video/jtframe_blank.v        ]
+
+######################
+# Sound
+# JT89
+set_global_assignment -name QIP_FILE [file join $::quartus(qip_path) ../../modules/jt89/hdl/jt89.qip     ]
+

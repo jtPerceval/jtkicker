@@ -123,7 +123,6 @@ always @(posedge clk) begin
             flip     <= cpu_dout[0];
         end
         if( color_cs ) pal_sel <= cpu_dout[2:0];
-        if( vscr_cs  ) vpos <= cpu_dout;
     end
 end
 
