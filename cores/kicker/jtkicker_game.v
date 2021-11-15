@@ -71,15 +71,16 @@ module jtkicker_game(
     input   [ 3:0]  gfx_en
 );
 
-// SDRAM offsets.
-localparam GFX_OFFSET  =  `GFX_START>>1;
-localparam PCM0_OFFSET =  'hA_0000>>1;
-localparam PCM1_OFFSET =  'hC_0000>>1;
-localparam PROM_START  =  'h140000;
+// SDRAM offsets
+localparam SCR_START   =  `SCR_START;
+localparam OBJ_START   =  `OBJ_START;
+localparam PROM_START  =  `PROM_START;
 
-wire        main_cs, main_ok, gfx_cs, gfx_ok;
-wire [15:0] gfx_data;
-wire [17:0] gfx_addr;
+wire        main_cs, main_ok;
+
+wire [12:0] scr_addr;
+wire [31:0] scr_data;
+wire        scr_ok;
 
 wire [ 7:0] main_data;
 wire [16:0] main_addr;
@@ -87,12 +88,13 @@ wire [ 2:0] cen_base;
 
 wire [ 7:0] dipsw_a, dipsw_b;
 wire [ 3:0] dipsw_c;
-wire        LHBL, LVBL;
+wire        LVBL, V16;
 
 wire [13:0] cpu_addr;
-wire        gfx_irqn, gfx_romcs, pal_cs;
-wire        cpu4_cen, cpu_cen, cpu_rnw, cpu_irqn, cpu_nmin;
-wire [ 7:0] gfx_dout, pal_dout, cpu_dout;
+WIRE [ 2:0] pal_sel;
+wire        cpu_cen, cpu_rnw, cpu_irqn, cpu_nmin;
+wire        vscr_cs, prom_we;
+wire [ 7:0] vscr_dout, cpu_dout;
 
 assign prog_rd    = 0;
 assign dwnld_busy = downloading;
@@ -128,16 +130,16 @@ jtframe_crossclk_cen u_ti2_cen(
     .cen_out    ( ti2_cen   )   // 1.5MHz
 );
 
-wire [21:0] pre_prog;
+wire [21:0] pre_addr;
 
 assign pxl_cen  = cen_base[0]; // ~6MHz
 assign pxl2_cen = cen_base[1]; // ~3MHz
 
 always @(*) begin
-    prog_addr = pre_prog;
+    prog_addr = pre_addr;
     if( ioctl_addr > SCR_START && ioctl_addr<OBJ_START ) begin
-        prog_addr[0]   = pre_prog[3];
-        prog_addr[3:1] = pre_prog[2:0];
+        prog_addr[0]   = pre_addr[3];
+        prog_addr[3:1] = pre_addr[2:0];
     end
 end
 
@@ -203,56 +205,54 @@ jtkicker_main u_main(
 assign main_cs = 0;
 `endif
 
-`ifndef NOVIDEO
-jtkicker_video u_video (
-    .rst            ( rst           ),
-    .clk            ( clk           ),
-    .clk24          ( clk24         ),
-    .pxl2_cen       ( pxl2_cen      ),
-    .pxl_cen        ( pxl_cen       ),
-    .LHBL           ( LHBL          ),
-    .LVBL           ( LVBL          ),
-    .LHBL_dly       ( LHBL_dly      ),
-    .LVBL_dly       ( LVBL_dly      ),
-    .HS             ( HS            ),
-    .VS             ( VS            ),
-    .flip           ( flip          ),
-    .dip_pause      ( dip_pause     ),
-    .start_button   ( &start_button ),
+jtkicker_video(
+    .rst        ( rst       ),
+    .clk        ( clk       ),
+    .clk24      ( clk24     ),
+
+    .pxl_cen    ( pxl_cen   ),
+    .pxl2_cen   ( pxl2_cen  ),
+
+    // configuration
+    .pal_sel    ( pal_sel   ),
+    .flip       ( flip      ),
+
+    // CPU interface
+    .cpu_addr   ( cpu_addr  ),
+    .cpu_dout   ( cpu_dout  ),
+    .vram_we    ( vram_we   ),
+    .vscr_cs    ( vscr_cs   ),
+    .vram_dout  ( vram_dout ),
+    .vscr_dout  ( vscr_dout ),
+
     // PROMs
-    .prom_we        ( prom_we       ),
-    .prog_addr      ( prog_addr[8:0]),
-    .prog_data      ( prog_data[3:0]),
-    // GFX - CPU interface
-    .gfx_cs         ( gfx_cs        ),
-    .cpu_rnw        ( cpu_rnw       ),
-    .cpu_cen        ( cpu_cen       ),
-    .cpu_addr       ( cpu_addr      ),
-    .cpu_dout       ( cpu_dout      ),
-    .gfx_dout       ( gfx_dout      ),
-    // SDRAM
-    .gfx_addr       (  gfx_addr     ),
-    .gfx_data       (  gfx_data     ),
-    .gfx_ok         (  gfx_ok       ),
-    .gfx_romcs      (  gfx_romcs    ),
-    // pixels
-    .red            ( red           ),
-    .green          ( green         ),
-    .blue           ( blue          )
-    // Test
-    //.gfx_en         ( gfx_en        )
+    .prog_data  ( prog_data ),
+    .prog_addr  ( prog_addr ),
+    .prom_en    ( prom_we   ),
+
+    // Scroll
+    .scr_addr   ( scr_addr  ),
+    .scr_data   ( scr_data  ),
+    .scr_ok     ( scr_ok    ),
+
+    .LVBL       ( LVBL      ),
+    .V16        ( V16       ),
+    .LHBL_dly   ( LHBL_dly  ),
+    .LVBL_dly   ( LVBL_dly  ),
+    .red        ( red       ),
+    .green      ( green     ),
+    .blue       ( blue      )
 );
-`endif
+
 
 jtframe_rom #(
-    .SLOT0_AW    ( 18              ),
-    .SLOT0_DW    ( 16              ),
-    .SLOT0_OFFSET( GFX_OFFSET      ),
+    .SLOT0_AW    ( 13              ),
+    .SLOT0_DW    ( 32              ),
+    .SLOT0_OFFSET( SCR_START>>1    ),
 
-    // PCM 0
     .SLOT1_AW    ( 17              ),
     .SLOT1_DW    (  8              ),
-    .SLOT1_OFFSET( PCM0_OFFSET     ),
+    .SLOT1_OFFSET( OBJ_START>>1    ),
 
     .SLOT7_AW    ( 17              ),
     .SLOT7_DW    (  8              ),
@@ -261,41 +261,41 @@ jtframe_rom #(
     .rst         ( rst           ),
     .clk         ( clk           ),
 
-    .slot0_cs    ( gfx1_romcs    ),
-    .slot1_cs    ( gfx2_romcs    ),
+    .slot0_cs    ( LVBL          ),
+    .slot1_cs    ( LVBL          ),
     .slot2_cs    ( 1'b0          ),
-    .slot3_cs    ( 1'b0          ), // unused
-    .slot4_cs    ( 1'b0          ), // unused
-    .slot5_cs    ( 1'b0          ), // unused
+    .slot3_cs    ( 1'b0          ),
+    .slot4_cs    ( 1'b0          ),
+    .slot5_cs    ( 1'b0          ),
     .slot6_cs    ( 1'b0          ),
     .slot7_cs    ( main_cs       ),
     .slot8_cs    ( 1'b0          ),
 
-    .slot0_ok    ( gfx1_ok       ),
-    .slot1_ok    ( pcma_ok       ),
-    .slot2_ok    ( pcmb_ok       ),
-    .slot3_ok    ( pcmc_ok       ),
-    .slot4_ok    ( pcmd_ok       ),
+    .slot0_ok    ( scr_ok        ),
+    .slot1_ok    ( obj_ok        ),
+    .slot2_ok    (               ),
+    .slot3_ok    (               ),
+    .slot4_ok    (               ),
     .slot5_ok    (               ),
     .slot6_ok    (               ),
     .slot7_ok    ( main_ok       ),
     .slot8_ok    (               ),
 
-    .slot0_addr  ( gfx_addr      ),
-    .slot1_addr  ( pcma_addr     ),
-    .slot2_addr  ( pcmb_addr     ),
-    .slot3_addr  ( pcmc_addr     ),
-    .slot4_addr  ( pcmd_addr     ),
+    .slot0_addr  ( scr_addr      ),
+    .slot1_addr  ( obj_addr      ),
+    .slot2_addr  (               ),
+    .slot3_addr  (               ),
+    .slot4_addr  (               ),
     .slot5_addr  (               ),
     .slot6_addr  (               ),
     .slot7_addr  ( main_addr     ),
     .slot8_addr  (               ),
 
-    .slot0_dout  ( gfx_data      ),
-    .slot1_dout  ( pcma_dout     ),
-    .slot2_dout  ( pcmb_dout     ),
-    .slot3_dout  ( pcmc_dout     ),
-    .slot4_dout  ( pcmd_dout     ),
+    .slot0_dout  ( scr_data      ),
+    .slot1_dout  ( obj_data      ),
+    .slot2_dout  (               ),
+    .slot3_dout  (               ),
+    .slot4_dout  (               ),
     .slot5_dout  (               ),
     .slot6_dout  (               ),
     .slot7_dout  ( main_data     ),
