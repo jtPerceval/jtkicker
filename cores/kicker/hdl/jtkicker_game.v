@@ -91,9 +91,9 @@ wire [ 3:0] dipsw_c;
 wire        LVBL, V16;
 
 wire [13:0] cpu_addr;
-WIRE [ 2:0] pal_sel;
+wire [ 2:0] pal_sel;
 wire        cpu_cen, cpu_rnw, cpu_irqn, cpu_nmin;
-wire        vscr_cs, prom_we;
+wire        vscr_cs, vram_we, prom_we;
 wire [ 7:0] vscr_dout, cpu_dout;
 
 assign prog_rd    = 0;
@@ -210,7 +210,7 @@ jtkicker_main u_main(
 assign main_cs = 0;
 `endif
 
-jtkicker_video(
+jtkicker_video u_video(
     .rst        ( rst       ),
     .clk        ( clk       ),
     .clk24      ( clk24     ),
@@ -225,7 +225,8 @@ jtkicker_video(
     // CPU interface
     .cpu_addr   ( cpu_addr  ),
     .cpu_dout   ( cpu_dout  ),
-    .vram_we    ( vram_we   ),
+    .cpu_rnw    ( cpu_rnw   ),
+    .vram_cs    ( vram_cs   ),
     .vscr_cs    ( vscr_cs   ),
     .vram_dout  ( vram_dout ),
     .vscr_dout  ( vscr_dout ),

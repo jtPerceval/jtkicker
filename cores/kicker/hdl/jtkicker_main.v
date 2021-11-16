@@ -24,7 +24,7 @@ module jtkicker_main(
     input               ti1_cen,
     input               ti2_cen,
     // ROM
-    output reg  [15:0]  rom_addr,
+    output      [15:0]  rom_addr,
     output reg          rom_cs,
     input       [ 7:0]  rom_data,
     input               rom_ok,
@@ -44,7 +44,7 @@ module jtkicker_main(
     output reg          obj2_cs,
 
     // configuration
-    output      [ 2:0]  pal_sel,
+    output reg  [ 2:0]  pal_sel,
     output reg          flip,
 
     // interrupt triggers
