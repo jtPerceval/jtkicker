@@ -82,6 +82,8 @@ wire [12:0] scr_addr;
 wire [31:0] scr_data;
 wire        scr_ok;
 
+wire        obj_ok;
+
 wire [ 7:0] main_data;
 wire [16:0] main_addr;
 wire [ 2:0] cen_base;
@@ -92,9 +94,11 @@ wire        LVBL, V16;
 
 wire [13:0] cpu_addr;
 wire [ 2:0] pal_sel;
-wire        cpu_cen, cpu_rnw, cpu_irqn, cpu_nmin;
-wire        vscr_cs, vram_we, prom_we;
-wire [ 7:0] vscr_dout, cpu_dout;
+wire        cpu_cen, cpu4_cen, ti1_cen, ti2_cen;
+wire        cpu_rnw, cpu_irqn, cpu_nmin;
+wire        vscr_cs, vram_cs, obj1_cs, obj2_cs,
+            prom_we, flip;
+wire [ 7:0] vscr_dout, vram_dout, obj_dout, cpu_dout;
 
 assign prog_rd    = 0;
 assign dwnld_busy = downloading;
@@ -243,6 +247,8 @@ jtkicker_video u_video(
 
     .LVBL       ( LVBL      ),
     .V16        ( V16       ),
+    .HS         ( HS        ),
+    .VS         ( VS        ),
     .LHBL_dly   ( LHBL_dly  ),
     .LVBL_dly   ( LVBL_dly  ),
     .red        ( red       ),

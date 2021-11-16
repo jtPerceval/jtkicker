@@ -47,8 +47,10 @@ module jtkicker_video(
     input        [31:0] scr_data,
     input               scr_ok,
 
-    output              LVBL,
+    output              HS,
+    output              VS,
     output              V16,
+    output              LVBL,
     output              LHBL_dly,
     output              LVBL_dly,
     output        [3:0] red,
@@ -95,8 +97,8 @@ jtframe_vtimer #(
     .Vinit      (           ),
     .LHBL       ( LHBL      ),
     .LVBL       ( LVBL      ),
-    .HS         (           ),
-    .VS         (           )
+    .HS         ( HS        ),
+    .VS         ( VS        )
 );
 
 jtkicker_scroll u_scroll(
