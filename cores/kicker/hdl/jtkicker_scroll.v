@@ -128,7 +128,7 @@ jtframe_dual_ram u_low(
     .data1  (               ),
     .addr1  ( rd_addr       ),
     .we1    ( 1'b0          ),
-    .q1     ( code          )
+    .q1     ( attr          )
 );
 
 jtframe_dual_ram u_high(
@@ -143,7 +143,7 @@ jtframe_dual_ram u_high(
     .data1  (               ),
     .addr1  ( rd_addr       ),
     .we1    ( 1'b0          ),
-    .q1     ( attr          )
+    .q1     ( code          )
 );
 
 jtframe_prom #(
@@ -152,7 +152,7 @@ jtframe_prom #(
 //    simfile = "477j09.b8",
 ) u_palette(
     .clk    ( clk       ),
-    .cen    ( pxl_cen   ),
+    .cen    ( 1'b1      ),
     .data   ( prog_data ),
     .wr_addr( prog_addr ),
     .we     ( prog_en   ),
