@@ -90,7 +90,10 @@ always @(posedge clk, posedge rst) begin
         vscr <= 0;
     end else begin
         if( vscr_cs  ) vpos <= cpu_dout;
-        if( hdump[8] ) vscr <= {8{flip}} ^ (vdump + (vdump>8'o50 ? vpos : 8'h0));
+        if( hdump[8] )
+            vscr <= {8{flip}} ^ vdump;
+        else if( hdump[4] )
+            vscr <= {8{flip}} ^ (vdump + vpos); // H32 in sch
     end
 end
 
