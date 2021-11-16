@@ -45,11 +45,15 @@
             <part name="5.j4" crc="654037f8" map="12"/>
         </interleave>
         <!-- gfx1 - starts at 0x10000 -->
-        <part name="6.i1" crc="ff18a7ed"/>
-        <part name="7.j1" crc="d9a7cff6"/>
+        <interleave output="16">
+            <part name="6.i1" crc="ff18a7ed" map="01"/>
+            <part name="7.j1" crc="d9a7cff6" map="10"/>
+        </interleave>
         <!-- gfx2 - starts at 0x16000 -->
-        <part name="2.m8" crc="560521c7"/>
-        <part name="1.l8" crc="a79959b2"/>
+        <interleave output="16">
+            <part name="2.m8" crc="560521c7" map="01"/>
+            <part name="1.l8" crc="a79959b2" map="10"/>
+        </interleave>
         <!-- proms - starts at 0x1E000 -->
         <part name="3.k1" crc="b09db4b4"/>
         <part name="4.l1" crc="270a2bf3"/>
