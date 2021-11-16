@@ -245,6 +245,11 @@ jtkicker_video u_video(
     .scr_data   ( scr_data  ),
     .scr_ok     ( scr_ok    ),
 
+    // Objects
+    .obj1_cs    ( obj1_cs   ),
+    .obj2_cs    ( obj2_cs   ),
+    .obj_dout   ( obj_dout  ),
+
     .LVBL       ( LVBL      ),
     .V16        ( V16       ),
     .HS         ( HS        ),

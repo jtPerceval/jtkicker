@@ -32,10 +32,15 @@ module jtkicker_video(
     input        [10:0] cpu_addr,
     input         [7:0] cpu_dout,
     input               cpu_rnw,
+
     input               vram_cs,
     input               vscr_cs,
     output        [7:0] vram_dout,
     output        [7:0] vscr_dout,
+
+    input               obj1_cs,
+    input               obj2_cs,
+    output        [7:0] obj_dout,
 
     // PROMs
     input         [3:0] prog_data,
@@ -46,6 +51,11 @@ module jtkicker_video(
     output       [12:0] scr_addr,
     input        [31:0] scr_data,
     input               scr_ok,
+
+    // Objects
+    output       [12:0] obj_addr,
+    input        [31:0] obj_data,
+    input               obj_ok,
 
     output              HS,
     output              VS,
@@ -136,6 +146,41 @@ jtkicker_scroll u_scroll(
     .rom_ok     ( scr_ok    ),
 
     .pxl        ( scr_pxl   )
+);
+
+jtkicker_obj u_obj(
+    .rst        ( rst       ),
+    .clk        ( clk       ),        // 48 MHz
+    .clk24      ( clk24     ),      // 24 MHz
+
+    .pxl_cen    ( pxl_cen   ),
+
+    // CPU interface
+    .cpu_addr   ( cpu_addr  ),
+    .cpu_dout   ( cpu_dout  ),
+    .obj1_cs    ( obj1_cs   ),
+    .obj2_cs    ( obj2_cs   ),
+    .cpu_rnw    ( cpu_rnw   ),
+    .obj_dout   ( obj_dout  ),
+
+    // video inputs
+    .LHBL       ( LHBL      ),
+    .LVBL       ( LVBL      ),
+    .vdump      ( vdump     ),
+    .hdump      ( hdump     ),
+    .flip       ( flip      ),
+
+    // PROMs
+    .prog_data  ( prog_data ),
+    .prog_addr  ( prog_addr[7:0] ),
+    .prog_en    ( prom_we[4]),
+
+    // SDRAM
+    .rom_addr   ( obj_addr  ),
+    .rom_data   ( obj_data  ),
+    .rom_ok     ( obj_ok    ),
+
+    .pxl        ( obj_pxl   )
 );
 
 jtkicker_colmix u_colmix(

@@ -74,7 +74,7 @@ reg         firq_clrn, irq_clrn;
 reg         ior_cs, dip2_cs, dip3_cs,
             intshow_cs, ti1_cs, ti2_cs,
             color_cs, tidata1_cs, tidata2_cs, iow_cs;
-// reg      afe_cs; // watchdog
+reg      afe_cs; // watchdog
 wire        VMA;
 
 assign irq_trigger  = ~LVBL & dip_pause;
@@ -86,7 +86,7 @@ assign rom_addr     = A;
 always @(*) begin
     rom_cs  = VMA && A[15:14] !=0 && RnW && VMA; // ROM = 4000 - FFFF
     iow_cs     = 0;
-    //afe_cs     = 0;
+    afe_cs     = 0;
     intshow_cs = 0;
     ti2_cs     = 0;
     ti1_cs     = 0;
@@ -104,7 +104,7 @@ always @(*) begin
         case( A[13:11] )
             0: case(A[10:8] )
                 0: iow_cs     = 1;
-                //1: afe_cs     = 1; // watchdog
+                1: afe_cs     = 1; // watchdog
                 2: intshow_cs = 1; // related to VSCR, raster line count?
                 3: ti2_cs     = 1; // TITG2 in sch.
                 4: ti1_cs     = 1; // TITG1 in sch.
@@ -130,6 +130,10 @@ always @(posedge clk) begin
         2: cabinet <= {2'b11, joystick2[5:4], joystick2[2], joystick2[3], joystick2[0], joystick2[1]};
         3: cabinet <= dipsw_a;
     endcase
+    `ifdef SIMULATION
+    if( rom_cs && rom_addr[15:1]==16'hb8c6>>1) cpu_din <= 8'h3d;
+    else
+    `endif
     cpu_din <= rom_cs  ? rom_data  :
                vram_cs ? vram_dout :
                intshow_cs ? vscr_dout :

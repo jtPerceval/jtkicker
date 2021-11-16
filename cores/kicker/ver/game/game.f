@@ -1,7 +1,7 @@
 ../../hdl/jtkicker_colmix.v
 ../../hdl/jtkicker_game.v
 ../../hdl/jtkicker_main.v
-# ../../hdl/jtkicker_obj.v
+../../hdl/jtkicker_obj.v
 ../../hdl/jtkicker_scroll.v
 ../../hdl/jtkicker_video.v
 

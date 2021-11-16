@@ -22,17 +22,14 @@ module jtkicker_obj(
     input               clk24,      // 24 MHz
 
     input               pxl_cen,
-    input         [2:0] pal_sel,
 
     // CPU interface
     input        [10:0] cpu_addr,
-    input         [7:0] cpu_din,
+    input         [7:0] cpu_dout,
     input               obj1_cs,
     input               obj2_cs,
     input               cpu_rnw,
-    input               vscr_cs,
     output        [7:0] obj_dout,
-    output        [7:0] vscr_dout,
 
     // video inputs
     input               LHBL,
@@ -51,65 +48,21 @@ module jtkicker_obj(
     input        [31:0] rom_data,
     input               rom_ok,
 
-    output        [3:0] pxl,
+    output        [3:0] pxl
 );
 
-wire [ 7:0] code, attr, vram_high, vram_low;
-wire [ 3:0] pal_msb;
-reg  [31:0] pxl_data;
+wire [ 7:0] obj1_dout, obj2_dout, pal_addr;
+wire        obj1_we, obj2_we;
 wire [ 9:0] scan_addr;
-reg  [ 7:0] hdf, vpos, vscr;
-reg         cur_hf;
-wire        vram_we_low, vram_high;
-wire        vflip;
 
 assign obj_dout = obj1_cs ? obj1_dout : obj2_dout;
 assign obj1_we  = obj1_cs & ~cpu_rnw;
 assign obj2_we  = obj2_cs & ~cpu_rnw;
 
-assign vflip = attr[5];
-assign hflip = attr[4];
-assign code_msb = attr[7:6];
-assign pal_msb  = attr[3:0];
+assign scan_addr = 0;
+assign pal_addr = 0;
 
-always @(*) begin
-    hdf = {8{flip}} ^ hdump;
-end
-
-assign rom_addr = { code, vscr[2:0]^{3{vflip}} }; // 2+8+3=13 bits
-assign pxl      = cur_hf ? pxl_data[3:0] : pxl_data[31:28];
-assign scan_addr  = { vscr[7:3], hdf[7:3] }; // 5+5 = 10
-assign vscr_dout= vscr;
-
-// scroll register in custom chip 085
-always @(posedge clk, posedge rst) begin
-    if( rst ) begin
-        vpos <= 0;
-        vscr <= 0;
-    end else begin
-        if( vscr_cs  ) vpos <= cpu_dout;
-        if( hdump[8] ) vscr <= {8{flip}} ^ (vpos+vdump);
-    end
-end
-
-always @(posedge clk) if(pxl_cen) begin
-    if( hdf[2:0]==1 ) begin // 2 pixel delay to grab data
-        pxl_data <= {
-            rom_data[31], rom_data[27], rom_data[23], rom_data[19],
-            rom_data[30], rom_data[26], rom_data[22], rom_data[18],
-            rom_data[29], rom_data[25], rom_data[21], rom_data[17],
-            rom_data[28], rom_data[24], rom_data[20], rom_data[16],
-
-            rom_data[15], rom_data[11], rom_data[ 7], rom_data[ 3],
-            rom_data[14], rom_data[10], rom_data[ 6], rom_data[ 2],
-            rom_data[13], rom_data[ 9], rom_data[ 5], rom_data[ 1],
-            rom_data[12], rom_data[ 8], rom_data[ 4], rom_data[ 0]
-        };
-        cur_hf   <= hflip;
-    end else begin
-        pxl_data <= cur_hf ? pxl_data>>4 : pxl_data<<4;
-    end
-end
+assign rom_addr = 0;
 
 jtframe_dual_ram u_low(
     // Port 0, CPU
@@ -123,7 +76,7 @@ jtframe_dual_ram u_low(
     .data1  (               ),
     .addr1  ( scan_addr     ),
     .we1    ( 1'b0          ),
-    .q1     ( code          )
+    .q1     (               )
 );
 
 jtframe_dual_ram u_high(
@@ -138,7 +91,7 @@ jtframe_dual_ram u_high(
     .data1  (               ),
     .addr1  ( scan_addr     ),
     .we1    ( 1'b0          ),
-    .q1     ( attr          )
+    .q1     (               )
 );
 
 jtframe_prom #(
@@ -152,7 +105,7 @@ jtframe_prom #(
     .wr_addr( prog_addr ),
     .we     ( prog_en   ),
 
-    .scan_addr( pal_addr  ),
+    .rd_addr( pal_addr  ),
     .q      ( pxl       )
 );
 

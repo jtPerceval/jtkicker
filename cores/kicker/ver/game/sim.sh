@@ -4,7 +4,7 @@ AUXTMP=/tmp/$RANDOM$RANDOM
 jtcfgstr -target=mist -output=bash -parse ../../hdl/jtkicker.def |grep _START > $AUXTMP
 source $AUXTMP
 
-jtsim_sdram
+#jtsim_sdram
 
 export M6809=1
 
