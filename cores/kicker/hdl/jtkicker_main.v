@@ -66,7 +66,6 @@ module jtkicker_main(
     output               peak
 );
 
-wire [ 7:0] prot_dout, ram_dout;
 reg  [ 7:0] cabinet, cpu_din;
 wire [15:0] A;
 wire        RnW, irq_n, firq_n;
@@ -81,7 +80,7 @@ wire        VMA;
 assign irq_trigger  = ~LVBL & dip_pause;
 assign firq_trigger =  V16  & dip_pause;
 assign cpu_rnw      = RnW;
-assign sample       = 0;
+assign sample       = ti1_cen;
 assign rom_addr     = A;
 
 always @(*) begin

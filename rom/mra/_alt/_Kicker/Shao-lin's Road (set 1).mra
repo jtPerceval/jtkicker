@@ -35,9 +35,15 @@
     <rom index="0" zip="shaolins.zip|kicker.zip" md5="None">
         <!-- maincpu - starts at 0x0 -->
         <part repeat="0x6000"> FF</part>
-        <part name="477l03.d9" crc="2598dfdd"/>
-        <part name="477l04.d10" crc="0cf0351a"/>
-        <part name="477l05.d11" crc="654037f8"/>
+        <interleave output="16">
+            <part name="477l03.d9" crc="2598dfdd" map="12"/>
+        </interleave>
+        <interleave output="16">
+            <part name="477l04.d10" crc="0cf0351a" map="12"/>
+        </interleave>
+        <interleave output="16">
+            <part name="477l05.d11" crc="654037f8" map="12"/>
+        </interleave>
         <!-- gfx1 - starts at 0x10000 -->
         <part name="477j06.a10" crc="ff18a7ed"/>
         <part name="477j07.a11" crc="5f53ae61"/>
@@ -74,5 +80,5 @@
         <dip name="Upright Controls" bits="17" ids="Dual,Single"/>
         <dip name="Service Mode" bits="18" ids="On,Off"/>
     </switches>
-    <buttons names="Shot,Jump,Start,Coin,Core credits" default="Y,X,Start,Select,-" count="2"/>
+    <buttons names="button 1, button 2,Start,Coin,Core credits" default="Y,X,Start,Select,-" count="2"/>
 </misterromdescription>
