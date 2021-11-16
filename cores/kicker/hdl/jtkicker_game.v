@@ -86,7 +86,7 @@ wire        obj_ok;
 
 wire [ 7:0] main_data;
 wire [15:0] main_addr;
-wire [ 2:0] cen_base;
+wire [ 3:0] cen_base;
 
 wire [ 7:0] dipsw_a, dipsw_b;
 wire [ 3:0] dipsw_c;
@@ -104,9 +104,9 @@ assign dwnld_busy = downloading;
 assign { dipsw_c, dipsw_b, dipsw_a } = dipsw[19:0];
 assign dip_flip = ~flip;
 
-jtframe_frac_cen #(.W(3)) u_cen (
+jtframe_frac_cen #(.W(4)) u_cen (
     .clk    ( clk       ),
-    .n      ( 10'd16    ),
+    .n      ( 10'd32    ),
     .m      ( 10'd125   ),
     .cen    ( cen_base  ),
     .cenb   (           ) // 180 shifted
@@ -114,21 +114,21 @@ jtframe_frac_cen #(.W(3)) u_cen (
 
 jtframe_crossclk_cen u_cpu_cen(
     .clk_in     ( clk       ),
-    .cen_in     ( pxl_cen   ),
+    .cen_in     ( pxl2_cen  ),
     .clk_out    ( clk24     ),
     .cen_out    ( cpu4_cen  )   // 6MHz
 );
 
 jtframe_crossclk_cen u_ti1_cen(
     .clk_in     ( clk       ),
-    .cen_in     ( pxl2_cen  ),
+    .cen_in     (cen_base[2]),
     .clk_out    ( clk24     ),
     .cen_out    ( ti1_cen   )   // 3MHz
 );
 
 jtframe_crossclk_cen u_ti2_cen(
     .clk_in     ( clk       ),
-    .cen_in     (cen_base[2]),
+    .cen_in     (cen_base[3]),
     .clk_out    ( clk24     ),
     .cen_out    ( ti2_cen   )   // 1.5MHz
 );
@@ -136,8 +136,8 @@ jtframe_crossclk_cen u_ti2_cen(
 wire [21:0] pre_addr;
 wire [ 7:0] nc;
 
-assign pxl_cen  = cen_base[0]; // ~6MHz
-assign pxl2_cen = cen_base[1]; // ~3MHz
+assign pxl2_cen = cen_base[0]; // ~12MHz
+assign pxl_cen  = cen_base[1]; // ~ 6MHz
 
 always @(*) begin
     prog_addr = pre_addr;

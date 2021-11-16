@@ -98,7 +98,7 @@ always @(posedge clk, posedge rst) begin
 end
 
 always @(posedge clk) if(pxl_cen) begin
-    if( hdf[2:0]==1 ) begin // 2 pixel delay to grab data
+    if( hdf[2:0]==4 ) begin // 2 pixel delay to grab data
         pxl_data <= {
             rom_data[31], rom_data[27], rom_data[23], rom_data[19],
             rom_data[30], rom_data[26], rom_data[22], rom_data[18],
@@ -152,7 +152,7 @@ jtframe_prom #(
 //    simfile = "477j09.b8",
 ) u_palette(
     .clk    ( clk       ),
-    .cen    ( 1'b1      ),
+    .cen    ( pxl_cen   ),
     .data   ( prog_data ),
     .wr_addr( prog_addr ),
     .we     ( prog_en   ),
