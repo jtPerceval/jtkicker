@@ -23,9 +23,9 @@ module jtkicker_game(
     input           clk24,
     output          pxl2_cen,   // 12   MHz
     output          pxl_cen,    //  6   MHz
-    output   [4:0]  red,
-    output   [4:0]  green,
-    output   [4:0]  blue,
+    output   [3:0]  red,
+    output   [3:0]  green,
+    output   [3:0]  blue,
     output          LHBL_dly,
     output          LVBL_dly,
     output          HS,
@@ -85,14 +85,13 @@ wire        scr_ok;
 wire        obj_ok;
 
 wire [ 7:0] main_data;
-wire [16:0] main_addr;
+wire [15:0] main_addr;
 wire [ 2:0] cen_base;
 
 wire [ 7:0] dipsw_a, dipsw_b;
 wire [ 3:0] dipsw_c;
 wire        LVBL, V16;
 
-wire [13:0] cpu_addr;
 wire [ 2:0] pal_sel;
 wire        cpu_cen, cpu4_cen, ti1_cen, ti2_cen;
 wire        cpu_rnw, cpu_irqn, cpu_nmin;
@@ -135,6 +134,7 @@ jtframe_crossclk_cen u_ti2_cen(
 );
 
 wire [21:0] pre_addr;
+wire [ 7:0] nc;
 
 assign pxl_cen  = cen_base[0]; // ~6MHz
 assign pxl2_cen = cen_base[1]; // ~3MHz
@@ -147,7 +147,7 @@ always @(*) begin
     end
 end
 
-jtframe_dwnld #(.PROM_START(PROM_START),.SWAB(1))
+jtframe_dwnld #(.PROM_START(PROM_START))
 u_dwnld(
     .clk            ( clk           ),
     .downloading    ( downloading   ),
@@ -155,7 +155,7 @@ u_dwnld(
     .ioctl_dout     ( ioctl_dout    ),
     .ioctl_wr       ( ioctl_wr      ),
     .prog_addr      ( pre_addr      ),
-    .prog_data      ( prog_data     ),
+    .prog_data      ( {nc,prog_data}),
     .prog_mask      ( prog_mask     ), // active low
     .prog_we        ( prog_we       ),
     .prom_we        ( prom_we       ),
@@ -227,7 +227,7 @@ jtkicker_video u_video(
     .flip       ( flip      ),
 
     // CPU interface
-    .cpu_addr   ( cpu_addr  ),
+    .cpu_addr   ( main_addr[10:0]  ),
     .cpu_dout   ( cpu_dout  ),
     .cpu_rnw    ( cpu_rnw   ),
     .vram_cs    ( vram_cs   ),
@@ -237,7 +237,7 @@ jtkicker_video u_video(
 
     // PROMs
     .prog_data  ( prog_data ),
-    .prog_addr  ( prog_addr ),
+    .prog_addr  ( prog_addr[10:0] ),
     .prom_en    ( prom_we   ),
 
     // Scroll
@@ -266,7 +266,7 @@ jtframe_rom #(
     .SLOT1_DW    (  8              ),
     .SLOT1_OFFSET( OBJ_START>>1    ),
 
-    .SLOT7_AW    ( 17              ),
+    .SLOT7_AW    ( 16              ),
     .SLOT7_DW    (  8              ),
     .SLOT7_OFFSET(  0              )  // Main
 ) u_rom (
