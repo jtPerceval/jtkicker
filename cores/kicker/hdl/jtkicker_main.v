@@ -24,7 +24,7 @@ module jtkicker_main(
     input               ti1_cen,
     input               ti2_cen,
     // ROM
-    output reg  [16:0]  rom_addr,
+    output reg  [15:0]  rom_addr,
     output reg          rom_cs,
     input       [ 7:0]  rom_data,
     input               rom_ok,
@@ -36,18 +36,24 @@ module jtkicker_main(
     input               service,
 
     // GFX
-    output      [10:0]  vram_addr,
-    output      [10:0]  obj_addr,
     output              cpu_rnw,
     output      [ 7:0]  cpu_dout,
+    output reg          vscr_cs,
+    output reg          vram_cs,
+    output reg          obj1_cs,
+    output reg          obj2_cs,
+
+    // configuration
     output      [ 2:0]  pal_sel,
-    input               LVBL,
-    input               V16,
-    output reg          gfx_cs,
     output reg          flip,
 
+    // interrupt triggers
+    input               LVBL,
+    input               V16,
+
     input      [7:0]    vram_dout,
-    input      [7:0]    oram_dout,
+    input      [7:0]    vscr_dout,  // output from Konami 085 custom chip
+    input      [7:0]    obj_dout,
     // DIP switches
     input               dip_pause,
     input      [7:0]    dipsw_a,
@@ -61,64 +67,85 @@ module jtkicker_main(
 );
 
 wire [ 7:0] prot_dout, ram_dout;
+reg  [ 7:0] cabinet, cpu_din;
 wire [15:0] A;
-wire        RnW, irq_n, irq_ack;
-wire        irq_trigger;
-reg         nmi_clrn, irq_clrn;
+wire        RnW, irq_n, firq_n;
+wire        irq_trigger, firq_trigger;
+reg         firq_clrn, irq_clrn;
+reg         ior_cs, dip2_cs, dip3_cs,
+            afe_cs, intshow_cs, ti1_cs, ti2_cs,
+            color_cs, tidata1_cs, tidata2_cs, iow_cs;
 wire        VMA;
 
-assign irq_trigger = ~gfx_irqn & dip_pause;
-assign cpu_rnw     = RnW;
-assign vram_addr    = A[10:0];
-assign obj_addr    = { A[11], A[9:0] };
-assign sample      = 0;
+assign irq_trigger  = ~LVBL & dip_pause;
+assign firq_trigger =  V16  & dip_pause;
+assign cpu_rnw      = RnW;
+assign sample       = 0;
+assign rom_addr     = A;
 
 always @(*) begin
     rom_cs  = A[15:14] !=0 && RnW && VMA; // ROM = 4000 - FFFF
+    iow_cs     = 0;
+    afe_cs     = 0;
+    intshow_cs = 0;
+    ti2_cs     = 0;
+    ti1_cs     = 0;
+    dip2_cs    = 0;
+    dip3_cs    = 0;
+    ior_cs     = 0;
+    tidata2_cs = 0;
+    tidata1_cs = 0;
+    color_cs   = 0;
+    vscr_cs    = 0;
+    obj1_cs    = 0;
+    obj2_cs    = 0;
+    vram_cs    = 0;
     case( A[13:11] )
         0: case(A[10:8] )
-            0: iow_cs = 1;
-            1: afe_cs = 1;  // watchdog
+            0: iow_cs     = 1;
+            1: afe_cs     = 1; // watchdog
             2: intshow_cs = 1; // related to VSCR
-            3: ti2_cs   = 1; // TITG2 in sch.
-            4: ti1_cs   = 1; // TITG1 in sch.
-            5: dip2_cs  = 1;
-            6: dip3_cs  = 1;
-            7: ior_cs   = 1; // IOEN in sch.
+            3: ti2_cs     = 1; // TITG2 in sch.
+            4: ti1_cs     = 1; // TITG1 in sch.
+            5: dip2_cs    = 1;
+            6: dip3_cs    = 1;
+            7: ior_cs     = 1; // IOEN in sch.
         endcase
         1: tidata2_cs = 1;
         2: tidata1_cs = 1;
-        3: color_cs = 1;
-        4: vscr_cs  = 1;
-        5,6: obj_cs = 1;
-        7: vram_cs  = 1;
+        3: color_cs   = 1;
+        4: vscr_cs    = 1;
+        5: obj1_cs    = 1;
+        6: obj2_cs    = 1;
+        7: vram_cs    = 1;
     endcase
 end
 
-
 always @(posedge clk) begin
     case( A[1:0] )
-        0: cabinet <= { 4'hf, dipsw_c };
-        1: cabinet <= {2'b11, joystick2[5:4], joystick2[2], joystick2[3], joystick2[0], joystick2[1]};
-        2: cabinet <= {2'b11, joystick1[5:4], joystick1[2], joystick1[3], joystick1[0], joystick1[1]};
-        3: cabinet <= { ~3'd0, start_button, service, coin_input };
+        0: cabinet <= { ~3'd0, start_button, service, coin_input };
+        1: cabinet <= {2'b11, joystick1[5:4], joystick1[2], joystick1[3], joystick1[0], joystick1[1]};
+        2: cabinet <= {2'b11, joystick2[5:4], joystick2[2], joystick2[3], joystick2[0], joystick2[1]};
+        3: cabinet <= dipsw_a;
     endcase
     cpu_din <= rom_cs  ? rom_data  :
-               vram_cs ? ram_dout  :
-               gfx_cs  ? gfx_dout  :
-               in_cs   ? cabinet   :
-               sys_cs  ? sys_dout  : 8'hff;
+               vram_cs ? vram_dout :
+               vscr_cs ? vscr_dout :
+               (obj1_cs | obj2_cs) ? obj_dout  :
+               ior_cs  ? cabinet   :
+               dip2_cs ? dipsw_b   :
+               dip3_cs ? { 4'hf, dipsw_c } : 8'hff;
 end
 
 always @(posedge clk) begin
     if( rst ) begin
-        nmi_clrn <= 0;
-        irq_clrn <= 0;
-        flip     <= 0;
-        pal_sel  <= 0;
+        firq_clrn <= 0;
+        irq_clrn  <= 0;
+        flip      <= 0;
+        pal_sel   <= 0;
     end else if(cpu_cen) begin
         if( iow_cs ) begin
-            nmi_clrn <= cpu_dout[1];
+            firq_clrn <= cpu_dout[1];
             irq_clrn <= cpu_dout[2];
             flip     <= cpu_dout[0];
         end
@@ -126,15 +153,9 @@ always @(posedge clk) begin
     end
 end
 
-jtframe_cen3p57 #(.CLK24(1)) u_cen(
-    .clk        ( clk       ),
-    .cen_3p57   ( cen_fm    ),
-    .cen_1p78   (           )
-);
-
-jtframe_ff u_ff(
-    .clk      ( clk         ),
+jtframe_ff u_irq(
     .rst      ( rst         ),
+    .clk      ( clk         ),
     .cen      ( 1'b1        ),
     .din      ( 1'b1        ),
     .q        (             ),
@@ -144,6 +165,18 @@ jtframe_ff u_ff(
     .sigedge  ( irq_trigger )     // signal whose edge will trigger the FF
 );
 
+jtframe_ff u_firq(
+    .rst      ( rst         ),
+    .clk      ( clk         ),
+    .cen      ( 1'b1        ),
+    .din      ( 1'b1        ),
+    .q        (             ),
+    .qn       ( firq_n      ),
+    .set      (             ),    // active high
+    .clr      ( ~firq_clrn  ),    // active high
+    .sigedge  (firq_trigger )     // signal whose edge will trigger the FF
+);
+
 reg  [ 7:0] ti1_data, ti2_data;
 wire [10:0] ti1_snd,  ti2_snd;
 wire        rdy1, rdy2;
@@ -151,10 +184,10 @@ wire        rdy1, rdy2;
 always @(posedge clk, posedge rst) begin
     if( rst ) begin
         ti1_data <= 0;
-        ti_data2 <= 0;
+        ti2_data <= 0;
     end else begin
         if( tidata1_cs ) ti1_data <= cpu_dout;
-        if( tidata2_cs ) ti_data2 <= cpu_dout;
+        if( tidata2_cs ) ti2_data <= cpu_dout;
     end
 end
 
@@ -183,12 +216,12 @@ jt89 u_ti2(
 jtframe_sys6809 #(.RAM_AW(0)) u_cpu(
     .rstn       ( ~rst      ),
     .clk        ( clk       ),
-    .cen        ( cen12     ),   // This is normally the input clock to the CPU
+    .cen        ( cpu4_cen  ),   // This is normally the input clock to the CPU
     .cpu_cen    ( cpu_cen   ),   // 1/4th of cen -> 3MHz
 
     // Interrupts
     .nIRQ       ( irq_n     ),
-    .nFIRQ      ( nmi_n     ),
+    .nFIRQ      ( firq_n    ),
     .nNMI       ( 1'b1      ),
     .irq_ack    (           ),
     // Bus sharing
@@ -208,10 +241,10 @@ jtframe_sys6809 #(.RAM_AW(0)) u_cpu(
 );
 
 
-jtframe_mixer #(.W0(10),.W1(10)) u_mixer(
+jtframe_mixer #(.W0(11),.W1(11)) u_mixer(
     .rst    ( rst       ),
     .clk    ( clk       ),
-    .cen    ( cen_ti1   ),
+    .cen    ( ti1_cen   ),
     // input signals
     .ch0    ( ti1_snd   ),
     .ch1    ( ti2_snd   ),

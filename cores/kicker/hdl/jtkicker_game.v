@@ -161,8 +161,8 @@ u_dwnld(
 
 `ifndef NOMAIN
 jtkicker_main u_main(
-    .clk            ( clk24         ),        // 24 MHz
     .rst            ( rst24         ),
+    .clk            ( clk24         ),        // 24 MHz
     .cpu4_cen       ( cpu4_cen      ),
     .cpu_cen        ( cpu_cen       ),
     .ti1_cen        ( ti1_cen       ),
@@ -179,18 +179,23 @@ jtkicker_main u_main(
     .joystick2      ( joystick2     ),
     .service        ( service       ),
     // GFX
-    .flip           ( flip          ),
-    .gfx_addr       ( cpu_addr      ),
     .cpu_dout       ( cpu_dout      ),
     .cpu_rnw        ( cpu_rnw       ),
-    .gfx_irqn       ( cpu_irqn      ),
-    .gfx_nmin       ( cpu_nmin      ),
-    .gfx_cs         ( gfx_cs        ),
-    .pal_cs         ( pal_cs        ),
 
-    .gfx_dout       ( gfx_dout      ),
-    .pal_dout       ( pal_dout      ),
+    .vscr_cs        ( vscr_cs       ),
+    .vram_cs        ( vram_cs       ),
+    .vram_dout      ( vram_dout     ),
+    .vscr_dout      ( vscr_dout     ),
 
+    .obj1_cs        ( obj1_cs       ),
+    .obj2_cs        ( obj2_cs       ),
+    .obj_dout       ( obj_dout      ),
+    // GFX configuration
+    .pal_sel        ( pal_sel       ),
+    .flip           ( flip          ),
+    // interrupt triggers
+    .LVBL           ( LVBL          ),
+    .V16            ( V16           ),
     // DIP switches
     .dip_pause      ( dip_pause     ),
     .dipsw_a        ( dipsw_a       ),

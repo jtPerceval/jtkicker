@@ -27,7 +27,8 @@ module jtkicker_scroll(
     // CPU interface
     input        [10:0] cpu_addr,
     input         [7:0] cpu_dout,
-    input               vram_we,
+    input               cpu_rnw,
+    input               vram_cs,
     input               vscr_cs,
     output        [7:0] vram_dout,
     output        [7:0] vscr_dout,
@@ -61,7 +62,9 @@ reg  [ 7:0] hdf, vpos, vscr;
 reg         cur_hf;
 wire        vram_we_low, vram_we_high;
 wire        vflip, hflip;
+wire        vram_we;
 
+assign vram_we      = vram_cs & ~cpu_rnw;
 assign vram_we_low  = vram_we & ~cpu_addr[10];
 assign vram_we_high = vram_we &  cpu_addr[10];
 assign vram_dout    = cpu_addr[10] ? vram_high : vram_low;

@@ -31,7 +31,8 @@ module jtkicker_video(
     // CPU interface
     input        [10:0] cpu_addr,
     input         [7:0] cpu_dout,
-    input               vram_we,
+    input               cpu_rnw,
+    input               vram_cs,
     input               vscr_cs,
     output        [7:0] vram_dout,
     output        [7:0] vscr_dout,
@@ -108,8 +109,9 @@ jtkicker_scroll u_scroll(
 
     // CPU interface
     .cpu_addr   ( cpu_addr  ),
-    .cpu_dout    ( cpu_dout   ),
-    .vram_we    ( vram_we   ),
+    .cpu_dout   ( cpu_dout  ),
+    .cpu_rnw    ( cpu_rnw   ),
+    .vram_cs    ( vram_cs   ),
     .vscr_cs    ( vscr_cs   ),
     .vram_dout  ( vram_dout ),
     .vscr_dout  ( vscr_dout ),
