@@ -116,8 +116,8 @@ always @(*) begin
             2: tidata1_cs = 1;
             3: color_cs   = 1;
             4: vscr_cs    = 1;  // vertical scroll position
-            5: obj1_cs    = 1;
-            6: obj2_cs    = 1;
+            5: obj2_cs    = 1;
+            6: obj1_cs    = 1;
             7: vram_cs    = 1;
         endcase
     end

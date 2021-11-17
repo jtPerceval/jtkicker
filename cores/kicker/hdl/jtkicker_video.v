@@ -55,6 +55,7 @@ module jtkicker_video(
     // Objects
     output       [12:0] obj_addr,
     input        [31:0] obj_data,
+    output              obj_cs,
     input               obj_ok,
 
     output              HS,
@@ -68,7 +69,7 @@ module jtkicker_video(
     output        [3:0] blue
 );
 
-wire       LHBL;
+wire       LHBL, hinit;
 wire [8:0] vdump, vrender, hdump;
 wire [3:0] obj_pxl, scr_pxl;
 reg  [4:0] prom_we;
@@ -104,7 +105,7 @@ jtframe_vtimer #(
     .vrender    ( vrender   ),
     .vrender1   (           ),
     .H          ( hdump     ),
-    .Hinit      (           ),
+    .Hinit      ( hinit     ),
     .Vinit      (           ),
     .LHBL       ( LHBL      ),
     .LVBL       ( LVBL      ),
@@ -165,9 +166,10 @@ jtkicker_obj u_obj(
     .obj_dout   ( obj_dout  ),
 
     // video inputs
+    .hinit      ( hinit     ),
     .LHBL       ( LHBL      ),
     .LVBL       ( LVBL      ),
-    .vdump      ( vdump     ),
+    .vrender    ( vrender   ),
     .hdump      ( hdump     ),
     .flip       ( flip      ),
 
@@ -177,6 +179,7 @@ jtkicker_obj u_obj(
     .prog_en    ( prom_we[4]),
 
     // SDRAM
+    .rom_cs     ( obj_cs    ),
     .rom_addr   ( obj_addr  ),
     .rom_data   ( obj_data  ),
     .rom_ok     ( obj_ok    ),

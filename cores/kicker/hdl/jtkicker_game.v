@@ -78,11 +78,9 @@ localparam PROM_START  =  `PROM_START;
 
 wire        main_cs, main_ok;
 
-wire [12:0] scr_addr;
-wire [31:0] scr_data;
-wire        scr_ok;
-
-wire        obj_ok;
+wire [12:0] scr_addr, obj_addr;
+wire [31:0] scr_data, obj_data;
+wire        scr_ok, obj_ok, objrom_cs;
 
 wire [ 7:0] main_data;
 wire [15:0] main_addr;
@@ -143,7 +141,12 @@ always @(*) begin
     prog_addr = pre_addr;
     if( ioctl_addr >= SCR_START && ioctl_addr<OBJ_START ) begin
         prog_addr[0]   = ~pre_addr[3];
-        prog_addr[3:1] = pre_addr[2:0];
+        prog_addr[3:1] =  pre_addr[2:0];
+    end
+    if( ioctl_addr >= OBJ_START && ioctl_addr<PROM_START ) begin
+        prog_addr[0]   = ~pre_addr[3];
+        prog_addr[1]   =  pre_addr[4];
+        prog_addr[5:2] =  { pre_addr[5], pre_addr[2:0] }; // making [5] explicit for now
     end
 end
 
@@ -230,10 +233,15 @@ jtkicker_video u_video(
     .cpu_addr   ( main_addr[10:0]  ),
     .cpu_dout   ( cpu_dout  ),
     .cpu_rnw    ( cpu_rnw   ),
+    // Scroll
     .vram_cs    ( vram_cs   ),
     .vscr_cs    ( vscr_cs   ),
     .vram_dout  ( vram_dout ),
     .vscr_dout  ( vscr_dout ),
+    // Objects
+    .obj1_cs    ( obj1_cs   ),
+    .obj2_cs    ( obj2_cs   ),
+    .obj_dout   ( obj_dout  ),
 
     // PROMs
     .prog_data  ( prog_data ),
@@ -244,11 +252,11 @@ jtkicker_video u_video(
     .scr_addr   ( scr_addr  ),
     .scr_data   ( scr_data  ),
     .scr_ok     ( scr_ok    ),
-
     // Objects
-    .obj1_cs    ( obj1_cs   ),
-    .obj2_cs    ( obj2_cs   ),
-    .obj_dout   ( obj_dout  ),
+    .obj_addr   ( obj_addr  ),
+    .obj_data   ( obj_data  ),
+    .obj_cs     ( objrom_cs ),
+    .obj_ok     ( obj_ok    ),
 
     .LVBL       ( LVBL      ),
     .V16        ( V16       ),
@@ -267,7 +275,7 @@ jtframe_rom #(
     .SLOT0_DW    ( 32              ),
     .SLOT0_OFFSET( SCR_START>>1    ),
 
-    .SLOT1_AW    ( 17              ),
+    .SLOT1_AW    ( 14              ),
     .SLOT1_DW    (  8              ),
     .SLOT1_OFFSET( OBJ_START>>1    ),
 
@@ -279,7 +287,7 @@ jtframe_rom #(
     .clk         ( clk           ),
 
     .slot0_cs    ( LVBL          ),
-    .slot1_cs    ( LVBL          ),
+    .slot1_cs    ( objrom_cs     ),
     .slot2_cs    ( 1'b0          ),
     .slot3_cs    ( 1'b0          ),
     .slot4_cs    ( 1'b0          ),
@@ -299,7 +307,7 @@ jtframe_rom #(
     .slot8_ok    (               ),
 
     .slot0_addr  ({scr_addr,1'b0}),
-    .slot1_addr  ( obj_addr      ),
+    .slot1_addr  ({obj_addr,1'b0}),
     .slot2_addr  (               ),
     .slot3_addr  (               ),
     .slot4_addr  (               ),

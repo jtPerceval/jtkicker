@@ -32,9 +32,10 @@ module jtkicker_obj(
     output        [7:0] obj_dout,
 
     // video inputs
+    input               hinit,
     input               LHBL,
     input               LVBL,
-    input         [7:0] vdump,
+    input         [7:0] vrender,
     input         [8:0] hdump,
     input               flip,
 
@@ -44,25 +45,23 @@ module jtkicker_obj(
     input               prog_en,
 
     // SDRAM
-    output       [12:0] rom_addr,
+    output reg   [12:0] rom_addr,
     input        [31:0] rom_data,
+    output reg          rom_cs,
     input               rom_ok,
 
     output        [3:0] pxl
 );
 
-wire [ 7:0] obj1_dout, obj2_dout, pal_addr;
+wire [ 7:0] obj1_dout, obj2_dout, pal_addr,
+            low_dout, hi_dout;
 wire        obj1_we, obj2_we;
-wire [ 9:0] scan_addr;
+reg  [ 5:0] scan_addr;
+wire [ 3:0] pal_data;
 
 assign obj_dout = obj1_cs ? obj1_dout : obj2_dout;
 assign obj1_we  = obj1_cs & ~cpu_rnw;
 assign obj2_we  = obj2_cs & ~cpu_rnw;
-
-assign scan_addr = 0;
-assign pal_addr = 0;
-
-assign rom_addr = 0;
 
 jtframe_dual_ram u_low(
     // Port 0, CPU
@@ -74,9 +73,9 @@ jtframe_dual_ram u_low(
     // Port 1
     .clk1   ( clk           ),
     .data1  (               ),
-    .addr1  ( scan_addr     ),
+    .addr1  ({4'd0,scan_addr}),
     .we1    ( 1'b0          ),
-    .q1     (               )
+    .q1     ( low_dout      )
 );
 
 jtframe_dual_ram u_high(
@@ -89,9 +88,138 @@ jtframe_dual_ram u_high(
     // Port 1
     .clk1   ( clk           ),
     .data1  (               ),
-    .addr1  ( scan_addr     ),
+    .addr1  ({4'd0,scan_addr}),
     .we1    ( 1'b0          ),
-    .q1     (               )
+    .q1     ( hi_dout       )
+);
+
+wire [3:0] buf_in;
+reg  [7:0] buf_a;
+reg        buf_we;
+reg        cen2=0;
+wire       inzone;
+reg        hinit_x;
+reg  [1:0] scan_st;
+
+reg  [7:0] dr_attr, dr_code, dr_xpos;
+reg  [3:0] dr_v;
+reg        dr_start, dr_busy;
+wire [7:0] ydiff;
+
+assign inzone = hi_dout>=vrender && hi_dout<(vrender+8'h10);
+assign ydiff  = vrender-hi_dout;
+
+always @(posedge clk) begin
+    cen2 <= ~cen2;
+    if( hinit ) hinit_x <= 1;
+    else if(cen2) hinit_x <= 0;
+end
+
+// Table scan
+always @(posedge clk, posedge rst) begin
+    if( rst ) begin
+        scan_st <= 0;
+    end else if( cen2 ) begin
+        case( scan_st )
+            default: begin
+                if( hinit_x ) begin
+                    scan_addr <= 0;
+                    scan_st   <= 1;
+                end
+            end
+            1: begin
+                if( !inzone ) begin
+                    scan_addr<=scan_addr+6'd2;
+                    if( &scan_addr[5:1] ) scan_st <= 0;
+                end
+                dr_attr   <= low_dout;
+                dr_v      <= ydiff[3:0];
+                scan_addr <=scan_addr+6'd1;
+                scan_st   <= 2;
+            end
+            2: begin
+                if( !dr_busy ) begin
+                    dr_code  <= hi_dout;
+                    dr_xpos  <= low_dout;
+                    dr_start <= 1;
+                end else begin
+                    scan_addr <=scan_addr+6'd1;
+                    if( &scan_addr[5:1] ) scan_st <= 0;
+                    scan_st <= 1;
+                end
+            end
+        endcase
+    end
+end
+
+// Draw
+reg  [31:0] pxl_data;
+reg  [ 2:0] dr_cnt;
+wire        hflip, vflip;
+
+assign pal_addr = { dr_attr[3:0], hflip ? pxl_data[3:0] : pxl_data[31:28] };
+assign hflip    = dr_attr[6];
+assign vflip    = dr_attr[7];
+
+always @(posedge clk, posedge rst) begin
+    if( rst ) begin
+        dr_busy  <= 0;
+        rom_cs   <= 0;
+        rom_addr <= 0;
+        pxl_data <= 0;
+        buf_we   <= 0;
+        buf_a    <= 0;
+        dr_cnt   <= 0;
+    end else if( cen2 ) begin
+        if( dr_start && !dr_busy ) begin
+            rom_addr <= { dr_code, dr_v^{4{vflip}}, 1'b0 };
+            rom_cs   <= 1;
+            dr_cnt   <= 7;
+            buf_a    <= dr_xpos;
+        end
+        if( dr_busy && (!rom_cs || rom_ok) ) begin
+            if( dr_cnt==7 ) begin
+                pxl_data <= {
+                    rom_data[27], rom_data[31], rom_data[19], rom_data[23],
+                    rom_data[26], rom_data[30], rom_data[18], rom_data[22],
+                    rom_data[25], rom_data[29], rom_data[17], rom_data[21],
+                    rom_data[24], rom_data[28], rom_data[16], rom_data[20],
+                    rom_data[11], rom_data[15], rom_data[ 3], rom_data[ 7],
+                    rom_data[10], rom_data[14], rom_data[ 2], rom_data[ 6],
+                    rom_data[ 9], rom_data[13], rom_data[ 1], rom_data[ 5],
+                    rom_data[ 8], rom_data[12], rom_data[ 0], rom_data[ 4]
+                };
+                buf_we <= 1;
+                rom_cs <= 0;
+            end else begin
+                pxl_data <= hflip ? pxl_data>>4 : pxl_data<<4;
+            end
+            dr_cnt <= dr_cnt - 3'd1;
+            buf_a  <= hflip ? buf_a-8'd1 : buf_a+8'd1;
+            if( !dr_cnt ) begin
+                buf_we  <= 0;
+                if( rom_addr[0] ) begin
+                    dr_busy <= 0;
+                end else begin
+                    rom_addr[0] <= 1;
+                    rom_cs      <= 1;
+                end
+            end
+        end
+    end
+end
+
+jtframe_obj_buffer #(.AW(8),.DW(4), .ALPHA(0)) u_buffer(
+    .clk    ( clk   ),
+    .LHBL   ( LHBL  ),
+    // New data writes
+    .wr_data( buf_in),
+    .wr_addr( buf_a ),
+    .we     ( buf_we),
+    // Old data reads (and erases)
+    .rd_addr( hdump ),
+    .rd     (pxl_cen),                 // data will be erased after the rd event
+    .rd_data( pxl   )
 );
 
 jtframe_prom #(
@@ -100,13 +228,13 @@ jtframe_prom #(
 //    simfile = "477j08.f16",
 ) u_palette(
     .clk    ( clk       ),
-    .cen    ( pxl_cen   ),
+    .cen    ( 1'b1      ),
     .data   ( prog_data ),
     .wr_addr( prog_addr ),
     .we     ( prog_en   ),
 
     .rd_addr( pal_addr  ),
-    .q      ( pxl       )
+    .q      ( buf_in    )
 );
 
 endmodule
