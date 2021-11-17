@@ -51,8 +51,8 @@
         </interleave>
         <!-- gfx2 - starts at 0x16000 -->
         <interleave output="16">
-            <part name="2.m8" crc="560521c7" map="01"/>
-            <part name="1.l8" crc="a79959b2" map="10"/>
+            <part name="1.l8" crc="a79959b2" map="01"/>
+            <part name="2.m8" crc="560521c7" map="10"/>
         </interleave>
         <!-- proms - starts at 0x1E000 -->
         <part name="3.k1" crc="b09db4b4"/>

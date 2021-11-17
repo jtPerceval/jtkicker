@@ -75,7 +75,7 @@ jtframe_dual_ram u_low(
     .data1  (               ),
     .addr1  ({4'd0,scan_addr}),
     .we1    ( 1'b0          ),
-    .q1     ( low_dout      )
+    .q1     ( hi_dout       )
 );
 
 jtframe_dual_ram u_high(
@@ -90,7 +90,7 @@ jtframe_dual_ram u_high(
     .data1  (               ),
     .addr1  ({4'd0,scan_addr}),
     .we1    ( 1'b0          ),
-    .q1     ( hi_dout       )
+    .q1     ( low_dout      )
 );
 
 wire [3:0] buf_in;
@@ -104,10 +104,11 @@ reg  [1:0] scan_st;
 reg  [7:0] dr_attr, dr_code, dr_xpos;
 reg  [3:0] dr_v;
 reg        dr_start, dr_busy;
-wire [7:0] ydiff;
+wire [7:0] ydiff, dr_y;
 
-assign inzone = hi_dout>=vrender && hi_dout<(vrender+8'h10);
-assign ydiff  = vrender-hi_dout;
+assign dr_y   = ~low_dout;
+assign inzone = dr_y>=vrender && dr_y<(vrender+8'h10);
+assign ydiff  = vrender-dr_y;
 assign done   = &scan_addr[5:1];
 
 always @(posedge clk) begin
@@ -119,33 +120,28 @@ end
 // Table scan
 always @(posedge clk, posedge rst) begin
     if( rst ) begin
-        scan_st <= 0;
+        scan_st  <= 0;
+        dr_start <= 0;
     end else if( cen2 ) begin
         dr_start <= 0;
         case( scan_st )
-            0: begin
-                if( hinit_x ) begin
-                    scan_addr <= 0;
-                    scan_st   <= 1;
-                end
+            0: if( hinit_x ) begin
+                scan_addr <= 0;
+                scan_st   <= 1;
             end
-            1: begin
-                if( !inzone ) begin
-                    scan_addr<=scan_addr+6'd2;
-                    if( done ) scan_st <= 0;
-                end else if(!dr_busy) begin
-                    dr_attr   <= low_dout;
-                    dr_v      <= ydiff[3:0];
-                    scan_addr <=scan_addr+6'd1;
-                    scan_st   <= 2;
-                end
+            1: if(!dr_busy) begin
+                dr_xpos   <= hi_dout;
+                dr_attr   <= low_dout;
+                scan_addr <= scan_addr+6'd1;
+                scan_st   <= 2;
             end
             2: begin
-                dr_code  <= hi_dout;
-                dr_xpos  <= low_dout;
-                dr_start <= 1;
-                scan_addr <=scan_addr+6'd1;
-                scan_st  <= done ? 0 : 3;
+                dr_code   <= hi_dout;
+                //dr_y      <= low_dout;
+                dr_v      <= ydiff[3:0];
+                scan_addr <= scan_addr+6'd1;
+                dr_start  <= inzone;
+                scan_st   <= done ? 0 : 3;
             end
             3: scan_st <= 1; // give time to dr_busy to rise
         endcase
@@ -157,7 +153,7 @@ reg  [31:0] pxl_data;
 reg  [ 2:0] dr_cnt;
 wire        hflip, vflip;
 
-assign pal_addr = { dr_attr[3:0], hflip ? pxl_data[3:0] : pxl_data[31:28] };
+assign pal_addr = { dr_attr[3:0], !hflip ? pxl_data[3:0] : pxl_data[31:28] };
 assign hflip    = dr_attr[6];
 assign vflip    = dr_attr[7];
 
@@ -172,10 +168,10 @@ always @(posedge clk, posedge rst) begin
         dr_cnt   <= 0;
     end else if( cen2 ) begin
         if( dr_start && !dr_busy ) begin
-            rom_addr <= { dr_code, dr_v^{4{vflip}}, 1'b0 };
+            rom_addr <= { dr_code, dr_v^{4{vflip}}, ~hflip };
             rom_cs   <= 1;
             dr_cnt   <= 7;
-            buf_a    <= dr_xpos;
+            buf_a    <= dr_xpos + (hflip ? 8'd16 : 8'h0);
             dr_busy  <= 1;
         end
         if( dr_busy && (!rom_cs || rom_ok) ) begin
@@ -193,16 +189,16 @@ always @(posedge clk, posedge rst) begin
                 buf_we <= 1;
                 rom_cs <= 0;
             end else begin
-                pxl_data <= hflip ? pxl_data>>4 : pxl_data<<4;
+                pxl_data <= !hflip ? pxl_data>>4 : pxl_data<<4;
             end
             dr_cnt <= dr_cnt - 3'd1;
             buf_a  <= hflip ? buf_a-8'd1 : buf_a+8'd1;
             if( !dr_cnt ) begin
-                buf_we  <= 0;
-                if( rom_addr[0] ) begin
+                if( rom_addr[0]==hflip ) begin
+                    buf_we  <= 0;
                     dr_busy <= 0;
                 end else begin
-                    rom_addr[0] <= 1;
+                    rom_addr[0] <= ~rom_addr[0];
                     rom_cs      <= 1;
                 end
             end

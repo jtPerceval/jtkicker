@@ -51,8 +51,8 @@
         </interleave>
         <!-- gfx2 - starts at 0x14000 -->
         <interleave output="16">
-            <part name="477j02.h15" crc="b94e645b" map="01"/>
-            <part name="477j01.h14" crc="61bbf797" map="10"/>
+            <part name="477j01.h14" crc="61bbf797" map="01"/>
+            <part name="477j02.h15" crc="b94e645b" map="10"/>
         </interleave>
         <!-- proms - starts at 0x1C000 -->
         <part name="477j10.a12" crc="b09db4b4"/>
