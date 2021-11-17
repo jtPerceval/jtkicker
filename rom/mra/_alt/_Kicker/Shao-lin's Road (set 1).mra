@@ -46,8 +46,8 @@
         </interleave>
         <!-- gfx1 - starts at 0x10000 -->
         <interleave output="16">
-            <part name="477j06.a10" crc="ff18a7ed" map="01"/>
-            <part name="477j07.a11" crc="5f53ae61" map="10"/>
+            <part name="477j07.a11" crc="5f53ae61" map="01"/>
+            <part name="477j06.a10" crc="ff18a7ed" map="10"/>
         </interleave>
         <!-- gfx2 - starts at 0x14000 -->
         <interleave output="16">

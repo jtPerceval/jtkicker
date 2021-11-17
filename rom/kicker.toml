@@ -25,7 +25,7 @@ delete = [ "Unused", "Unknown" ]
 # or arguments passed to mame2mra
 regions = [
     { name="maincpu", reverse=true },
-    { name="gfx1", width=16 }, # start=$GFX1_START
+    { name="gfx1", width=16, reverse=true, no_offset=true }, # start=$GFX1_START
     { name="gfx2", width=16 }, # start=$GFX2_START
     { name="proms"          },
 ]

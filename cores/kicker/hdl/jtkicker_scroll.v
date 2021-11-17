@@ -103,14 +103,14 @@ always @(posedge clk) if(pxl_cen) begin
     end
     if( hdf[2:0]==4 ) begin // 2 pixel delay to grab data
         pxl_data <= {
-            rom_data[31], rom_data[27], rom_data[23], rom_data[19],
-            rom_data[30], rom_data[26], rom_data[22], rom_data[18],
-            rom_data[29], rom_data[25], rom_data[21], rom_data[17],
-            rom_data[28], rom_data[24], rom_data[20], rom_data[16],
-            rom_data[15], rom_data[11], rom_data[ 7], rom_data[ 3],
-            rom_data[14], rom_data[10], rom_data[ 6], rom_data[ 2],
-            rom_data[13], rom_data[ 9], rom_data[ 5], rom_data[ 1],
-            rom_data[12], rom_data[ 8], rom_data[ 4], rom_data[ 0]
+            rom_data[27], rom_data[31], rom_data[19], rom_data[23],
+            rom_data[26], rom_data[30], rom_data[18], rom_data[22],
+            rom_data[25], rom_data[29], rom_data[17], rom_data[21],
+            rom_data[24], rom_data[28], rom_data[16], rom_data[20],
+            rom_data[11], rom_data[15], rom_data[ 3], rom_data[ 7],
+            rom_data[10], rom_data[14], rom_data[ 2], rom_data[ 6],
+            rom_data[ 9], rom_data[13], rom_data[ 1], rom_data[ 5],
+            rom_data[ 8], rom_data[12], rom_data[ 0], rom_data[ 4]
         };
         cur_hf   <= hflip;
         cur_pal  <= pal_msb;
@@ -160,7 +160,7 @@ jtframe_prom #(
     .wr_addr( prog_addr ),
     .we     ( prog_en   ),
 
-    .rd_addr( { pal_addr[7:4], pal_addr[0], pal_addr[1], pal_addr[2], pal_addr[3] }  ),
+    .rd_addr( pal_addr  ),
     .q      ( pxl       )
 );
 
