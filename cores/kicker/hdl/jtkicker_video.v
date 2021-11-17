@@ -94,8 +94,11 @@ jtframe_vtimer #(
     .HB_END     (  9'd383   ),
     .HB_START   (  9'd255   ),
     .HCNT_END   (  9'd383   ),
+    //.HS_START   (  9'd320   ),
+    //.HS_END     (  9'd338   )
     .HS_START   (  9'd320   ),
     .HS_END     (  9'd338   )
+
 ) u_vtimer(
     .clk        ( clk       ),
     .pxl_cen    ( pxl_cen   ),

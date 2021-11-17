@@ -67,13 +67,13 @@ jtframe_prom #(
     .we     ( prog_en[0]),
 
     .rd_addr( pal_addr  ),
-    .q      ( raw[3:0]  )
+    .q      ( raw[11:8] )
 );
 
 jtframe_prom #(
     .dw ( 4     ),
     .aw ( 8     )
-//    simfile = "477j10.a12",
+//    simfile = "477j11.a13",
 ) u_green(
     .clk    ( clk       ),
     .cen    ( pxl_cen   ),
@@ -88,7 +88,7 @@ jtframe_prom #(
 jtframe_prom #(
     .dw ( 4     ),
     .aw ( 8     )
-//    simfile = "477j10.a12",
+//    simfile = "477j12.a14",
 ) u_blue(
     .clk    ( clk       ),
     .cen    ( pxl_cen   ),
@@ -97,7 +97,7 @@ jtframe_prom #(
     .we     ( prog_en[2]),
 
     .rd_addr( pal_addr  ),
-    .q      ( raw[11:8] )
+    .q      ( raw[ 3:0] )
 );
 
 jtframe_blank #(.DLY(9)) u_blank(

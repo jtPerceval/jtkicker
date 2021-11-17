@@ -160,7 +160,7 @@ jtframe_prom #(
     .wr_addr( prog_addr ),
     .we     ( prog_en   ),
 
-    .rd_addr( pal_addr  ),
+    .rd_addr( { pal_addr[7:4], pal_addr[0], pal_addr[1], pal_addr[2], pal_addr[3] }  ),
     .q      ( pxl       )
 );
 
