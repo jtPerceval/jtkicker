@@ -90,10 +90,10 @@ always @(posedge clk, posedge rst) begin
         vscr <= 0;
     end else begin
         if( vscr_cs  ) vpos <= cpu_dout;
-        if( hdump[8] )
+        if( flip ? hdump >= 9'o330 : hdump<9'o40 )
             vscr <= {8{flip}} ^ vdump;
-        else if( hdump[5] )
-            vscr <= {8{flip}} ^ (vdump + vpos); // H32 in sch
+        else
+            vscr <= ({8{flip}} ^ vdump) + vpos;
     end
 end
 
@@ -112,7 +112,7 @@ always @(posedge clk) if(pxl_cen) begin
             rom_data[ 9], rom_data[13], rom_data[ 1], rom_data[ 5],
             rom_data[ 8], rom_data[12], rom_data[ 0], rom_data[ 4]
         };
-        cur_hf   <= hflip;
+        cur_hf   <= hflip^flip;
         cur_pal  <= pal_msb;
     end else begin
         pxl_data <= cur_hf ? pxl_data>>4 : pxl_data<<4;
