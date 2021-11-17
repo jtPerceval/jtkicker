@@ -97,7 +97,7 @@ wire [3:0] buf_in;
 reg  [7:0] buf_a;
 reg        buf_we;
 reg        cen2=0;
-wire       inzone;
+wire       inzone, done;
 reg        hinit_x;
 reg  [1:0] scan_st;
 
@@ -108,6 +108,7 @@ wire [7:0] ydiff;
 
 assign inzone = hi_dout>=vrender && hi_dout<(vrender+8'h10);
 assign ydiff  = vrender-hi_dout;
+assign done   = &scan_addr[5:1];
 
 always @(posedge clk) begin
     cen2 <= ~cen2;
@@ -120,8 +121,9 @@ always @(posedge clk, posedge rst) begin
     if( rst ) begin
         scan_st <= 0;
     end else if( cen2 ) begin
+        dr_start <= 0;
         case( scan_st )
-            default: begin
+            0: begin
                 if( hinit_x ) begin
                     scan_addr <= 0;
                     scan_st   <= 1;
@@ -130,24 +132,22 @@ always @(posedge clk, posedge rst) begin
             1: begin
                 if( !inzone ) begin
                     scan_addr<=scan_addr+6'd2;
-                    if( &scan_addr[5:1] ) scan_st <= 0;
+                    if( done ) scan_st <= 0;
+                end else if(!dr_busy) begin
+                    dr_attr   <= low_dout;
+                    dr_v      <= ydiff[3:0];
+                    scan_addr <=scan_addr+6'd1;
+                    scan_st   <= 2;
                 end
-                dr_attr   <= low_dout;
-                dr_v      <= ydiff[3:0];
-                scan_addr <=scan_addr+6'd1;
-                scan_st   <= 2;
             end
             2: begin
-                if( !dr_busy ) begin
-                    dr_code  <= hi_dout;
-                    dr_xpos  <= low_dout;
-                    dr_start <= 1;
-                end else begin
-                    scan_addr <=scan_addr+6'd1;
-                    if( &scan_addr[5:1] ) scan_st <= 0;
-                    scan_st <= 1;
-                end
+                dr_code  <= hi_dout;
+                dr_xpos  <= low_dout;
+                dr_start <= 1;
+                scan_addr <=scan_addr+6'd1;
+                scan_st  <= done ? 0 : 3;
             end
+            3: scan_st <= 1; // give time to dr_busy to rise
         endcase
     end
 end
@@ -176,6 +176,7 @@ always @(posedge clk, posedge rst) begin
             rom_cs   <= 1;
             dr_cnt   <= 7;
             buf_a    <= dr_xpos;
+            dr_busy  <= 1;
         end
         if( dr_busy && (!rom_cs || rom_ok) ) begin
             if( dr_cnt==7 ) begin
@@ -210,21 +211,21 @@ always @(posedge clk, posedge rst) begin
 end
 
 jtframe_obj_buffer #(.AW(8),.DW(4), .ALPHA(0)) u_buffer(
-    .clk    ( clk   ),
-    .LHBL   ( LHBL  ),
+    .clk    ( clk       ),
+    .LHBL   ( LHBL      ),
     // New data writes
-    .wr_data( buf_in),
-    .wr_addr( buf_a ),
-    .we     ( buf_we),
+    .wr_data( buf_in    ),
+    .wr_addr( buf_a     ),
+    .we     ( buf_we    ),
     // Old data reads (and erases)
-    .rd_addr( hdump ),
-    .rd     (pxl_cen),                 // data will be erased after the rd event
-    .rd_data( pxl   )
+    .rd_addr( hdump[7:0]),
+    .rd     (pxl_cen    ),  // data will be erased after the rd event
+    .rd_data( pxl       )
 );
 
 jtframe_prom #(
-    .dw ( 4     ),
-    .aw ( 8     )
+    .dw     ( 4         ),
+    .aw     ( 8         )
 //    simfile = "477j08.f16",
 ) u_palette(
     .clk    ( clk       ),

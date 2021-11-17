@@ -244,7 +244,7 @@ jtkicker_video u_video(
     .obj_dout   ( obj_dout  ),
 
     // PROMs
-    .prog_data  ( prog_data ),
+    .prog_data  ( prog_data[ 3:0] ),
     .prog_addr  ( prog_addr[10:0] ),
     .prom_en    ( prom_we   ),
 
@@ -276,7 +276,7 @@ jtframe_rom #(
     .SLOT0_OFFSET( SCR_START>>1    ),
 
     .SLOT1_AW    ( 14              ),
-    .SLOT1_DW    (  8              ),
+    .SLOT1_DW    ( 32              ),
     .SLOT1_OFFSET( OBJ_START>>1    ),
 
     .SLOT7_AW    ( 16              ),

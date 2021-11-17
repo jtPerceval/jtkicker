@@ -169,7 +169,7 @@ jtkicker_obj u_obj(
     .hinit      ( hinit     ),
     .LHBL       ( LHBL      ),
     .LVBL       ( LVBL      ),
-    .vrender    ( vrender   ),
+    .vrender    (vrender[7:0]),
     .hdump      ( hdump     ),
     .flip       ( flip      ),
 
