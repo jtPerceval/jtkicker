@@ -46,7 +46,7 @@ module jtkicker_scroll(
     input               prog_en,
 
     // SDRAM
-    output       [12:0] rom_addr,
+    output reg   [12:0] rom_addr,
     input        [31:0] rom_data,
     input               rom_ok,
 
@@ -55,6 +55,7 @@ module jtkicker_scroll(
 
 wire [ 7:0] code, attr, vram_high, vram_low, pal_addr;
 wire [ 3:0] pal_msb;
+reg  [ 3:0] cur_pal;
 wire [ 1:0] code_msb;
 reg  [31:0] pxl_data;
 wire [ 9:0] rd_addr;
@@ -78,10 +79,9 @@ always @(*) begin
     hdf = {8{flip}} ^ hdump[7:0];
 end
 
-assign rom_addr = { code_msb, code, vscr[2:0]^{3{vflip}} }; // 2+8+3=13 bits
 assign rd_addr  = { vscr[7:3], hdf[7:3] }; // 5+5 = 10
 assign vscr_dout= vscr;
-assign pal_addr = { pal_msb, cur_hf ? pxl_data[3:0] : pxl_data[31:28] };
+assign pal_addr = { cur_pal, cur_hf ? pxl_data[3:0] : pxl_data[31:28] };
 
 // scroll register in custom chip 085
 always @(posedge clk, posedge rst) begin
@@ -92,25 +92,28 @@ always @(posedge clk, posedge rst) begin
         if( vscr_cs  ) vpos <= cpu_dout;
         if( hdump[8] )
             vscr <= {8{flip}} ^ vdump;
-        else if( hdump[4] )
+        else if( hdump[5] )
             vscr <= {8{flip}} ^ (vdump + vpos); // H32 in sch
     end
 end
 
 always @(posedge clk) if(pxl_cen) begin
+    if( hdf[2:0]==0 ) begin
+        rom_addr <= { code_msb, code, vscr[2:0]^{3{vflip}} }; // 2+8+3=13 bits
+    end
     if( hdf[2:0]==4 ) begin // 2 pixel delay to grab data
         pxl_data <= {
             rom_data[31], rom_data[27], rom_data[23], rom_data[19],
             rom_data[30], rom_data[26], rom_data[22], rom_data[18],
             rom_data[29], rom_data[25], rom_data[21], rom_data[17],
             rom_data[28], rom_data[24], rom_data[20], rom_data[16],
-
             rom_data[15], rom_data[11], rom_data[ 7], rom_data[ 3],
             rom_data[14], rom_data[10], rom_data[ 6], rom_data[ 2],
             rom_data[13], rom_data[ 9], rom_data[ 5], rom_data[ 1],
             rom_data[12], rom_data[ 8], rom_data[ 4], rom_data[ 0]
         };
         cur_hf   <= hflip;
+        cur_pal  <= pal_msb;
     end else begin
         pxl_data <= cur_hf ? pxl_data>>4 : pxl_data<<4;
     end

@@ -100,7 +100,7 @@ jtframe_prom #(
     .q      ( raw[11:8] )
 );
 
-jtframe_blank #(.DLY(4)) u_blank(
+jtframe_blank #(.DLY(9)) u_blank(
     .clk        ( clk       ),
     .pxl_cen    ( pxl_cen   ),
     .LHBL       ( LHBL      ),
