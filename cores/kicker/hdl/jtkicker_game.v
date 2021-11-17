@@ -141,7 +141,7 @@ assign pxl_cen  = cen_base[1]; // ~ 6MHz
 
 always @(*) begin
     prog_addr = pre_addr;
-    if( ioctl_addr > SCR_START && ioctl_addr<OBJ_START ) begin
+    if( ioctl_addr >= SCR_START && ioctl_addr<OBJ_START ) begin
         prog_addr[0]   = ~pre_addr[3];
         prog_addr[3:1] = pre_addr[2:0];
     end

@@ -150,10 +150,10 @@ always @(posedge clk) begin
         flip      <= 0;
         pal_sel   <= 0;
     end else if(cpu_cen) begin
-        if( iow_cs ) begin
+        if( iow_cs && !RnW ) begin
             firq_clrn <= cpu_dout[1];
-            irq_clrn <= cpu_dout[2];
-            flip     <= cpu_dout[0];
+            irq_clrn  <= cpu_dout[2];
+            flip      <= cpu_dout[0];
         end
         if( color_cs ) pal_sel <= cpu_dout[2:0];
     end
@@ -201,8 +201,8 @@ jt89 u_ti1(
     .rst    ( rst           ),
     .clk    ( clk           ),
     .clk_en ( ti1_cen       ),
-    .wr_n   ( rdy1 & ti1_cs ),
-    .ce_n   ( ~ti1_cs       ),
+    .wr_n   ( rdy1          ),
+    .cs_n   ( ~ti1_cs       ),
     .din    ( ti1_data      ),
     .sound  ( ti1_snd       ),
     .ready  ( rdy1          )
@@ -212,8 +212,8 @@ jt89 u_ti2(
     .rst    ( rst           ),
     .clk    ( clk           ),
     .clk_en ( ti2_cen       ),
-    .wr_n   ( rdy2 & ti2_cs ),
-    .ce_n   ( ~ti2_cs       ),
+    .wr_n   ( rdy2          ),
+    .cs_n   ( ~ti2_cs       ),
     .din    ( ti2_data      ),
     .sound  ( ti2_snd       ),
     .ready  ( rdy2          )

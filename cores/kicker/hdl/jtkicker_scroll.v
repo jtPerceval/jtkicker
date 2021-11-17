@@ -76,7 +76,7 @@ assign code_msb = attr[7:6];
 assign pal_msb  = attr[3:0];
 
 always @(*) begin
-    hdf = {8{flip}} ^ hdump[7:0];
+    hdf = flip ? (~hdump[7:0])-8'o10 : hdump[7:0];
 end
 
 assign rd_addr  = { vscr[7:3], hdf[7:3] }; // 5+5 = 10
@@ -90,7 +90,7 @@ always @(posedge clk, posedge rst) begin
         vscr <= 0;
     end else begin
         if( vscr_cs  ) vpos <= cpu_dout;
-        if( flip ? hdump >= 9'o330 : hdump<9'o40 )
+        if( flip ? hdf<9'o40 : hdump<9'o40 )
             vscr <= {8{flip}} ^ vdump;
         else
             vscr <= ({8{flip}} ^ vdump) + vpos;
