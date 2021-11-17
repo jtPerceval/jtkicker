@@ -254,8 +254,8 @@ jtframe_mixer #(.W0(11),.W1(11)) u_mixer(
     // input signals
     .ch0    ( ti1_snd   ),
     .ch1    ( ti2_snd   ),
-    .ch2    (           ),
-    .ch3    (           ),
+    .ch2    ( 16'd0     ),
+    .ch3    ( 16'd0     ),
     // gain for each channel in 4.4 fixed point format
     .gain0  ( 8'h08     ),
     .gain1  ( 8'h08     ),
