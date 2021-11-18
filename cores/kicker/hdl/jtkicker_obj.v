@@ -140,7 +140,7 @@ always @(posedge clk, posedge rst) begin
                 //dr_y      <= low_dout;
                 dr_v      <= ydiff[3:0];
                 scan_addr <= scan_addr+6'd1;
-                dr_start  <= inzone;
+                dr_start  <= inzone && dr_xpos > 8'o30;
                 scan_st   <= done ? 0 : 3;
             end
             3: scan_st <= 1; // give time to dr_busy to rise
