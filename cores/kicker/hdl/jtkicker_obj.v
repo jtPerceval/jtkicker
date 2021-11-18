@@ -63,6 +63,7 @@ assign obj_dout = obj1_cs ? obj1_dout : obj2_dout;
 assign obj1_we  = obj1_cs & ~cpu_rnw;
 assign obj2_we  = obj2_cs & ~cpu_rnw;
 
+// Mapped at 0x3000
 jtframe_dual_ram u_low(
     // Port 0, CPU
     .clk0   ( clk24         ),
@@ -78,6 +79,7 @@ jtframe_dual_ram u_low(
     .q1     ( hi_dout       )
 );
 
+// Mapped at 0x2800
 jtframe_dual_ram u_high(
     // Port 0, CPU
     .clk0   ( clk24         ),

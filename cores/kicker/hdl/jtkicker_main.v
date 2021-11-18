@@ -68,20 +68,20 @@ module jtkicker_main(
 
 reg  [ 7:0] cabinet, cpu_din;
 wire [15:0] A;
-wire        RnW, irq_n, firq_n;
-wire        irq_trigger, firq_trigger;
-reg         firq_clrn, irq_clrn;
+wire        RnW, irq_n, nmi_n;
+wire        irq_trigger, nmi_trigger;
+reg         nmi_clrn, irq_clrn;
 reg         ior_cs, dip2_cs, dip3_cs,
             intshow_cs, ti1_cs, ti2_cs,
             color_cs, tidata1_cs, tidata2_cs, iow_cs;
-reg      afe_cs; // watchdog
+reg         afe_cs; // watchdog
 wire        VMA;
 
-assign irq_trigger  = ~LVBL & dip_pause;
-assign firq_trigger =  V16  & dip_pause;
-assign cpu_rnw      = RnW;
-assign sample       = ti1_cen;
-assign rom_addr     = A;
+assign irq_trigger = ~LVBL & dip_pause;
+assign nmi_trigger =  V16;
+assign cpu_rnw     = RnW;
+assign sample      = ti1_cen;
+assign rom_addr    = A;
 
 always @(*) begin
     rom_cs  = VMA && A[15:14] !=0 && RnW && VMA; // ROM = 4000 - FFFF
@@ -145,15 +145,15 @@ end
 
 always @(posedge clk) begin
     if( rst ) begin
-        firq_clrn <= 0;
-        irq_clrn  <= 0;
-        flip      <= 0;
-        pal_sel   <= 0;
+        nmi_clrn <= 0;
+        irq_clrn <= 0;
+        flip     <= 0;
+        pal_sel  <= 0;
     end else if(cpu_cen) begin
         if( iow_cs && !RnW ) begin
-            firq_clrn <= cpu_dout[1];
-            irq_clrn  <= cpu_dout[2];
-            flip      <= cpu_dout[0];
+            nmi_clrn <= cpu_dout[1];
+            irq_clrn <= cpu_dout[2];
+            flip     <= cpu_dout[0];
         end
         if( color_cs ) pal_sel <= cpu_dout[2:0];
     end
@@ -171,16 +171,16 @@ jtframe_ff u_irq(
     .sigedge  ( irq_trigger )     // signal whose edge will trigger the FF
 );
 
-jtframe_ff u_firq(
+jtframe_ff u_nmi(
     .rst      ( rst         ),
     .clk      ( clk         ),
     .cen      ( 1'b1        ),
     .din      ( 1'b1        ),
     .q        (             ),
-    .qn       ( firq_n      ),
+    .qn       ( nmi_n       ),
     .set      (             ),    // active high
-    .clr      ( ~firq_clrn  ),    // active high
-    .sigedge  (firq_trigger )     // signal whose edge will trigger the FF
+    .clr      ( ~nmi_clrn   ),    // active high
+    .sigedge  (nmi_trigger  )     // signal whose edge will trigger the FF
 );
 
 reg  [ 7:0] ti1_data, ti2_data;
@@ -227,8 +227,8 @@ jtframe_sys6809 #(.RAM_AW(0)) u_cpu(
 
     // Interrupts
     .nIRQ       ( irq_n     ),
-    .nFIRQ      ( firq_n    ),
-    .nNMI       ( 1'b1      ),
+    .nFIRQ      ( 1'b1      ),
+    .nNMI       ( nmi_n     ),
     .irq_ack    (           ),
     // Bus sharing
     .bus_busy   ( 1'b0      ),
@@ -257,8 +257,8 @@ jtframe_mixer #(.W0(11),.W1(11)) u_mixer(
     .ch2    ( 16'd0     ),
     .ch3    ( 16'd0     ),
     // gain for each channel in 4.4 fixed point format
-    .gain0  ( 8'h08     ),
-    .gain1  ( 8'h08     ),
+    .gain0  ( 8'h18     ),
+    .gain1  ( 8'h18     ),
     .gain2  ( 8'h00     ),
     .gain3  ( 8'h00     ),
     .mixed  ( snd       ),
