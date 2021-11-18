@@ -175,7 +175,7 @@ always @(posedge clk, posedge rst) begin
             dr_busy  <= 1;
         end
         if( dr_busy && (!rom_cs || rom_ok) ) begin
-            if( dr_cnt==7 ) begin
+            if( dr_cnt==7 && rom_cs ) begin
                 pxl_data <= {
                     rom_data[27], rom_data[31], rom_data[19], rom_data[23],
                     rom_data[26], rom_data[30], rom_data[18], rom_data[22],
@@ -191,8 +191,8 @@ always @(posedge clk, posedge rst) begin
             end else begin
                 pxl_data <= !hflip ? pxl_data>>4 : pxl_data<<4;
                 buf_a  <= hflip ? buf_a-8'd1 : buf_a+8'd1;
+                dr_cnt <= dr_cnt - 3'd1;
             end
-            dr_cnt <= dr_cnt - 3'd1;
             if( !dr_cnt ) begin
                 if( rom_addr[0]==hflip ) begin
                     buf_we  <= 0;
