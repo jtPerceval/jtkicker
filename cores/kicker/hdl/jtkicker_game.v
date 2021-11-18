@@ -145,7 +145,7 @@ always @(*) begin
     end
     if( ioctl_addr >= OBJ_START && ioctl_addr<PROM_START ) begin
         prog_addr[0]   = ~pre_addr[3];
-        prog_addr[1]   =  pre_addr[4];
+        prog_addr[1]   = ~pre_addr[4];
         prog_addr[5:2] =  { pre_addr[5], pre_addr[2:0] }; // making [5] explicit for now
     end
 end
