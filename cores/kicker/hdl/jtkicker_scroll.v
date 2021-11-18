@@ -90,10 +90,12 @@ always @(posedge clk, posedge rst) begin
         vscr <= 0;
     end else begin
         if( vscr_cs  ) vpos <= cpu_dout;
-        if( flip ? hdf<9'o40 : hdump<9'o40 )
+        if( flip ? hdf<9'o40 : hdump<9'o40 ) begin
             vscr <= {8{flip}} ^ vdump;
-        else
-            vscr <= ({8{flip}} ^ vdump) + vpos;
+        end else begin
+            // +1 needed to have a straight grid during boot up
+            vscr <= ({8{flip}} ^ vdump) + vpos + 8'd1;
+        end
     end
 end
 
