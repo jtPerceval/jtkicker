@@ -151,8 +151,9 @@ end
 // Draw
 reg  [31:0] pxl_data;
 reg  [ 2:0] dr_cnt;
-wire        hflip, vflip;
+wire        hflip, vflip, hff;
 
+assign hff      = hflip^flip;
 assign pal_addr = { dr_attr[3:0], !hflip ? pxl_data[3:0] : pxl_data[31:28] };
 assign hflip    = dr_attr[6];
 assign vflip    = dr_attr[7];
@@ -171,7 +172,7 @@ always @(posedge clk, posedge rst) begin
             rom_addr <= { dr_code, dr_v^{4{vflip}}, ~hflip };
             rom_cs   <= 1;
             dr_cnt   <= 7;
-            buf_a    <= dr_xpos + (hflip ? 8'd16 : 8'h0) + 8'd6;
+            buf_a    <= dr_xpos + (hff ? 8'd16 : 8'h0) + 8'd6;
             dr_busy  <= 1;
         end
         if( dr_busy && (!rom_cs || rom_ok) ) begin
@@ -190,7 +191,7 @@ always @(posedge clk, posedge rst) begin
                 rom_cs <= 0;
             end else begin
                 pxl_data <= !hflip ? pxl_data>>4 : pxl_data<<4;
-                buf_a  <= hflip ? buf_a-8'd1 : buf_a+8'd1;
+                buf_a  <= hff ? buf_a-8'd1 : buf_a+8'd1;
                 dr_cnt <= dr_cnt - 3'd1;
             end
             if( !dr_cnt ) begin
