@@ -171,7 +171,7 @@ always @(posedge clk, posedge rst) begin
             rom_addr <= { dr_code, dr_v^{4{vflip}}, ~hflip };
             rom_cs   <= 1;
             dr_cnt   <= 7;
-            buf_a    <= dr_xpos + (hflip ? 8'd16 : 8'h0);
+            buf_a    <= dr_xpos + (hflip ? 8'd16 : 8'h0) + 8'd6;
             dr_busy  <= 1;
         end
         if( dr_busy && (!rom_cs || rom_ok) ) begin
@@ -190,13 +190,14 @@ always @(posedge clk, posedge rst) begin
                 rom_cs <= 0;
             end else begin
                 pxl_data <= !hflip ? pxl_data>>4 : pxl_data<<4;
+                buf_a  <= hflip ? buf_a-8'd1 : buf_a+8'd1;
             end
             dr_cnt <= dr_cnt - 3'd1;
-            buf_a  <= hflip ? buf_a-8'd1 : buf_a+8'd1;
             if( !dr_cnt ) begin
                 if( rom_addr[0]==hflip ) begin
                     buf_we  <= 0;
                     dr_busy <= 0;
+                    rom_cs  <= 0;
                 end else begin
                     rom_addr[0] <= ~rom_addr[0];
                     rom_cs      <= 1;
@@ -205,6 +206,10 @@ always @(posedge clk, posedge rst) begin
         end
     end
 end
+
+wire buf_clr;
+
+assign buf_clr = pxl_cen & LHBL;
 
 jtframe_obj_buffer #(.AW(8),.DW(4), .ALPHA(0)) u_buffer(
     .clk    ( clk       ),
@@ -215,7 +220,7 @@ jtframe_obj_buffer #(.AW(8),.DW(4), .ALPHA(0)) u_buffer(
     .we     ( buf_we    ),
     // Old data reads (and erases)
     .rd_addr( hdump[7:0]),
-    .rd     (pxl_cen    ),  // data will be erased after the rd event
+    .rd     ( buf_clr   ),  // data will be erased after the rd event
     .rd_data( pxl       )
 );
 
