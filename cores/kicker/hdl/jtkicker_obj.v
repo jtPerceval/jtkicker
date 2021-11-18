@@ -103,6 +103,7 @@ reg  [1:0] scan_st;
 
 reg  [7:0] dr_attr, dr_code, dr_xpos;
 reg  [3:0] dr_v;
+reg  [4:0] drawn;
 reg        dr_start, dr_busy;
 wire [7:0] ydiff, dr_y;
 
@@ -122,11 +123,13 @@ always @(posedge clk, posedge rst) begin
     if( rst ) begin
         scan_st  <= 0;
         dr_start <= 0;
+        drawn    <= 0;
     end else if( cen2 ) begin
         dr_start <= 0;
         case( scan_st )
             0: if( hinit_x ) begin
                 scan_addr <= 0;
+                drawn     <= 0;
                 scan_st   <= 1;
             end
             1: if(!dr_busy) begin
@@ -140,7 +143,10 @@ always @(posedge clk, posedge rst) begin
                 //dr_y      <= low_dout;
                 dr_v      <= ydiff[3:0];
                 scan_addr <= scan_addr+6'd1;
-                dr_start  <= inzone && dr_xpos > 8'o30;
+                if( inzone && dr_xpos > 8'o30 && drawn < 24 ) begin
+                    dr_start <= 1;
+                    drawn    <= drawn + 1'd1;
+                end
                 scan_st   <= done ? 0 : 3;
             end
             3: scan_st <= 1; // give time to dr_busy to rise
