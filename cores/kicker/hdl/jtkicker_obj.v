@@ -112,7 +112,7 @@ wire [7:0] ydiff, dr_y;
 assign dr_y   = ~low_dout;
 assign inzone = dr_y>=vrender && dr_y<(vrender+8'h10);
 assign ydiff  = vrender-dr_y-4'd1;
-assign done   = &scan_addr[5:1];
+assign done   = scan_addr[5:1]==24; //&scan_addr[5:1];
 
 always @(posedge clk) begin
     cen2 <= ~cen2;
