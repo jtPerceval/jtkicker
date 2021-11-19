@@ -1,3 +1,10 @@
+; INTSHOW test
+; Starts up the board correctly, handling the watchdog
+; counts the number of frames
+; and produces a table with the value read
+; from $200 at each NMI interrupt. There are
+; 8 NMI interrupts per frame
+
 IOW  equ $0
 VCOL equ $3800
 VRAM equ $3C00
@@ -7,7 +14,10 @@ VDMP equ $0200
 WDOG equ $0100
 ATTR equ $3
 
-FCNT equ $3200
+; RAM variables
+FCNT equ $3200      ; frame counter
+NCNT equ $3202      ; NMI counter
+VRD  equ $3203      ; value read from $200 (VDMP), INTSHOW in schematics
 
 ORCC equ $1A
 
@@ -87,11 +97,25 @@ PRINTHEX8:
 SWI: RTI
 NMI:
     CLR ,U  ; watchdog
+    LDA VDMP
+    STA VRD
+    LDA NCNT
+    INCA
+    STA NCNT
+    LDY #(VRAM+$250)
+    LEAY A,Y
+    LDX #NCNT
+    BSR PRINTHEX8
+    LEAY -$40,Y
+    LDX #VRD
+    BSR PRINTHEX8
+    ; clears the interrupt latch
     LDA #4
     STA IOW
     LDA #6
     STA IOW
     RTI
+
 IRQ:
     LDD FCNT
     ADDD #1
@@ -99,6 +123,9 @@ IRQ:
     LDX #FCNT
     LDY #(VRAM+$241)
     BSR PRINTHEX16
+    ; Restart the NMI counter
+    CLR NCNT
+    ; clears the interrupt latch
     LDA #2
     STA IOW
     LDA #6
