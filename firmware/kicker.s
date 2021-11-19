@@ -5,6 +5,7 @@ PAL  equ $1800
 SCR  equ $2000
 VDMP equ $0200
 WDOG equ $0100
+ATTR equ $3
 
 FCNT equ $3200
 
@@ -13,8 +14,7 @@ ORCC equ $1A
     org $C000
 RESET:
     dc.b ORCC,$50
-    LDA #1
-    STA IOW
+    CLR IOW
 
     LDS #$3400
     LDA #$10    ; BLANK
@@ -30,7 +30,7 @@ clr_vram:
     LDA #1
     STA PAL
     ANDCC #$AF
-    LDA #7
+    LDA #6
     STA IOW
 
     LDX #str_jotego
@@ -42,12 +42,15 @@ END:
     BRA END
 
 PRINT:
+    LDB #ATTR
+.loop:
     LDA ,X+
     BEQ PRINT_RET
     SUBA #$30
     STA ,Y
+    STB -$400,Y
     LEAY -$20,Y
-    BRA PRINT
+    BRA .loop
 PRINT_RET:
     RTS
 
@@ -58,6 +61,7 @@ PRINTHEX16:
     RTS
 
 PRINTHEX8:
+    LDB #ATTR
     LDA ,X
     LSRA
     LSRA
@@ -68,6 +72,7 @@ PRINTHEX8:
     ADDA #7
 .belowA:
     STA ,Y
+    STB -$400,Y
     LDA ,X
     ANDA #$F
     CMPA #$A
@@ -75,15 +80,16 @@ PRINTHEX8:
     ADDA #7
 .belowA2:
     STA -$20,Y
+    STB -$420,Y
     LEAY -$40,Y
     RTS
 
 SWI: RTI
 NMI:
     CLR ,U  ; watchdog
-    LDA #5
+    LDA #4
     STA IOW
-    LDA #7
+    LDA #6
     STA IOW
     RTI
 IRQ:
@@ -93,9 +99,9 @@ IRQ:
     LDX #FCNT
     LDY #(VRAM+$241)
     BSR PRINTHEX16
-    LDA #3
+    LDA #2
     STA IOW
-    LDA #7
+    LDA #6
     STA IOW
     RTI
 FIRQ:
