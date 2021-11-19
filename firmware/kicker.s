@@ -44,7 +44,7 @@ clr_vram:
     STA IOW
 
     LDX #str_jotego
-    LDY #(VRAM+$210)       ; Middle of the screen
+    LDY #(VRAM+$2AF)       ; Middle of the screen
     BSR PRINT
 
 END:
@@ -136,7 +136,7 @@ FIRQ:
 
 ; Messages
 str_jotego:
-    dc.b "JOTEGO",0
+    dc.b "INTSHOW TEST",0
 PROGEND:
     cnop $10000-$C-PROGEND,1
     dc.w SWI,FIRQ,IRQ,SWI,NMI,RESET
