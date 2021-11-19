@@ -101,7 +101,7 @@ wire        vsync60;
 assign prog_rd    = 0;
 assign dwnld_busy = downloading;
 assign { dipsw_c, dipsw_b, dipsw_a } = dipsw[19:0];
-assign dip_flip = ~flip;
+assign dip_flip = flip;
 assign vsync60  = status[13];   // high to use a 6MHz pixel clock, instead of 6.144MHz
 
 // Using an integer divider for the 6.144MHz
