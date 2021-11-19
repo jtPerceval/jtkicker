@@ -6,6 +6,8 @@
 ; 8 NMI interrupts per frame
 
 IOW  equ $0
+OBJ2 equ $2800
+OBJ1 equ $3000
 VCOL equ $3800
 VRAM equ $3C00
 PAL  equ $1800
@@ -18,6 +20,7 @@ ATTR equ $3
 FCNT equ $3200      ; frame counter
 NCNT equ $3202      ; NMI counter
 VRD  equ $3203      ; value read from $200 (VDMP), INTSHOW in schematics
+VSCR equ $3204      ; vertical scroll
 
 ORCC equ $1A
 
@@ -27,15 +30,30 @@ RESET:
     CLR IOW
 
     LDS #$3400
-    LDA #$10    ; BLANK
     LDU #WDOG
-    LDX #VCOL
+    LDX #VRAM
     LDY #$1000
+    CLRA
+    STA VSCR
+    STA SCR
+    LDA #$10    ; blank tile
 clr_vram:
-    STA ,X+
+    STA ,X
+    CLR $400,X
+    LEAX 1,X
     CLR ,U      ; watchdog
     LEAY ,-Y
     BNE clr_vram
+
+    LDX #OBJ2
+    LDY #$400
+    CLRA
+clr_obj:
+    STA ,X
+    STA $800,X
+    LEAX 1,X
+    LEAY ,-Y
+    BNE clr_obj
 
     LDA #1
     STA PAL
@@ -45,6 +63,10 @@ clr_vram:
 
     LDX #str_jotego
     LDY #(VRAM+$2AF)       ; Middle of the screen
+    BSR PRINT
+
+    LDX #str_vscr
+    LDY #(VRAM+$2B0)       ; Middle of the screen
     BSR PRINT
 
 END:
@@ -105,10 +127,10 @@ NMI:
     LDY #(VRAM+$250)
     LEAY A,Y
     LDX #NCNT
-    BSR PRINTHEX8
+    LBSR PRINTHEX8
     LEAY -$40,Y
     LDX #VRD
-    BSR PRINTHEX8
+    LBSR PRINTHEX8
     ; clears the interrupt latch
     LDA #4
     STA IOW
@@ -122,9 +144,22 @@ IRQ:
     STD FCNT
     LDX #FCNT
     LDY #(VRAM+$241)
-    BSR PRINTHEX16
+    LBSR PRINTHEX16
     ; Restart the NMI counter
     CLR NCNT
+    ; If the frame count is multiple of 8
+    ; increase the scroll
+    LDD FCNT
+    ANDB #$F
+    BNE .else
+    LDA VSCR
+    INCA
+    STA VSCR
+    STA SCR
+    LDY #(VRAM+$240)
+    LDX #VSCR
+    LBSR PRINTHEX8
+.else:
     ; clears the interrupt latch
     LDA #2
     STA IOW
@@ -137,6 +172,9 @@ FIRQ:
 ; Messages
 str_jotego:
     dc.b "INTSHOW TEST",0
+str_vscr:
+    dc.b "VSCR ",0
+
 PROGEND:
     cnop $10000-$C-PROGEND,1
     dc.w SWI,FIRQ,IRQ,SWI,NMI,RESET
