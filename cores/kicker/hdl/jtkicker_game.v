@@ -96,16 +96,22 @@ wire        cpu_rnw, cpu_irqn, cpu_nmin;
 wire        vscr_cs, vram_cs, obj1_cs, obj2_cs,
             prom_we, flip;
 wire [ 7:0] vscr_dout, vram_dout, obj_dout, cpu_dout;
+wire        vsync60;
 
 assign prog_rd    = 0;
 assign dwnld_busy = downloading;
 assign { dipsw_c, dipsw_b, dipsw_a } = dipsw[19:0];
 assign dip_flip = ~flip;
+assign vsync60  = status[13];   // high to use a 6MHz pixel clock, instead of 6.144MHz
 
+// Using an integer divider for the 6.144MHz
+// cen_base will probably help with the video
+// compatibility in MiSTer. MiST seems to be
+// doing well with the fractional divider.
 jtframe_frac_cen #(.W(4)) u_cen (
     .clk    ( clk       ),
-    .n      ( 10'd32    ),
-    .m      ( 10'd125   ),
+    .n      ( vsync60 ? 10'd1 : 10'd32    ),
+    .m      ( vsync60 ? 10'd4 : 10'd125   ),
     .cen    ( cen_base  ),
     .cenb   (           ) // 180 shifted
 );

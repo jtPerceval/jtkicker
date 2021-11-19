@@ -159,7 +159,7 @@ end
 // Draw
 reg  [31:0] pxl_data;
 reg  [ 2:0] dr_cnt;
-wire        hflip, vflip, hflip;
+wire        hflip, vflip;
 
 assign pal_addr = { dr_attr[3:0], pxl_data[3:0] };
 assign hflip    = dr_attr[6];

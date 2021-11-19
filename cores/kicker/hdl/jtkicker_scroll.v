@@ -83,7 +83,9 @@ assign rd_addr  = { vscr[7:3], hdf[7:3] }; // 5+5 = 10
 assign vscr_dout= vscr; // this could be vdump instead of vscr, it's hard to
                         // measure it in a test program because vscr=vdump
                         // for the first rows, which is when the NMI occurs
-assign pal_addr = { cur_pal, cur_hf ? pxl_data[3:0] : pxl_data[31:28] };
+assign pal_addr =
+    flip && hdump<8'o20 ? 0 :   // removes the first columns in flip mode
+    { cur_pal, cur_hf ? pxl_data[3:0] : pxl_data[31:28] };
 
 // scroll register in custom chip 085
 always @(posedge clk, posedge rst) begin
