@@ -44,12 +44,13 @@ module jtkicker_colmix(
 wire [7:0] pal_addr;
 reg  [4:0] mux;
 wire       obj_blank = obj_pxl[3:0]==0 || !gfx_en[3];
+wire [3:0] scr_gated = gfx_en[0] ? scr_pxl : 4'd0;
 
 assign pal_addr = { pal_sel, mux};
 
 always @(posedge clk) if(pxl_cen) begin
     mux[4]   <= obj_blank;
-    mux[3:0] <= obj_blank ? scr_pxl : obj_pxl;
+    mux[3:0] <= obj_blank ? scr_gated : obj_pxl;
 end
 
 wire [11:0] raw, rgb;

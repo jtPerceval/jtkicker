@@ -76,7 +76,7 @@ assign code_msb = attr[7:6];
 assign pal_msb  = attr[3:0];
 
 always @(*) begin
-    hdf = flip ? (~hdump[7:0])-8'o10 : hdump[7:0];
+    hdf = flip ? (~hdump[7:0])-8'd7 : hdump[7:0];
 end
 
 assign rd_addr  = { vscr[7:3], hdf[7:3] }; // 5+5 = 10
