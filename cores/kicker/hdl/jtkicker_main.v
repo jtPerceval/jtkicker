@@ -74,7 +74,7 @@ reg         nmi_clrn, irq_clrn;
 reg         ior_cs, dip2_cs, dip3_cs,
             intshow_cs, ti1_cs, ti2_cs,
             color_cs, tidata1_cs, tidata2_cs, iow_cs;
-reg         afe_cs; // watchdog
+// reg         afe_cs; // watchdog
 wire        VMA;
 
 assign irq_trigger = ~LVBL & dip_pause;
@@ -86,7 +86,7 @@ assign rom_addr    = A;
 always @(*) begin
     rom_cs  = VMA && A[15:14] !=0 && RnW && VMA; // ROM = 4000 - FFFF
     iow_cs     = 0;
-    afe_cs     = 0;
+    // afe_cs     = 0;
     intshow_cs = 0;
     ti2_cs     = 0;
     ti1_cs     = 0;
@@ -104,13 +104,14 @@ always @(*) begin
         case( A[13:11] )
             0: case(A[10:8] )
                 0: iow_cs     = 1;
-                1: afe_cs     = 1; // watchdog
+                // 1: afe_cs     = 1; // watchdog
                 2: intshow_cs = 1; // related to VSCR, raster line count?
                 3: ti2_cs     = 1; // TITG2 in sch.
                 4: ti1_cs     = 1; // TITG1 in sch.
                 5: dip2_cs    = 1;
                 6: dip3_cs    = 1;
                 7: ior_cs     = 1; // IOEN in sch.
+                default:;
             endcase
             1: tidata2_cs = 1;
             2: tidata1_cs = 1;

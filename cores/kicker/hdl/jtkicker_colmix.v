@@ -37,12 +37,13 @@ module jtkicker_colmix(
     output        [3:0] green,
     output        [3:0] blue,
     output              LHBL_dly,
-    output              LVBL_dly
+    output              LVBL_dly,
+    input         [3:0] gfx_en
 );
 
 wire [7:0] pal_addr;
 reg  [4:0] mux;
-wire       obj_blank = obj_pxl[3:0]==0;
+wire       obj_blank = obj_pxl[3:0]==0 || !gfx_en[3];
 
 assign pal_addr = { pal_sel, mux};
 

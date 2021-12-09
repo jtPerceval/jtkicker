@@ -66,7 +66,8 @@ module jtkicker_video(
     output              LVBL_dly,
     output        [3:0] red,
     output        [3:0] green,
-    output        [3:0] blue
+    output        [3:0] blue,
+    input         [3:0] gfx_en
 );
 
 wire       LHBL, hinit;
@@ -208,7 +209,8 @@ jtkicker_colmix u_colmix(
     .green      ( green     ),
     .blue       ( blue      ),
     .LHBL_dly   ( LHBL_dly  ),
-    .LVBL_dly   ( LVBL_dly  )
+    .LVBL_dly   ( LVBL_dly  ),
+    .gfx_en     ( gfx_en    )
 );
 
 endmodule

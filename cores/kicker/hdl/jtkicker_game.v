@@ -272,7 +272,8 @@ jtkicker_video u_video(
     .LVBL_dly   ( LVBL_dly  ),
     .red        ( red       ),
     .green      ( green     ),
-    .blue       ( blue      )
+    .blue       ( blue      ),
+    .gfx_en     ( gfx_en    )
 );
 
 
