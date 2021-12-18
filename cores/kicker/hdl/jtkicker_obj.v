@@ -16,6 +16,9 @@
     Version: 1.0
     Date: 15-11-2021 */
 
+// This module captures the logic in
+// custom chips 083 and 502
+
 module jtkicker_obj(
     input               rst,
     input               clk,        // 48 MHz
@@ -113,7 +116,7 @@ reg        dr_start, dr_busy;
 wire [7:0] ydiff, dr_y;
 
 assign dr_y   = ~low_dout;
-assign inzone = dr_y>=vrender && dr_y<(vrender+8'h10);
+assign inzone = dr_y>=vrender && dr_y<(vrender+8'h10) && dr_y<8'hfe;
 assign ydiff  = vrender-dr_y-4'd1;
 assign done   = scan_addr[5:1]==23;
 
@@ -143,10 +146,9 @@ always @(posedge clk, posedge rst) begin
             end
             2: begin
                 dr_code   <= hi_dout;
-                //dr_y      <= low_dout;
                 dr_v      <= ydiff[3:0];
                 scan_addr <= scan_addr+6'd1;
-                if( inzone /*&& dr_xpos > 8'o1 */ ) begin
+                if( inzone ) begin
                     dr_start <= 1;
                 end
                 scan_st   <= done ? 0 : 3;

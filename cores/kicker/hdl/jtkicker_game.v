@@ -219,8 +219,7 @@ u_dwnld(
     // Sound
     .snd            ( snd           ),
     .sample         ( sample        ),
-    .peak           ( game_led      ),
-    .debug_bus      ( debug_bus     )
+    .peak           ( game_led      )
 );
 `else
 assign main_cs = 0;

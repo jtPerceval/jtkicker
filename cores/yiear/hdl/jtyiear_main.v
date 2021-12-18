@@ -63,8 +63,7 @@ module jtyiear_main(
     // Sound
     output signed [15:0] snd,
     output               sample,
-    output               peak,
-    input         [ 7:0] debug_bus
+    output               peak
 );
 
 reg  [ 7:0] cabinet, cpu_din;

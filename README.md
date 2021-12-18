@@ -1,4 +1,4 @@
-# JTKICKER FPGA core compatible with Kicker hardware
+# JTKICKER/JTYIEAR FPGA core compatible with Kicker/Yie Ar Kung-fu hardware
 
 You have in your hands a faithful reproduction of Kicker's hardware. We have analysed the PCB and extracted full schematics from it. We burnt EPROMs with specific code designed to test the custom chips functionality. The discoveries found during this process have been reported to the MAME team. So we can improve the experience in emulators where possible too.
 
@@ -12,6 +12,10 @@ You can show your appreciation through
 It hasn't been possible to assess whether the INTSHOW custom chip outputs the current scan line or the current vertical scroll position, as these values are the same for over a third of the line. And it is at that time when when the INTSHOW value is easy to read, as it is when the NMI interrupt comes in. In practice, it doesn't seem to matter.
 
 The 60.5Hz vertical frequency seems problematic in MiSTer for some screens. This could be improved using a different PLL as the base clock. For now, there is a safe 60Hz mode that can be enabled in the OSD as a fall back option.
+
+# Yie Ar KUNG-FU
+
+The schematics are dated on the 19th Nov. 1984.
 
 # Acknowledgement
 

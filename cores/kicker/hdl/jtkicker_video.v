@@ -67,7 +67,8 @@ module jtkicker_video(
     output        [3:0] red,
     output        [3:0] green,
     output        [3:0] blue,
-    input         [3:0] gfx_en
+    input         [3:0] gfx_en,
+    input         [7:0] debug_bus
 );
 
 wire       LHBL, hinit;
