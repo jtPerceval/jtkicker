@@ -68,7 +68,8 @@ module jtkicker_game(
     input           enable_psg,
     input           enable_fm,
     // Debug
-    input   [ 3:0]  gfx_en
+    input   [ 3:0]  gfx_en,
+    input   [ 7:0]  debug_bus
 );
 
 // SDRAM offsets
@@ -78,7 +79,8 @@ localparam PROM_START  =  `PROM_START;
 
 wire        main_cs, main_ok;
 
-wire [12:0] scr_addr, obj_addr;
+wire [12:0] scr_addr;
+wire [13:0] obj_addr;
 wire [31:0] scr_data, obj_data;
 wire        scr_ok, obj_ok, objrom_cs;
 
@@ -217,7 +219,8 @@ u_dwnld(
     // Sound
     .snd            ( snd           ),
     .sample         ( sample        ),
-    .peak           ( game_led      )
+    .peak           ( game_led      ),
+    .debug_bus      ( debug_bus     )
 );
 `else
 assign main_cs = 0;
@@ -273,7 +276,8 @@ assign main_cs = 0;
     .red        ( red       ),
     .green      ( green     ),
     .blue       ( blue      ),
-    .gfx_en     ( gfx_en    )
+    .gfx_en     ( gfx_en    ),
+    .debug_bus  ( debug_bus )
 );
 
 
@@ -282,7 +286,7 @@ jtframe_rom #(
     .SLOT0_DW    ( 32              ),
     .SLOT0_OFFSET( SCR_START>>1    ),
 
-    .SLOT1_AW    ( 14              ),
+    .SLOT1_AW    ( 15              ),
     .SLOT1_DW    ( 32              ),
     .SLOT1_OFFSET( OBJ_START>>1    ),
 

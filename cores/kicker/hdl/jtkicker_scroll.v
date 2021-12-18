@@ -76,7 +76,7 @@ assign vram_we_high = vram_we &  cpu_addr[BSEL];
 assign vram_dout    = cpu_addr[BSEL] ? vram_high : vram_low;
 
 generate
-    if ( NOSCROLL ) begin // Kicker
+    if ( !NOSCROLL ) begin // Kicker
         assign vflip    = attr[5];
         assign hflip    = attr[4];
         assign code_msb = attr[7:6];
@@ -84,7 +84,7 @@ generate
     end else begin // Yie Ar Kungfu
         assign hflip    = attr[7];
         assign vflip    = attr[6];
-        assign code_msb = {1'b0,attr[5]};
+        assign code_msb = {1'b0,attr[4]};
         assign pal_msb  = 0;
     end
 endgenerate

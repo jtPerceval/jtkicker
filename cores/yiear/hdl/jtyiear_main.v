@@ -63,7 +63,8 @@ module jtyiear_main(
     // Sound
     output signed [15:0] snd,
     output               sample,
-    output               peak
+    output               peak,
+    input         [ 7:0] debug_bus
 );
 
 reg  [ 7:0] cabinet, cpu_din;
@@ -115,7 +116,7 @@ always @(*) begin
                         0: tidata1_cs = 1;
                         default:;
                     endcase
-                2: { obj2_cs, obj1_cs } = { A[10], ~A[10] };
+                2: { obj2_cs, obj1_cs } = {2{debug_bus[0]}}^{ A[10], ~A[10] };
                 3: vram_cs = 1;
                 default:;
             endcase
@@ -123,6 +124,8 @@ always @(*) begin
         default:;
     endcase
 end
+
+reg fake=0, bsy_ls;
 
 always @(posedge clk) begin
     case( A[1:0] )
@@ -137,7 +140,9 @@ always @(posedge clk) begin
                ior_cs  ? cabinet   :
                dip2_cs ? dipsw_b   :
                dip3_cs ? { 4'hf, dipsw_c } :
-               vlm_bsy_cs ? 8'hfe : 8'hff;
+               vlm_bsy_cs ? {7'h7f,fake} : 8'hff;
+    if( vlm_bsy_cs && !bsy_ls ) fake<=~fake;
+    bsy_ls <= vlm_bsy_cs;
 end
 
 always @(posedge clk) begin

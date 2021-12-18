@@ -53,7 +53,7 @@ module jtyiear_video(
     input               scr_ok,
 
     // Objects
-    output       [12:0] obj_addr,
+    output       [13:0] obj_addr,
     input        [31:0] obj_data,
     output              obj_cs,
     input               obj_ok,
@@ -67,7 +67,8 @@ module jtyiear_video(
     output        [3:0] red,
     output        [3:0] green,
     output        [3:0] blue,
-    input         [3:0] gfx_en
+    input         [3:0] gfx_en,
+    input         [7:0] debug_bus
 );
 
 wire       LHBL, hinit;
@@ -145,10 +146,7 @@ jtkicker_scroll #(.BYPASS_PROM(1),.NOSCROLL(1)) u_scroll(
     .pxl        ( scr_pxl   )
 );
 
-wire [10:0] obj_ainv = { cpu_addr[10:8], cpu_addr[0], cpu_addr[1], cpu_addr[2], cpu_addr[3],
-                                         cpu_addr[4], cpu_addr[5], cpu_addr[6], cpu_addr[7] };
-
-jtkicker_obj #(.BYPASS_PROM(1)) u_obj(
+jtkicker_obj #(.BYPASS_PROM(1),.LARGE_ROM(1)) u_obj(
     .rst        ( rst       ),
     .clk        ( clk       ),        // 48 MHz
     .clk24      ( clk24     ),      // 24 MHz
@@ -156,7 +154,7 @@ jtkicker_obj #(.BYPASS_PROM(1)) u_obj(
     .pxl_cen    ( pxl_cen   ),
 
     // CPU interface
-    .cpu_addr   ( cpu_addr  ),
+    .cpu_addr   ( {cpu_addr[10:1],cpu_addr[0]^debug_bus[1]}  ),
     .cpu_dout   ( cpu_dout  ),
     .obj1_cs    ( obj1_cs   ),
     .obj2_cs    ( obj2_cs   ),

@@ -45,7 +45,7 @@ module jtkicker_obj(
     input               prog_en,
 
     // SDRAM
-    output reg   [12:0] rom_addr,
+    output reg   [13:0] rom_addr,
     input        [31:0] rom_data,
     output reg          rom_cs,
     input               rom_ok,
@@ -53,7 +53,7 @@ module jtkicker_obj(
     output        [3:0] pxl
 );
 
-parameter BYPASS_PROM=0;
+parameter BYPASS_PROM=0, LARGE_ROM=0;
 
 wire [ 7:0] obj1_dout, obj2_dout, pal_addr,
             low_dout, hi_dout;
@@ -66,7 +66,7 @@ assign obj1_we  = obj1_cs & ~cpu_rnw;
 assign obj2_we  = obj2_cs & ~cpu_rnw;
 
 // Mapped at 0x3000
-jtframe_dual_ram u_low(
+jtframe_dual_ram u_hi(
     // Port 0, CPU
     .clk0   ( clk24         ),
     .data0  ( cpu_dout      ),
@@ -82,7 +82,7 @@ jtframe_dual_ram u_low(
 );
 
 // Mapped at 0x2800
-jtframe_dual_ram u_high(
+jtframe_dual_ram u_low(
     // Port 0, CPU
     .clk0   ( clk24         ),
     .data0  ( cpu_dout      ),
@@ -174,7 +174,7 @@ always @(posedge clk, posedge rst) begin
         dr_cnt   <= 0;
     end else if( cen2 ) begin
         if( dr_start && !dr_busy ) begin
-            rom_addr <= { dr_code, dr_v^{4{vflip}}, 1'b0 };
+            rom_addr <= { LARGE_ROM ? dr_attr[0] : 1'b0, dr_code, dr_v^{4{vflip}}, 1'b0 };
             rom_cs   <= 1;
             dr_cnt   <= 7;
             buf_a    <= dr_xpos + (hflip ? 8'd15 : 8'h0) + 8'd6;

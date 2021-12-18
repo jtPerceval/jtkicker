@@ -72,7 +72,7 @@ jtframe_prom #(
 );
 
 
-jtframe_blank #(.DLY(9),.DW(8)) u_blank(
+jtframe_blank #(.DLY(8),.DW(8)) u_blank(
     .clk        ( clk       ),
     .pxl_cen    ( pxl_cen   ),
     .LHBL       ( LHBL      ),
