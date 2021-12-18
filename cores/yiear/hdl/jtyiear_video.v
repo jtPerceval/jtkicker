@@ -83,7 +83,7 @@ assign V16 = vdump[4];
 // the original, particularly VBLANK, H period
 // and V period
 jtframe_vtimer #(
-    .VB_START   (  9'd239   ),
+    .VB_START   (  9'd238   ),
     .VB_END     (  9'd015   ),
     .VCNT_END   (  9'd263   ),
     .VS_START   (  9'd254   ),
