@@ -146,7 +146,11 @@ jtkicker_scroll #(.BYPASS_PROM(1),.NOSCROLL(1)) u_scroll(
     .pxl        ( scr_pxl   )
 );
 
-jtkicker_obj #(.BYPASS_PROM(1),.LARGE_ROM(1)) u_obj(
+jtkicker_obj #(
+    .BYPASS_PROM( 1         ),
+    .LARGE_ROM  ( 1         ),
+    .HOFFSET    ( 8'd5      ))
+u_obj(
     .rst        ( rst       ),
     .clk        ( clk       ),        // 48 MHz
     .clk24      ( clk24     ),      // 24 MHz

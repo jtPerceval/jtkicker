@@ -55,6 +55,7 @@ module jtkicker_obj(
 );
 
 parameter BYPASS_PROM=0, LARGE_ROM=0;
+parameter [7:0] HOFFSET = 8'd6;
 
 wire [ 7:0] obj1_dout, obj2_dout, pal_addr,
             low_dout, hi_dout;
@@ -178,7 +179,7 @@ always @(posedge clk, posedge rst) begin
             rom_addr <= { LARGE_ROM ? dr_attr[0] : 1'b0, dr_code, dr_v^{4{vflip}}, 1'b0 };
             rom_cs   <= 1;
             dr_cnt   <= 7;
-            buf_a    <= dr_xpos + (hflip ? 8'd15 : 8'h0) + 8'd6;
+            buf_a    <= dr_xpos + (hflip ? 8'd15 : 8'h0) + HOFFSET;
             dr_busy  <= 1;
         end
         if( dr_busy && (!rom_cs || rom_ok) ) begin
