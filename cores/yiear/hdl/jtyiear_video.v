@@ -73,10 +73,8 @@ module jtyiear_video(
 wire       LHBL, hinit;
 wire [8:0] vdump, vrender, hdump;
 wire [3:0] obj_pxl, scr_pxl;
-reg  [4:0] prom_we;
 
 assign V16 = vdump[4];
-assign vscr_dout = 0;
 
 // The original counter keeps hdump[7] high
 // while hdump[8] is hight (i.e. during HBLANK)
@@ -110,7 +108,7 @@ jtframe_vtimer #(
     .VS         ( VS        )
 );
 
-jtkicker_scroll u_scroll(
+jtkicker_scroll #(.BYPASS_PROM(1),.NOSCROLL(1)) u_scroll(
     .rst        ( rst       ),
     .clk        ( clk       ),
     .clk24      ( clk24     ),
@@ -125,7 +123,7 @@ jtkicker_scroll u_scroll(
     .vram_cs    ( vram_cs   ),
     .vscr_cs    ( 1'b0      ),  // No 085 chip, so no scroll
     .vram_dout  ( vram_dout ),
-    .vscr_dout  (           ),
+    .vscr_dout  ( vscr_dout ),
 
     // video inputs
     .LHBL       ( LHBL      ),
@@ -135,9 +133,9 @@ jtkicker_scroll u_scroll(
     .flip       ( flip      ),
 
     // PROMs
-    .prog_data  ( prog_data ),
-    .prog_addr  ( prog_addr[7:0] ),
-    .prog_en    ( prom_we[3]),
+    .prog_data  (           ),
+    .prog_addr  (           ),
+    .prog_en    (           ),
 
     // SDRAM
     .rom_addr   ( scr_addr  ),
@@ -146,6 +144,9 @@ jtkicker_scroll u_scroll(
 
     .pxl        ( scr_pxl   )
 );
+
+wire [10:0] obj_ainv = { cpu_addr[10:8], cpu_addr[0], cpu_addr[1], cpu_addr[2], cpu_addr[3],
+                                         cpu_addr[4], cpu_addr[5], cpu_addr[6], cpu_addr[7] };
 
 jtkicker_obj #(.BYPASS_PROM(1)) u_obj(
     .rst        ( rst       ),
@@ -198,7 +199,7 @@ jtyiear_colmix u_colmix(
     // PROMs
     .prog_data  ( prog_data ),
     .prog_addr  ( prog_addr[4:0] ),
-    .prog_en    ( prom_we   ),
+    .prog_en    ( prom_en   ),
 
     .red        ( red       ),
     .green      ( green     ),

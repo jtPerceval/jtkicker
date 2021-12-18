@@ -43,8 +43,8 @@
         </interleave>
         <!-- gfx1 - starts at 0x10000 -->
         <interleave output="16">
-            <part name="407_c02.7h" crc="d9b167c6" map="01"/>
-            <part name="407_c01.6h" crc="b68fd91d" map="10"/>
+            <part name="407_c01.6h" crc="b68fd91d" map="01"/>
+            <part name="407_c02.7h" crc="d9b167c6" map="10"/>
         </interleave>
         <!-- gfx2 - starts at 0x14000 -->
         <interleave output="16">

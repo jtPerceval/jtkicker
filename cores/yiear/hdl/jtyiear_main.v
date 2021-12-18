@@ -75,6 +75,7 @@ reg         ior_cs, dip2_cs, dip3_cs,
             ti1_cs,
             color_cs, tidata1_cs, iow_cs;
 // reg         afe_cs; // watchdog
+reg         vlm_bsy_cs;
 wire        VMA;
 
 assign irq_trigger = ~LVBL & dip_pause;
@@ -97,16 +98,17 @@ always @(*) begin
     obj1_cs    = 0;
     obj2_cs    = 0;
     vram_cs    = 0;
+    vlm_bsy_cs = 0;
     case( A[15:14] )
-        // 0: BSY ??
+        0: vlm_bsy_cs = 1;
         1: case( A[13:11] )
                 0: iow_cs = 1;
                 1:
                     case(A[10:8])
                         // 7: afe_cs = 1;
                         6: ior_cs  = 1;
-                        5: dip2_cs = 1;
-                        4: dip3_cs = 1;
+                        5: dip3_cs = 1;
+                        4: dip2_cs = 1;
                         // 3: vlm_data_cs = 1;
                         // 2: vlm_cont = 1;
                         1: ti1_cs = 1;
@@ -134,7 +136,8 @@ always @(posedge clk) begin
                (obj1_cs | obj2_cs) ? obj_dout  :
                ior_cs  ? cabinet   :
                dip2_cs ? dipsw_b   :
-               dip3_cs ? { 4'hf, dipsw_c } : 8'hff;
+               dip3_cs ? { 4'hf, dipsw_c } :
+               vlm_bsy_cs ? 8'hfe : 8'hff;
 end
 
 always @(posedge clk) begin
@@ -236,7 +239,7 @@ jtframe_mixer #(.W0(11),.W1(11)) u_mixer(
     .cen    ( ti1_cen   ),
     // input signals
     .ch0    ( ti1_snd   ),
-    .ch1    ( 12'd0     ),
+    .ch1    ( 11'd0     ),
     .ch2    ( 16'd0     ),
     .ch3    ( 16'd0     ),
     // gain for each channel in 4.4 fixed point format

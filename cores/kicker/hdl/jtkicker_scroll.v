@@ -53,6 +53,9 @@ module jtkicker_scroll(
     output        [3:0] pxl
 );
 
+parameter BYPASS_PROM=0, NOSCROLL=0;
+localparam BSEL = NOSCROLL ? 0 : 10;
+
 wire [ 7:0] code, attr, vram_high, vram_low, pal_addr;
 wire [ 3:0] pal_msb;
 reg  [ 3:0] cur_pal;
@@ -64,23 +67,34 @@ reg         cur_hf;
 wire        vram_we_low, vram_we_high;
 wire        vflip, hflip;
 wire        vram_we;
+wire [ 9:0] eff_addr;
 
+assign eff_addr     = NOSCROLL ? cpu_addr[10:1] : cpu_addr[9:0];
 assign vram_we      = vram_cs & ~cpu_rnw;
-assign vram_we_low  = vram_we & ~cpu_addr[10];
-assign vram_we_high = vram_we &  cpu_addr[10];
-assign vram_dout    = cpu_addr[10] ? vram_high : vram_low;
+assign vram_we_low  = vram_we & ~cpu_addr[BSEL];
+assign vram_we_high = vram_we &  cpu_addr[BSEL];
+assign vram_dout    = cpu_addr[BSEL] ? vram_high : vram_low;
 
-assign vflip = attr[5];
-assign hflip = attr[4];
-assign code_msb = attr[7:6];
-assign pal_msb  = attr[3:0];
+generate
+    if ( NOSCROLL ) begin // Kicker
+        assign vflip    = attr[5];
+        assign hflip    = attr[4];
+        assign code_msb = attr[7:6];
+        assign pal_msb  = attr[3:0];
+    end else begin // Yie Ar Kungfu
+        assign hflip    = attr[7];
+        assign vflip    = attr[6];
+        assign code_msb = {1'b0,attr[5]};
+        assign pal_msb  = 0;
+    end
+endgenerate
 
 always @(*) begin
     hdf = flip ? (~hdump[7:0])-8'd7 : hdump[7:0];
 end
 
 assign rd_addr  = { vscr[7:3], hdf[7:3] }; // 5+5 = 10
-assign vscr_dout= vscr; // this could be vdump instead of vscr, it's hard to
+assign vscr_dout= NOSCROLL ? 8'd0 : vscr; // this could be vdump instead of vscr, it's hard to
                         // measure it in a test program because vscr=vdump
                         // for the first rows, which is when the NMI occurs
 assign pal_addr =
@@ -94,7 +108,7 @@ always @(posedge clk, posedge rst) begin
         vscr <= 0;
     end else begin
         if( vscr_cs  ) vpos <= cpu_dout;
-        if( flip ? hdf<9'o40 : hdump<9'o40 ) begin
+        if( NOSCROLL || (flip ? hdf<9'o40 : hdump<9'o40) ) begin
             vscr <= {8{flip}} ^ vdump;
         end else begin
             // +1 needed to have a straight grid during boot up
@@ -129,7 +143,7 @@ jtframe_dual_ram u_low(
     // Port 0, CPU
     .clk0   ( clk24         ),
     .data0  ( cpu_dout      ),
-    .addr0  ( cpu_addr[9:0] ),
+    .addr0  ( eff_addr      ),
     .we0    ( vram_we_low   ),
     .q0     ( vram_low      ),
     // Port 1
@@ -144,7 +158,7 @@ jtframe_dual_ram u_high(
     // Port 0, CPU
     .clk0   ( clk24         ),
     .data0  ( cpu_dout      ),
-    .addr0  ( cpu_addr[9:0] ),
+    .addr0  ( eff_addr      ),
     .we0    ( vram_we_high  ),
     .q0     ( vram_high     ),
     // Port 1
@@ -155,19 +169,25 @@ jtframe_dual_ram u_high(
     .q1     ( code          )
 );
 
-jtframe_prom #(
-    .dw ( 4     ),
-    .aw ( 8     )
-//    simfile = "477j09.b8",
-) u_palette(
-    .clk    ( clk       ),
-    .cen    ( pxl_cen   ),
-    .data   ( prog_data ),
-    .wr_addr( prog_addr ),
-    .we     ( prog_en   ),
+generate
+    if( BYPASS_PROM ) begin
+        assign pxl = pal_addr[3:0];
+    end else begin
+        jtframe_prom #(
+            .dw ( 4     ),
+            .aw ( 8     )
+        //    simfile = "477j09.b8",
+        ) u_palette(
+            .clk    ( clk       ),
+            .cen    ( pxl_cen   ),
+            .data   ( prog_data ),
+            .wr_addr( prog_addr ),
+            .we     ( prog_en   ),
 
-    .rd_addr( pal_addr  ),
-    .q      ( pxl       )
-);
+            .rd_addr( pal_addr  ),
+            .q      ( pxl       )
+        );
+    end
+endgenerate
 
 endmodule

@@ -54,7 +54,7 @@ wire [7:0] raw, rgb;
 // convert to 4-bit per component for simplicity
 assign {red,green,blue} = { rgb[2:0], rgb[2], // red
                             rgb[5:3], rgb[5], // green
-                         {2{rgb[1:0]}} } ;    // blue
+                         {2{rgb[7:6]}} } ;    // blue
 
 jtframe_prom #(
     .dw ( 8     ),
