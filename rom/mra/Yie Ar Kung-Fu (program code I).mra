@@ -48,12 +48,12 @@
         </interleave>
         <!-- gfx2 - starts at 0x14000 -->
         <interleave output="16">
-            <part name="407_d03.14h" crc="e6aa945b" map="01"/>
-            <part name="407_d05.16h" crc="45109b29" map="10"/>
+            <part name="407_d05.16h" crc="45109b29" map="01"/>
+            <part name="407_d03.14h" crc="e6aa945b" map="10"/>
         </interleave>
         <interleave output="16">
-            <part name="407_d04.15h" crc="cc187c22" map="01"/>
-            <part name="407_d06.17h" crc="1d650790" map="10"/>
+            <part name="407_d06.17h" crc="1d650790" map="01"/>
+            <part name="407_d04.15h" crc="cc187c22" map="10"/>
         </interleave>
         <!-- vlm - starts at 0x24000 -->
         <part name="407_c09.8b" crc="f75a1539"/>

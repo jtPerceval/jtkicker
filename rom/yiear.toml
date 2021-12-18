@@ -28,7 +28,7 @@ delete = [ "Unused", "Unknown" ]
 regions = [
     { name="maincpu", reverse=true },
     { name="gfx1", width=16, no_offset=true }, # start=$GFX1_START
-    { name="gfx2", width=16, reverse=true, no_offset=true, Sort_even=true }, # start=$GFX2_START
+    { name="gfx2", width=16, no_offset=true, Sort_even=true }, # start=$GFX2_START
     { name="vlm" },
     { name="proms"          },
 ]
