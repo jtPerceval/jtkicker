@@ -50,7 +50,8 @@ module jtkicker_obj(
     output reg          rom_cs,
     input               rom_ok,
 
-    output        [3:0] pxl
+    output        [3:0] pxl,
+    input         [7:0] debug_bus
 );
 
 parameter BYPASS_PROM=0, LARGE_ROM=0;

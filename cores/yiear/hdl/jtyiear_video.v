@@ -154,7 +154,7 @@ jtkicker_obj #(.BYPASS_PROM(1),.LARGE_ROM(1)) u_obj(
     .pxl_cen    ( pxl_cen   ),
 
     // CPU interface
-    .cpu_addr   ( {cpu_addr[10:1],cpu_addr[0]^debug_bus[1]}  ),
+    .cpu_addr   ( cpu_addr  ),
     .cpu_dout   ( cpu_dout  ),
     .obj1_cs    ( obj1_cs   ),
     .obj2_cs    ( obj2_cs   ),
@@ -180,7 +180,8 @@ jtkicker_obj #(.BYPASS_PROM(1),.LARGE_ROM(1)) u_obj(
     .rom_data   ( obj_data  ),
     .rom_ok     ( obj_ok    ),
 
-    .pxl        ( obj_pxl   )
+    .pxl        ( obj_pxl   ),
+    .debug_bus  ( debug_bus )
 );
 
 jtyiear_colmix u_colmix(

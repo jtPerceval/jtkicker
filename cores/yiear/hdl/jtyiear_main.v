@@ -116,7 +116,7 @@ always @(*) begin
                         0: tidata1_cs = 1;
                         default:;
                     endcase
-                2: { obj2_cs, obj1_cs } = {2{debug_bus[0]}}^{ A[10], ~A[10] };
+                2: { obj2_cs, obj1_cs } = { ~A[10], A[10] };
                 3: vram_cs = 1;
                 default:;
             endcase
