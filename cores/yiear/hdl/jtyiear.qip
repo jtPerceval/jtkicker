@@ -1,0 +1,37 @@
+set KICKER  ../../kicker/hdl
+set MODULES ../../../modules
+set JTFRAME ../../../modules/jtframe/hdl
+
+set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) ${KICKER}/jtkicker_game.v     ]
+set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) ${KICKER}/jtkicker_scroll.v   ]
+set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) ${KICKER}/jtkicker_obj.v      ]
+set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) jtyiear_main.v      ]
+set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) jtyiear_video.v     ]
+set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) jtyiear_colmix.v    ]
+
+# M6809
+set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) ${JTFRAME}/cpu/mc6809i.v    ]
+set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) ${JTFRAME}/cpu/jtframe_sys6809.v     ]
+set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) ${JTFRAME}/cpu/jtframe_z80wait.v     ]
+
+# Clocking
+set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) ${JTFRAME}/clocking/jtframe_frac_cen.v  ]
+set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) ${JTFRAME}/clocking/jtframe_crossclk_cen.v  ]
+
+# Other
+set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) ${JTFRAME}/jtframe_ff.v  ]
+set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) ${JTFRAME}/ram/jtframe_ram.v  ]
+set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) ${JTFRAME}/sdram/jtframe_dwnld.v  ]
+
+
+# Video
+set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) ${JTFRAME}/video/jtframe_vtimer.v        ]
+set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) ${JTFRAME}/ram/jtframe_obj_buffer.v        ]
+set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) ${JTFRAME}/video/jtframe_blank.v        ]
+
+######################
+# Sound
+# JT89
+set_global_assignment -name QIP_FILE [file join $::quartus(qip_path) ${MODULES}/jt89/hdl/jt89.qip     ]
+set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) ${JTFRAME}/sound/jtframe_mixer.v        ]
+

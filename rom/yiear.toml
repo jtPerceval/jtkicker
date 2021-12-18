@@ -7,16 +7,16 @@ mraauthor=["jotego"]
 # debug=true
 
 [parse]
-sourcefile="shaolins.cpp"
+sourcefile="yiear.cpp"
 
 [buttons]
 core=2 # max number of buttons supported by the core
 names=[
-    { names="Kick,Jump" }
+    { names="Punch,Kick" }
 ]
 
 [rbf]
-name="jtkicker"
+name="jtyiear"
 
 [dipsw]
 delete = [ "Unused", "Unknown" ]
@@ -29,14 +29,12 @@ regions = [
     { name="maincpu", reverse=true },
     { name="gfx1", width=16, reverse=true, no_offset=true }, # start=$GFX1_START
     { name="gfx2", width=16, reverse=true, no_offset=true }, # start=$GFX2_START
+    { name="vlm" },
     { name="proms"          },
 ]
 # { name="myregion", reorder=[3,2,1,0] } # reorder files inside a region
 order = [
-    "maincpu", "gfx1", "gfx2", "proms"
+    "maincpu", "gfx1", "gfx2", "vlm", "proms"
 ]
 
-patches = [
-    { setname="kicker", offset=0x58c6, value="3d 3d" }
-]
 

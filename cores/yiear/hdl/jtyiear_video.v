@@ -16,7 +16,7 @@
     Version: 1.0
     Date: 11-11-2021 */
 
-module jtkicker_video(
+module jtyiear_video(
     input               rst,
     input               clk,        // 48 MHz
     input               clk24,      // 24 MHz
@@ -76,11 +76,7 @@ wire [3:0] obj_pxl, scr_pxl;
 reg  [4:0] prom_we;
 
 assign V16 = vdump[4];
-
-always @* begin
-    prom_we = 0;
-    prom_we[ prog_addr[10:8] ] = prom_en;
-end
+assign vscr_dout = 0;
 
 // The original counter keeps hdump[7] high
 // while hdump[8] is hight (i.e. during HBLANK)
@@ -127,9 +123,9 @@ jtkicker_scroll u_scroll(
     .cpu_dout   ( cpu_dout  ),
     .cpu_rnw    ( cpu_rnw   ),
     .vram_cs    ( vram_cs   ),
-    .vscr_cs    ( vscr_cs   ),
+    .vscr_cs    ( 1'b0      ),  // No 085 chip, so no scroll
     .vram_dout  ( vram_dout ),
-    .vscr_dout  ( vscr_dout ),
+    .vscr_dout  (           ),
 
     // video inputs
     .LHBL       ( LHBL      ),
@@ -139,7 +135,7 @@ jtkicker_scroll u_scroll(
     .flip       ( flip      ),
 
     // PROMs
-    .prog_data  ( prog_data[3:0] ),
+    .prog_data  ( prog_data ),
     .prog_addr  ( prog_addr[7:0] ),
     .prog_en    ( prom_we[3]),
 
@@ -151,7 +147,7 @@ jtkicker_scroll u_scroll(
     .pxl        ( scr_pxl   )
 );
 
-jtkicker_obj u_obj(
+jtkicker_obj #(.BYPASS_PROM(1)) u_obj(
     .rst        ( rst       ),
     .clk        ( clk       ),        // 48 MHz
     .clk24      ( clk24     ),      // 24 MHz
@@ -174,10 +170,10 @@ jtkicker_obj u_obj(
     .hdump      ( hdump     ),
     .flip       ( flip      ),
 
-    // PROMs
-    .prog_data  ( prog_data[3:0] ),
-    .prog_addr  ( prog_addr[7:0] ),
-    .prog_en    ( prom_we[4]),
+    // PROMs - Unused
+    .prog_data  (           ),
+    .prog_addr  (           ),
+    .prog_en    (           ),
 
     // SDRAM
     .rom_cs     ( obj_cs    ),
@@ -188,11 +184,10 @@ jtkicker_obj u_obj(
     .pxl        ( obj_pxl   )
 );
 
-jtkicker_colmix u_colmix(
+jtyiear_colmix u_colmix(
     .clk        ( clk       ),
 
     .pxl_cen    ( pxl_cen   ),
-    .pal_sel    ( pal_sel   ),
 
     // video inputs
     .obj_pxl    ( obj_pxl   ),
@@ -202,8 +197,8 @@ jtkicker_colmix u_colmix(
 
     // PROMs
     .prog_data  ( prog_data ),
-    .prog_addr  (prog_addr[7:0]),
-    .prog_en    (prom_we[2:0]),
+    .prog_addr  ( prog_addr[4:0] ),
+    .prog_en    ( prom_we   ),
 
     .red        ( red       ),
     .green      ( green     ),

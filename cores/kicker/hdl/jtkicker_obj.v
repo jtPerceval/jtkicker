@@ -53,6 +53,8 @@ module jtkicker_obj(
     output        [3:0] pxl
 );
 
+parameter BYPASS_PROM=0;
+
 wire [ 7:0] obj1_dout, obj2_dout, pal_addr,
             low_dout, hi_dout;
 wire        obj1_we, obj2_we;
@@ -228,19 +230,26 @@ jtframe_obj_buffer #(.AW(8),.DW(4), .ALPHA(0)) u_buffer(
     .rd_data( pxl       )
 );
 
-jtframe_prom #(
-    .dw     ( 4         ),
-    .aw     ( 8         )
-//    simfile = "477j08.f16",
-) u_palette(
-    .clk    ( clk       ),
-    .cen    ( 1'b1      ),
-    .data   ( prog_data ),
-    .wr_addr( prog_addr ),
-    .we     ( prog_en   ),
+generate
+    if( BYPASS_PROM ) begin
+        assign buf_in = pal_addr[3:0];
+    end else begin
+        jtframe_prom #(
+            .dw     ( 4         ),
+            .aw     ( 8         )
+        //    simfile = "477j08.f16",
+        ) u_palette(
+            .clk    ( clk       ),
+            .cen    ( 1'b1      ),
+            .data   ( prog_data ),
+            .wr_addr( prog_addr ),
+            .we     ( prog_en   ),
 
-    .rd_addr( pal_addr  ),
-    .q      ( buf_in    )
-);
+            .rd_addr( pal_addr  ),
+            .q      ( buf_in    )
+        );
+    end
+endgenerate
+
 
 endmodule

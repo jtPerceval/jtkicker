@@ -173,7 +173,7 @@ u_dwnld(
 );
 
 `ifndef NOMAIN
-jtkicker_main u_main(
+`MAIN_MODULE u_main(
     .rst            ( rst24         ),
     .clk            ( clk24         ),        // 24 MHz
     .cpu4_cen       ( cpu4_cen      ),
@@ -223,7 +223,7 @@ jtkicker_main u_main(
 assign main_cs = 0;
 `endif
 
-jtkicker_video u_video(
+`VIDEO_MODULE u_video(
     .rst        ( rst       ),
     .clk        ( clk       ),
     .clk24      ( clk24     ),
@@ -250,7 +250,7 @@ jtkicker_video u_video(
     .obj_dout   ( obj_dout  ),
 
     // PROMs
-    .prog_data  ( prog_data[ 3:0] ),
+    .prog_data  ( prog_data ),
     .prog_addr  ( prog_addr[10:0] ),
     .prom_en    ( prom_we   ),
 

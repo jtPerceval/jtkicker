@@ -12,8 +12,8 @@ mkdir -p mra/_alt
 # jtcfgstr -target=mist -output=bash -def $DEF|grep _START > $AUXTMP
 # source $AUXTMP
 
-# System 16B
-# mame2mra -def $CORES/s16b/hdl/jts16b.def -toml s16b.toml -outdir mra $*
-mame2mra -toml kicker.toml -outdir mra $*
+for i in kicker yiear; do
+    mame2mra -toml $i.toml -outdir mra $*
+done
 
 sshpass -p 1 scp -r mra/* root@MiSTer.home:/media/fat/_JT
