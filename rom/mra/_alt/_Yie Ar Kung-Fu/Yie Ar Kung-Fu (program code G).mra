@@ -56,7 +56,9 @@
             <part name="407_d04.15h" crc="cc187c22" map="10"/>
         </interleave>
         <!-- vlm - starts at 0x24000 -->
-        <part name="407_c09.8b" crc="f75a1539"/>
+        <interleave output="16">
+            <part name="407_c09.8b" crc="f75a1539" map="12"/>
+        </interleave>
         <!-- proms - starts at 0x26000 -->
         <part name="407c10.1g" crc="c283d71f"/>
         <!-- Total 0x26020 bytes - 152 kBytes -->

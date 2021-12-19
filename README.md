@@ -13,9 +13,13 @@ It hasn't been possible to assess whether the INTSHOW custom chip outputs the cu
 
 The 60.5Hz vertical frequency seems problematic in MiSTer for some screens. This could be improved using a different PLL as the base clock. For now, there is a safe 60Hz mode that can be enabled in the OSD as a fall back option.
 
-# Yie Ar KUNG-FU
+# System Comparison
 
-The schematics are dated on the 19th Nov. 1984.
+Game           | Date       |  ID | Palette PROM  | Scroll | PSG chips | PCM chips
+---------------|------------|-----|---------------|--------|-----------|-------------
+Yie Ar Kungfu  |19/Nov/1984 |GX407|  Only output  | No     | x1        | Yes
+Shaolin's Road |22/Mar/1985 |GX477| All elements  | Yes    | x2        | No
+
 
 # Acknowledgement
 
