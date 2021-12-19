@@ -84,6 +84,10 @@ wire        VMA;
 // VLM5030 sound
 reg         vlm_bsy_cs;
 wire        vlm_bsy, vlm_cen;
+reg         vlm_data_cs, vlm_cont,
+            vlm_st, vlm_rst, vlm_sel;
+reg   [7:0] vlm_data;
+wire  [7:0] vlm_mux;
 wire signed
       [9:0] vlm_snd;
 
@@ -108,6 +112,8 @@ always @(*) begin
     obj2_cs    = 0;
     vram_cs    = 0;
     vlm_bsy_cs = 0;
+    vlm_data_cs = 0;
+    vlm_cont   = 0;
     case( A[15:14] )
         0: vlm_bsy_cs = 1;
         1: case( A[13:11] )
@@ -118,8 +124,8 @@ always @(*) begin
                         6: ior_cs  = 1;
                         5: dip3_cs = 1;
                         4: dip2_cs = 1;
-                        // 3: vlm_data_cs = 1;
-                        // 2: vlm_cont = 1;
+                        3: vlm_data_cs = 1;
+                        2: vlm_cont = 1;
                         1: ti1_cs = 1;
                         0: tidata1_cs = 1;
                         default:;
@@ -155,7 +161,10 @@ always @(posedge clk) begin
         irq_clrn <= 0;
         flip     <= 0;
         pal_sel  <= 0;
+        vlm_data <= 0;
     end else if(cpu_cen) begin
+        if( vlm_data_cs ) vlm_data <= cpu_dout;
+        if( vlm_cont ) { vlm_rst, vlm_st, vlm_sel } <= cpu_dout[2:0];
         if( iow_cs && !RnW ) begin
             // bit 5 = SA ??
             irq_clrn <= cpu_dout[2];
@@ -247,16 +256,18 @@ jtframe_cen3p57 #(.CLK24(1)) u_vlmcen(
     .cen_1p78   (           )
 );
 
+assign vlm_mux = vlm_sel ? vlm_data : pcm_data;
+
 vlm5030_gl u_vlm(
-    .i_rst   ( rst          ),
+    .i_rst   ( vlm_rst      ),
     .i_clk   ( clk          ),
     .i_oscen ( vlm_cen      ),
-    .i_start (              ),
+    .i_start ( vlm_st       ),
     .i_vcu   ( 1'b0         ),
     .i_tst1  ( 1'b0         ),
     .o_tst2  (              ),
     .o_tst4  (              ),
-    .i_d     ( pcm_data     ),
+    .i_d     ( vlm_mux      ),
     .o_a     ( pcm_addr     ),
     .o_me_l  (              ),
     .o_mte   (              ),
