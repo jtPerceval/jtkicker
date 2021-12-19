@@ -220,7 +220,7 @@ end
 
 wire buf_clr, LHBL_dly;
 
-assign buf_clr = pxl_cen & ~hdump[8];
+assign buf_clr = pxl_cen & LHBL_dly;
 
 jtframe_sh #(.width(1),.stages(HOFFSET-1) ) u_dly(
     .clk    ( clk       ),
