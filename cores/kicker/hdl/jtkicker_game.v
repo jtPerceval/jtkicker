@@ -317,7 +317,7 @@ jtframe_rom #(
 
     .slot0_cs    ( LVBL          ),
     .slot1_cs    ( objrom_cs     ),
-    .slot2_cs    ( pcm_ok        ),
+    .slot2_cs    ( 1'b1          ),
     .slot3_cs    ( 1'b0          ),
     .slot4_cs    ( 1'b0          ),
     .slot5_cs    ( 1'b0          ),
@@ -327,7 +327,7 @@ jtframe_rom #(
 
     .slot0_ok    ( scr_ok        ),
     .slot1_ok    ( obj_ok        ),
-    .slot2_ok    (               ),
+    .slot2_ok    ( pcm_ok        ),
     .slot3_ok    (               ),
     .slot4_ok    (               ),
     .slot5_ok    (               ),
