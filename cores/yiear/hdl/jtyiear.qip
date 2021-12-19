@@ -15,6 +15,7 @@ set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) ${JTFRA
 set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) ${JTFRAME}/cpu/jtframe_z80wait.v     ]
 
 # Clocking
+set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) ${JTFRAME}/clocking/jtframe_cen48.v  ]
 set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) ${JTFRAME}/clocking/jtframe_frac_cen.v  ]
 set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) ${JTFRAME}/clocking/jtframe_crossclk_cen.v  ]
 
@@ -35,3 +36,4 @@ set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) ${JTFRA
 set_global_assignment -name QIP_FILE [file join $::quartus(qip_path) ${MODULES}/jt89/hdl/jt89.qip     ]
 set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) ${JTFRAME}/sound/jtframe_mixer.v        ]
 
+set_global_assignment -name QIP_FILE [file join $::quartus(qip_path) ${MODULES}/vlm5030/vlm5030.qip ]

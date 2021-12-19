@@ -76,6 +76,7 @@ module jtkicker_game(
 localparam SCR_START   =  `SCR_START;
 localparam OBJ_START   =  `OBJ_START;
 localparam PROM_START  =  `PROM_START;
+localparam PCM_START   =  `PCM_START;
 
 wire        main_cs, main_ok;
 
@@ -99,6 +100,11 @@ wire        vscr_cs, vram_cs, obj1_cs, obj2_cs,
             prom_we, flip;
 wire [ 7:0] vscr_dout, vram_dout, obj_dout, cpu_dout;
 wire        vsync60;
+
+// PCM - used by yiear
+wire [15:0] pcm_addr;
+wire [ 7:0] pcm_data;
+wire        pcm_ok;
 
 assign prog_rd    = 0;
 assign dwnld_busy = downloading;
@@ -217,12 +223,21 @@ u_dwnld(
     .dipsw_b        ( dipsw_b       ),
     .dipsw_c        ( dipsw_c       ),
     // Sound
+`ifdef PCM
+    .pcm_addr       ( pcm_addr      ),
+    .pcm_data       ( pcm_data      ),
+    .pcm_ok         ( pcm_ok        ),
+`endif
     .snd            ( snd           ),
     .sample         ( sample        ),
     .peak           ( game_led      )
 );
 `else
 assign main_cs = 0;
+`endif
+
+`ifndef PCM
+    assign pcm_addr = 0;
 `endif
 
 `VIDEO_MODULE u_video(
@@ -289,6 +304,10 @@ jtframe_rom #(
     .SLOT1_DW    ( 32              ),
     .SLOT1_OFFSET( OBJ_START>>1    ),
 
+    .SLOT2_AW    ( 16              ),
+    .SLOT2_DW    (  8              ),
+    .SLOT2_OFFSET( PCM_START>>1    ),
+
     .SLOT7_AW    ( 16              ),
     .SLOT7_DW    (  8              ),
     .SLOT7_OFFSET(  0              )  // Main
@@ -298,7 +317,7 @@ jtframe_rom #(
 
     .slot0_cs    ( LVBL          ),
     .slot1_cs    ( objrom_cs     ),
-    .slot2_cs    ( 1'b0          ),
+    .slot2_cs    ( pcm_ok        ),
     .slot3_cs    ( 1'b0          ),
     .slot4_cs    ( 1'b0          ),
     .slot5_cs    ( 1'b0          ),
@@ -318,7 +337,7 @@ jtframe_rom #(
 
     .slot0_addr  ({scr_addr,1'b0}),
     .slot1_addr  ({obj_addr,1'b0}),
-    .slot2_addr  (               ),
+    .slot2_addr  ( pcm_addr      ),
     .slot3_addr  (               ),
     .slot4_addr  (               ),
     .slot5_addr  (               ),
@@ -328,7 +347,7 @@ jtframe_rom #(
 
     .slot0_dout  ( scr_data      ),
     .slot1_dout  ( obj_data      ),
-    .slot2_dout  (               ),
+    .slot2_dout  ( pcm_data      ),
     .slot3_dout  (               ),
     .slot4_dout  (               ),
     .slot5_dout  (               ),

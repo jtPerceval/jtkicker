@@ -58,7 +58,7 @@ module jtkicker_obj(
 );
 
 parameter BYPASS_PROM=0, LARGE_ROM=0, REV_SCAN=0;
-parameter [8:0] HOFFSET = 9'd6;
+parameter [7:0] HOFFSET = 8'd6;
 
 wire [ 7:0] obj1_dout, obj2_dout, pal_addr,
             low_dout, hi_dout;
@@ -103,7 +103,7 @@ jtframe_dual_ram u_low(
 );
 
 wire [3:0] buf_in;
-reg  [8:0] buf_a;
+reg  [7:0] buf_a;
 reg        buf_we;
 reg        cen2=0;
 wire       inzone, done;
@@ -182,7 +182,7 @@ always @(posedge clk, posedge rst) begin
             rom_addr <= { LARGE_ROM ? dr_attr[0] : 1'b0, dr_code, dr_v^{4{vflip}}, 1'b0 };
             rom_cs   <= 1;
             dr_cnt   <= 7;
-            buf_a    <= {1'b0,dr_xpos} + (hflip ? 9'd15 : 9'h0) + HOFFSET;
+            buf_a    <= dr_xpos + (hflip ? 8'd15 : 8'h0) + HOFFSET;
             dr_busy  <= 1;
         end
         if( dr_busy && (!rom_cs || rom_ok) ) begin
@@ -201,7 +201,7 @@ always @(posedge clk, posedge rst) begin
                 rom_cs <= 0;
             end else begin
                 pxl_data <= pxl_data>>4;
-                buf_a  <= hflip ? buf_a-9'd1 : buf_a+9'd1;
+                buf_a  <= hflip ? buf_a-8'd1 : buf_a+8'd1;
                 dr_cnt <= dr_cnt - 3'd1;
             end
             if( !dr_cnt ) begin
@@ -218,19 +218,26 @@ always @(posedge clk, posedge rst) begin
     end
 end
 
-wire buf_clr;
+wire buf_clr, LHBL_dly;
 
-assign buf_clr = pxl_cen & LHBL;
+assign buf_clr = pxl_cen & ~hdump[8];
 
-jtframe_obj_buffer #(.AW(9),.DW(4), .ALPHA(0)) u_buffer(
+jtframe_sh #(.width(1),.stages(HOFFSET-1) ) u_dly(
     .clk    ( clk       ),
-    .LHBL   ( LHBL      ),
+    .clk_en ( pxl_cen   ),
+    .din    ( LHBL      ),
+    .drop   ( LHBL_dly  )
+);
+
+jtframe_obj_buffer #(.AW(8),.DW(4), .ALPHA(0)) u_buffer(
+    .clk    ( clk       ),
+    .LHBL   ( LHBL_dly  ),
     // New data writes
     .wr_data( buf_in    ),
     .wr_addr( buf_a     ),
     .we     ( buf_we    ),
     // Old data reads (and erases)
-    .rd_addr( hdump[8:0]),
+    .rd_addr( hdump[7:0]),
     .rd     ( buf_clr   ),  // data will be erased after the rd event
     .rd_data( pxl       )
 );

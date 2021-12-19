@@ -61,6 +61,10 @@ module jtyiear_main(
     input      [3:0]    dipsw_c,
 
     // Sound
+    output     [15:0]   pcm_addr,
+    input      [ 7:0]   pcm_data,
+    input               pcm_ok,
+
     output signed [15:0] snd,
     output               sample,
     output               peak
@@ -75,8 +79,13 @@ reg         ior_cs, dip2_cs, dip3_cs,
             ti1_cs,
             color_cs, tidata1_cs, iow_cs;
 // reg         afe_cs; // watchdog
-reg         vlm_bsy_cs;
 wire        VMA;
+
+// VLM5030 sound
+reg         vlm_bsy_cs;
+wire        vlm_bsy, vlm_cen;
+wire signed
+      [9:0] vlm_snd;
 
 assign irq_trigger = ~LVBL & dip_pause;
 assign nmi_trigger =  V16;
@@ -124,8 +133,6 @@ always @(*) begin
     endcase
 end
 
-reg fake=0, bsy_ls;
-
 always @(posedge clk) begin
     case( A[1:0] )
         0: cabinet <= { ~3'd0, start_button, service, coin_input };
@@ -139,9 +146,7 @@ always @(posedge clk) begin
                ior_cs  ? cabinet   :
                dip2_cs ? dipsw_b   :
                dip3_cs ? { 4'hf, dipsw_c } :
-               vlm_bsy_cs ? {7'h7f,fake} : 8'hff;
-    if( vlm_bsy_cs && !bsy_ls ) fake<=~fake;
-    bsy_ls <= vlm_bsy_cs;
+               vlm_bsy_cs ? {7'h7f,vlm_bsy} : 8'hff;
 end
 
 always @(posedge clk) begin
@@ -236,14 +241,38 @@ jtframe_sys6809 #(.RAM_AW(0)) u_cpu(
     .cpu_din    ( cpu_din   )
 );
 
+jtframe_cen3p57 #(.CLK24(1)) u_vlmcen(
+    .clk        ( clk       ),
+    .cen_3p57   ( vlm_cen   ),
+    .cen_1p78   (           )
+);
 
-jtframe_mixer #(.W0(11),.W1(11)) u_mixer(
+vlm5030_gl u_vlm(
+    .i_rst   ( rst          ),
+    .i_clk   ( clk          ),
+    .i_oscen ( vlm_cen      ),
+    .i_start (              ),
+    .i_vcu   ( 1'b0         ),
+    .i_tst1  ( 1'b0         ),
+    .o_tst2  (              ),
+    .o_tst4  (              ),
+    .i_d     ( pcm_data     ),
+    .o_a     ( pcm_addr     ),
+    .o_me_l  (              ),
+    .o_mte   (              ),
+    .o_bsy   ( vlm_bsy      ),
+
+    .o_dao   (              ),
+    .o_audio ( vlm_snd      )
+);
+
+jtframe_mixer #(.W0(11),.W1(10)) u_mixer(
     .rst    ( rst       ),
     .clk    ( clk       ),
     .cen    ( ti1_cen   ),
     // input signals
     .ch0    ( ti1_snd   ),
-    .ch1    ( 11'd0     ),
+    .ch1    ( vlm_snd   ),
     .ch2    ( 16'd0     ),
     .ch3    ( 16'd0     ),
     // gain for each channel in 4.4 fixed point format
