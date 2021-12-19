@@ -13,6 +13,8 @@ It hasn't been possible to assess whether the INTSHOW custom chip outputs the cu
 
 The 60.5Hz vertical frequency seems problematic in MiSTer for some screens. This could be improved using a different PLL as the base clock. For now, there is a safe 60Hz mode that can be enabled in the OSD as a fall back option.
 
+Screen synchronization can be a problem with the original PCB too. Connecting using the OSSC (default configuration) didn't bring a stable image in my small monitors for Yie Ar Kungfu. Kicker seemed ok.
+
 # System Comparison
 
 Game           | Date       |  ID | Palette PROM  | Scroll | PSG chips | PCM chips
