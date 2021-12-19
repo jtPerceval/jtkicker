@@ -162,6 +162,9 @@ always @(posedge clk) begin
         flip     <= 0;
         pal_sel  <= 0;
         vlm_data <= 0;
+        vlm_rst  <= 1;
+        vlm_st   <= 0;
+        vlm_sel  <= 0;
     end else if(cpu_cen) begin
         if( vlm_data_cs ) vlm_data <= cpu_dout;
         if( vlm_cont ) { vlm_rst, vlm_st, vlm_sel } <= cpu_dout[2:0];
@@ -256,20 +259,26 @@ jtframe_cen3p57 #(.CLK24(1)) u_vlmcen(
     .cen_1p78   (           )
 );
 
-assign vlm_mux = vlm_sel ? vlm_data : pcm_data;
+wire [2:0] pcm_nc;
+wire       vlm_ceng;
+
+assign vlm_mux = vlm_sel ? vlm_data :
+               ~vlm_me_b ? pcm_data : 8'hff;
+assign pcm_addr[15:13]=0;
+assign vlm_ceng = vlm_cen & ( vlm_me_b | pcm_ok );
 
 vlm5030_gl u_vlm(
     .i_rst   ( vlm_rst      ),
     .i_clk   ( clk          ),
-    .i_oscen ( vlm_cen      ),
+    .i_oscen ( vlm_ceng     ),
     .i_start ( vlm_st       ),
     .i_vcu   ( 1'b0         ),
     .i_tst1  ( 1'b0         ),
     .o_tst2  (              ),
     .o_tst4  (              ),
     .i_d     ( vlm_mux      ),
-    .o_a     ( pcm_addr     ),
-    .o_me_l  (              ),
+    .o_a     ( { pcm_nc, pcm_addr[12:0] } ),
+    .o_me_l  ( vlm_me_b     ),
     .o_mte   (              ),
     .o_bsy   ( vlm_bsy      ),
 

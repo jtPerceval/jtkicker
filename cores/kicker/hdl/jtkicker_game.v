@@ -157,7 +157,7 @@ always @(*) begin
         prog_addr[0]   = ~pre_addr[3];
         prog_addr[3:1] =  pre_addr[2:0];
     end
-    if( ioctl_addr >= OBJ_START && ioctl_addr<PROM_START ) begin
+    if( ioctl_addr >= OBJ_START && ioctl_addr<PCM_START ) begin
         prog_addr[0]   = ~pre_addr[3];
         prog_addr[1]   = ~pre_addr[4];
         prog_addr[5:2] =  { pre_addr[5], pre_addr[2:0] }; // making [5] explicit for now
@@ -233,7 +233,7 @@ u_dwnld(
     .peak           ( game_led      )
 );
 `else
-assign main_cs = 0;
+    assign main_cs = 0;
 `endif
 
 `ifndef PCM
