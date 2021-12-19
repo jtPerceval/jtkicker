@@ -177,7 +177,7 @@ architecture gl of vlm5030_gl is
          tstenIE2DAC : std_logic;
 
   signal clk2divq          : std_logic_vector(10 downto 0) := (others => '0');
-  signal c2d0, c2d1, c2d2,
+  signal c2d0, c2d1, -- c2d2,
          c2d3, c2d4, c2d5,
          c2d6, c2d7, c2d8,
          c2d9, c2d10       : r_clk;
@@ -504,7 +504,7 @@ begin
 
     c2d0  <= rising_edge_detect(refclk => clk2, val => clk2divq( 0), preval => feedback);
     c2d1  <= rising_edge_detect(refclk => clk2, val => clk2divq( 1), preval => clk2divq(0));
-    c2d2  <= rising_edge_detect(refclk => clk2, val => clk2divq( 2), preval => clk2divq(1));
+    -- c2d2  <= rising_edge_detect(refclk => clk2, val => clk2divq( 2), preval => clk2divq(1));
     c2d3  <= rising_edge_detect(refclk => clk2, val => clk2divq( 3), preval => clk2divq(2));
     c2d4  <= rising_edge_detect(refclk => clk2, val => clk2divq( 4), preval => clk2divq(3));
     c2d5  <= rising_edge_detect(refclk => clk2, val => clk2divq( 5), preval => clk2divq(4));
@@ -641,7 +641,8 @@ begin
 
     agen_block : block
       signal ncen3 : std_logic;
-      signal nclk2ctrlcen3, nclk2ctrlncen3 : std_logic;
+      signal nclk2ctrlcen3 : std_logic;
+      -- signal nclk2ctrlncen3 : std_logic;
       signal seqroma : std_logic_vector(4 downto 0) := "11110";
 
     begin
@@ -653,7 +654,7 @@ begin
       cen3  <= not ncen3;
 
       nclk2ctrlcen3  <=  cen3 nor clk2ctrl;
-      nclk2ctrlncen3 <= ncen3 nor clk2ctrl;
+      -- nclk2ctrlncen3 <= ncen3 nor clk2ctrl;
 
 
       process (clk2ctrl)
@@ -2146,8 +2147,8 @@ begin
       signal pwm0, pwm1, pwm2 : std_logic;
 
       signal nc2d10xr9del : std_logic;
-      signal nclk2gd5hi,
-            nclk2gd5lo    : std_logic;
+      --signal nclk2gd5hi,
+      --      nclk2gd5lo    : std_logic;
 
       signal pwmreg1toggle,
              pwmreg2toggle    : std_logic;
@@ -2175,8 +2176,8 @@ begin
           i_in  => c2d10xr9.val,
           o_out => nc2d10xr9del
         );
-      nclk2gd5hi <= nc2d10xr9del       nor clk2gd5;
-      nclk2gd5lo <= (not nc2d10xr9del) nor clk2gd5;
+      -- nclk2gd5hi <= nc2d10xr9del       nor clk2gd5;
+      -- nclk2gd5lo <= (not nc2d10xr9del) nor clk2gd5;
 
       pwmreg1toggle <= pwmreg0;
       pwmreg2toggle <= (not pwmreg1) nor (not pwmreg0);
