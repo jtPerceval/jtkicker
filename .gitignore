@@ -9,6 +9,8 @@
 *.jpg
 *.cdf
 *.arc
+*.lxt
+*.vcd
 cheat/*.bin
 cheat/*.fmt
 history

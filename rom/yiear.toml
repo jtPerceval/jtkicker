@@ -5,6 +5,7 @@ mraauthor=["jotego"]
 [features]
 # qsound=true
 # debug=true
+beta=true
 
 [parse]
 sourcefile="yiear.cpp"
