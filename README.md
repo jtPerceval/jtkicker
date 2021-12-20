@@ -17,10 +17,21 @@ Screen synchronization can be a problem with the original PCB too. Connecting us
 
 # System Comparison
 
-Game           | Date       |  ID | Palette PROM  | Scroll | PSG chips | PCM chips
----------------|------------|-----|---------------|--------|-----------|-------------
-Yie Ar Kungfu  |19/Nov/1984 |GX407|  Only output  | No     | x1        | Yes
-Shaolin's Road |22/Mar/1985 |GX477| All elements  | Yes    | x2        | No
+Games based on 082, 083 and 503 graphic chips
+
+Game            | Date       |  ID | Palette PROM  | Scroll | PSG  | VLM5030  | Sch
+----------------|------------|-----|---------------|--------|------|----------|----
+Mega Zone       |       1983 |     |  Only output  | No     | x1   | No       | Yes, only 083
+Yie Ar Kungfu   |19/Nov/1984 |GX407|  Only output  | No     | x1   | Yes      | Yes
+Shaolin's Road  |22/Mar/1985 |GX477| All elements  | Yes    | x2   | No       | Yes
+Track'n Field   |            |     |               |        |      | Yes      | Partial
+Juno First      |            |     |               |        |      | No       |
+Hyper Sports    |            |     |               |        |      | Yes      |
+Road Fighter    |            |     |               |        |      | Yes      |
+Super Basketball|            |     |               |        |      | Yes      |
+Mikie           |            |     |               |        |      |          |
+Pandora's Palace|            |     |               |        |      |          |
+Ping Pong       |            |     |               |        |      |          |
 
 
 # Acknowledgement

@@ -173,7 +173,7 @@ jtkicker_obj u_obj(
     .LVBL       ( LVBL      ),
     .vrender    (vrender[7:0]),
     .hdump      ( hdump     ),
-    .flip       ( flip      ),
+    .flip       ( 1'b0      ),      // unconnected in the original
 
     // PROMs
     .prog_data  ( prog_data[3:0] ),

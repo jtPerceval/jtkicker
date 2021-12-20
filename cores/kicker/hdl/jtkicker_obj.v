@@ -114,10 +114,12 @@ reg  [7:0] dr_attr, dr_code, dr_xpos;
 reg  [3:0] dr_v;
 reg        dr_start, dr_busy;
 wire [7:0] ydiff, dr_y;
+wire [7:0] vrf;
 
+assign vrf    = vrender ^ {8{flip}};
 assign dr_y   = ~low_dout;
-assign inzone = dr_y>=vrender && dr_y<(vrender+8'h10);
-assign ydiff  = vrender-dr_y-4'd1;
+assign inzone = dr_y>=vrf && dr_y<(vrf+8'h10);
+assign ydiff  = vrf-dr_y-4'd1;
 assign done   = REV_SCAN ? scan_addr[5:1]==0 : scan_addr[5:1]==23;
 
 always @(posedge clk) begin
