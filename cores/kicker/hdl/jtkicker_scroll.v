@@ -98,7 +98,7 @@ assign vscr_dout= NOSCROLL ? 8'd0 : vscr; // this could be vdump instead of vscr
                         // measure it in a test program because vscr=vdump
                         // for the first rows, which is when the NMI occurs
 assign pal_addr =
-    flip && hdump<8'o20 ? 8'd0 :   // removes the first columns in flip mode
+    flip && hdump<9'o20 ? 8'd0 :   // removes the first columns in flip mode
     { cur_pal, cur_hf ? pxl_data[3:0] : pxl_data[31:28] };
 
 // scroll register in custom chip 085
@@ -108,7 +108,7 @@ always @(posedge clk, posedge rst) begin
         vscr <= 0;
     end else begin
         if( vscr_cs  ) vpos <= cpu_dout;
-        if( NOSCROLL || (flip ? hdf<9'o40 : hdump<9'o40) ) begin
+        if( NOSCROLL || (flip ? hdf<8'o40 : hdump<9'o40) ) begin
             vscr <= {8{flip}} ^ vdump;
         end else begin
             // +1 needed to have a straight grid during boot up
@@ -139,7 +139,7 @@ always @(posedge clk) if(pxl_cen) begin
     end
 end
 
-jtframe_dual_ram u_low(
+jtframe_dual_ram #(.simfile("vram_lo.bin")) u_low(
     // Port 0, CPU
     .clk0   ( clk24         ),
     .data0  ( cpu_dout      ),
@@ -154,7 +154,7 @@ jtframe_dual_ram u_low(
     .q1     ( attr          )
 );
 
-jtframe_dual_ram u_high(
+jtframe_dual_ram #(.simfile("vram_hi.bin")) u_high(
     // Port 0, CPU
     .clk0   ( clk24         ),
     .data0  ( cpu_dout      ),

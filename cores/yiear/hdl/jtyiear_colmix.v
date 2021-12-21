@@ -57,9 +57,9 @@ assign {red,green,blue} = { rgb[2:0], rgb[2], // red
                          {2{rgb[7:6]}} } ;    // blue
 
 jtframe_prom #(
-    .dw ( 8     ),
-    .aw ( 5     )
-//    simfile = "477j10.a12",
+    .dw     ( 8         ),
+    .aw     ( 5         ),
+    .simfile("407c10.1g")
 ) u_pal(
     .clk    ( clk       ),
     .cen    ( pxl_cen   ),

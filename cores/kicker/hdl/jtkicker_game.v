@@ -73,10 +73,10 @@ module jtkicker_game(
 );
 
 // SDRAM offsets
-localparam SCR_START   =  `SCR_START;
-localparam OBJ_START   =  `OBJ_START;
-localparam PROM_START  =  `PROM_START;
-localparam PCM_START   =  `PCM_START;
+localparam [21:0] SCR_START   =  `SCR_START,
+                  OBJ_START   =  `OBJ_START,
+                  PCM_START   =  `PCM_START;
+localparam [24:0] PROM_START  =  `PROM_START;
 
 wire        main_cs, main_ok;
 
@@ -153,11 +153,11 @@ assign pxl_cen  = cen_base[1]; // ~ 6MHz
 
 always @(*) begin
     prog_addr = pre_addr;
-    if( ioctl_addr >= SCR_START && ioctl_addr<OBJ_START ) begin
+    if( ioctl_addr[21:0] >= SCR_START && ioctl_addr[21:0]<OBJ_START ) begin
         prog_addr[0]   = ~pre_addr[3];
         prog_addr[3:1] =  pre_addr[2:0];
     end
-    if( ioctl_addr >= OBJ_START && ioctl_addr<PCM_START ) begin
+    if( ioctl_addr[21:0] >= OBJ_START && ioctl_addr[21:0]<PCM_START ) begin
         prog_addr[0]   = ~pre_addr[3];
         prog_addr[1]   = ~pre_addr[4];
         prog_addr[5:2] =  { pre_addr[5], pre_addr[2:0] }; // making [5] explicit for now

@@ -17,6 +17,8 @@ module mist_dump(
     initial begin
         $display("DUMP starts");
         $dumpvars(1,mist_test.UUT.u_game);
+        $dumpvars(0,mist_test.u_harness);
+        //$dumpvars(0,mist_test.UUT.u_frame.u_board.u_sdram);
         $dumpon;
     end
     `else

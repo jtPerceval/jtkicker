@@ -1,2 +1,2 @@
 #!/bin/bash
-sim.sh -load -w -d NOMAIN $*
+sim.sh -verilator -load -w -d NOMAIN $*

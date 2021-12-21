@@ -18,6 +18,11 @@
 
 // This module captures the logic in
 // custom chips 083 and 502
+// The line count will change while the chips are
+// still rendering the previous line, so the software
+// writes some sprites with a -1 position in order
+// to compensate. This happens after a certain
+// position in the sprite table
 
 module jtkicker_obj(
     input               rst,
@@ -71,7 +76,7 @@ assign obj1_we  = obj1_cs & ~cpu_rnw;
 assign obj2_we  = obj2_cs & ~cpu_rnw;
 
 // Mapped at 0x3000
-jtframe_dual_ram u_hi(
+jtframe_dual_ram #(.simfile("obj2.bin")) u_hi(
     // Port 0, CPU
     .clk0   ( clk24         ),
     .data0  ( cpu_dout      ),
@@ -87,7 +92,7 @@ jtframe_dual_ram u_hi(
 );
 
 // Mapped at 0x2800
-jtframe_dual_ram u_low(
+jtframe_dual_ram #(.simfile("obj1.bin")) u_low(
     // Port 0, CPU
     .clk0   ( clk24         ),
     .data0  ( cpu_dout      ),
@@ -102,6 +107,9 @@ jtframe_dual_ram u_low(
     .q1     ( low_dout      )
 );
 
+// Max sprites drawn before the raster line count moves
+localparam [4:0] HALF = 5'd19;
+
 wire [3:0] buf_in;
 reg  [7:0] buf_a;
 reg        buf_we;
@@ -115,11 +123,13 @@ reg  [3:0] dr_v;
 reg        dr_start, dr_busy;
 wire [7:0] ydiff, dr_y;
 wire [7:0] vrf;
+wire       adj;
 
+assign adj    = REV_SCAN ? scan_addr[5:1]<HALF : scan_addr[5:1]>HALF;
 assign vrf    = vrender ^ {8{flip}};
-assign dr_y   = ~low_dout;
+assign dr_y   = ~low_dout + {7'd0, adj};
 assign inzone = dr_y>=vrf && dr_y<(vrf+8'h10);
-assign ydiff  = vrf-dr_y-4'd1;
+assign ydiff  = vrf-dr_y-8'd1;
 assign done   = REV_SCAN ? scan_addr[5:1]==0 : scan_addr[5:1]==23;
 
 always @(posedge clk) begin
@@ -206,7 +216,7 @@ always @(posedge clk, posedge rst) begin
                 buf_a  <= hflip ? buf_a-8'd1 : buf_a+8'd1;
                 dr_cnt <= dr_cnt - 3'd1;
             end
-            if( !dr_cnt ) begin
+            if( dr_cnt==0 ) begin
                 if( rom_addr[0] ) begin
                     buf_we  <= 0;
                     dr_busy <= 0;
@@ -234,6 +244,7 @@ jtframe_sh #(.width(1),.stages(HOFFSET-1) ) u_dly(
 jtframe_obj_buffer #(.AW(8),.DW(4), .ALPHA(0)) u_buffer(
     .clk    ( clk       ),
     .LHBL   ( LHBL_dly  ),
+    .flip   ( 1'b0      ),
     // New data writes
     .wr_data( buf_in    ),
     .wr_addr( buf_a     ),
