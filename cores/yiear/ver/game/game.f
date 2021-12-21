@@ -1,6 +1,7 @@
 ../../../kicker/hdl/jtkicker_game.v
 ../../../kicker/hdl/jtkicker_obj.v
 ../../../kicker/hdl/jtkicker_scroll.v
+../../../kicker/hdl/jtkicker_vtimer.v
 ../../hdl/jtyiear_main.v
 ../../hdl/jtyiear_video.v
 ../../hdl/jtyiear_colmix.v

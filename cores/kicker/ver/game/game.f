@@ -4,6 +4,7 @@
 ../../hdl/jtkicker_obj.v
 ../../hdl/jtkicker_scroll.v
 ../../hdl/jtkicker_video.v
+../../hdl/jtkicker_vtimer.v
 
 ${JTFRAME}/hdl/cpu/jtframe_z80wait.v
 

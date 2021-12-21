@@ -77,36 +77,17 @@ wire [3:0] obj_pxl, scr_pxl;
 
 assign V16 = vdump[4];
 
-// The original counter keeps hdump[7] high
-// while hdump[8] is hight (i.e. during HBLANK)
-// The rest of the count should match quite well
-// the original, particularly VBLANK, H period
-// and V period
-jtframe_vtimer #(
-    .VB_START   (  9'd238   ),
-    .VB_END     (  9'd015   ),
-    .VCNT_END   (  9'd263   ),
-    .VS_START   (  9'd254   ),
-    .VS_END     (  9'd2     ),
-    .HB_END     (  9'd383   ),
-    .HB_START   (  9'd255   ),
-    .HCNT_END   (  9'd383   ),
-    .HS_START   (  9'd300   ),
-    .HS_END     (  9'd318   )
-
-) u_vtimer(
-    .clk        ( clk       ),
-    .pxl_cen    ( pxl_cen   ),
-    .vdump      ( vdump     ),
-    .vrender    ( vrender   ),
-    .vrender1   (           ),
-    .H          ( hdump     ),
-    .Hinit      ( hinit     ),
-    .Vinit      (           ),
-    .LHBL       ( LHBL      ),
-    .LVBL       ( LVBL      ),
-    .HS         ( HS        ),
-    .VS         ( VS        )
+jtkicker_vtimer u_vtimer(
+    .clk    ( clk       ),
+    .pxl_cen( pxl_cen   ),
+    .vdump  ( vdump     ),
+    .vrender( vrender   ),
+    .hdump  ( hdump     ),
+    .hinit  ( hinit     ),
+    .LHBL   ( LHBL      ),
+    .LVBL   ( LVBL      ),
+    .HS     ( HS        ),
+    .VS     ( VS        )
 );
 
 jtkicker_scroll #(.BYPASS_PROM(1),.NOSCROLL(1)) u_scroll(

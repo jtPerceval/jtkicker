@@ -7,6 +7,7 @@ set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) jtkicke
 set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) jtkicker_scroll.v    ]
 set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) jtkicker_obj.v       ]
 set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) jtkicker_colmix.v    ]
+set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) jtkicker_vtimer.v    ]
 
 # M6809
 set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) ${JTFRAME}/cpu/mc6809i.v    ]
