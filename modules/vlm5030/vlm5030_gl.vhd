@@ -641,7 +641,7 @@ begin
 
     agen_block : block
       signal ncen3 : std_logic;
-      signal nclk2ctrlcen3 : std_logic;
+      -- signal nclk2ctrlcen3 : std_logic;
       -- signal nclk2ctrlncen3 : std_logic;
       signal seqroma : std_logic_vector(4 downto 0) := "11110";
 
@@ -653,7 +653,7 @@ begin
       ncen3 <= rstdel nor xromdo(7);
       cen3  <= not ncen3;
 
-      nclk2ctrlcen3  <=  cen3 nor clk2ctrl;
+      -- nclk2ctrlcen3  <=  cen3 nor clk2ctrl;
       -- nclk2ctrlncen3 <= ncen3 nor clk2ctrl;
 
 

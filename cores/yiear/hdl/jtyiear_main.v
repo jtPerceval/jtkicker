@@ -260,7 +260,7 @@ jtframe_cen3p57 #(.CLK24(1)) u_vlmcen(
 );
 
 wire [2:0] pcm_nc;
-wire       vlm_ceng;
+wire       vlm_ceng, vlm_me_b;
 
 assign vlm_mux = vlm_sel ? vlm_data :
                ~vlm_me_b ? pcm_data : 8'hff;
