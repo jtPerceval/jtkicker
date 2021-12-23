@@ -130,8 +130,7 @@ jtkicker_scroll #(.BYPASS_PROM(1),.NOSCROLL(1)) u_scroll(
 jtkicker_obj #(
     .BYPASS_PROM( 1         ),
     .LARGE_ROM  ( 1         ),
-    .HOFFSET    ( 8'd5      ),
-    .REV_SCAN   ( 1         ))
+    .HOFFSET    ( 8'd5      ))
 u_obj(
     .rst        ( rst       ),
     .clk        ( clk       ),        // 48 MHz

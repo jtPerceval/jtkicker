@@ -62,7 +62,7 @@ module jtkicker_obj(
     input         [7:0] debug_bus
 );
 
-parameter BYPASS_PROM=0, LARGE_ROM=0, REV_SCAN=0;
+parameter BYPASS_PROM=0, LARGE_ROM=0, REV_SCAN=1;
 parameter [7:0] HOFFSET = 8'd6;
 
 wire [ 7:0] obj1_dout, obj2_dout, pal_addr,
