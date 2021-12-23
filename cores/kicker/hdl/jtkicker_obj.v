@@ -243,7 +243,7 @@ jtframe_sh #(.width(1),.stages(HOFFSET-1) ) u_dly(
 
 jtframe_obj_buffer #(.AW(8),.DW(4), .ALPHA(0)) u_buffer(
     .clk    ( clk       ),
-    .LHBL   ( LHBL_dly  ),
+    .LHBL   ( ~hinit_x  ),  // change buffer right before writting the new line
     .flip   ( 1'b0      ),
     // New data writes
     .wr_data( buf_in    ),
