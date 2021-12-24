@@ -127,7 +127,7 @@ wire       adj;
 
 assign adj    = REV_SCAN ? scan_addr[5:1]<HALF : scan_addr[5:1]>HALF;
 assign vrf    = vrender ^ {8{flip}};
-assign dr_y   = ~low_dout + {7'd0, adj};
+assign dr_y   = ~low_dout + ( adj ? ( flip ? 8'hff : 8'h1 ) : 8'h0 );
 assign inzone = dr_y>=vrf && dr_y<(vrf+8'h10);
 assign ydiff  = vrf-dr_y-8'd1;
 assign done   = REV_SCAN ? scan_addr[5:1]==0 : scan_addr[5:1]==23;
