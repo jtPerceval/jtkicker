@@ -19,19 +19,19 @@ Screen synchronization can be a problem with the original PCB too. Connecting us
 
 Games based on 082, 083 and 503 graphic chips
 
-Game            | Date       |  ID | Palette PROM  | Scroll | PSG  | VLM5030  | Sch
-----------------|------------|-----|---------------|--------|------|----------|----
-Mega Zone       |       1983 |     |  Only output  | No     | x1   | No       | Yes, only 083
-Yie Ar Kungfu   |19/Nov/1984 |GX407|  Only output  | No     | x1   | Yes      | Yes
-Shaolin's Road  |22/Mar/1985 |GX477| All elements  | Yes    | x2   | No       | Yes
-Track'n Field   |            |     |               |        |      | Yes      | Partial
-Juno First      |            |     |               |        |      | No       |
-Hyper Sports    |            |     |               |        |      | Yes      |
-Road Fighter    |            |     |               |        |      | Yes      |
-Super Basketball|            |     |               |        |      | Yes      |
-Mikie           |            |     |               |        |      |          |
-Pandora's Palace|            |     |               |        |      |          |
-Ping Pong       |            |     |               |        |      |          |
+Game            | Date       |  ID | Palette PROM  | 085 | PSG  | VLM5030  | Sch           | eBay price | YT views |
+----------------|------------|-----|---------------|-----|------|----------|---------------|------------|----------| 
+Mega Zone       |       1983 | No  |  Only output  | No  | x1   | No       | Yes, only 083 |            |          |
+Yie Ar Kungfu   |19/Nov/1984 |GX407|  Only output  | No  | 74689| Yes      | Yes           |            |          |
+Shaolin's Road  |22/Mar/1985 |GX477| All elements  | Yes | 74689| No       | Yes           |            |          |
+Track'n Field   |10/Oct/1983 | No  | All elements  | No  |      | Yes      |Partial-Blurred|            |          |
+Juno First      |            | No  | All elements* | No  | 8910 | No       |Yes,with labels|            |          |
+Hyper Sports    |            |     |               |     |      | Yes      |
+Road Fighter    |            |     |               |     |      | Yes      |
+Super Basketball|            |     |               |     |      | Yes      |
+Mikie           |            |     |               |     |      |          |
+Pandora's Palace|            |     |               |     |      |          |
+Ping Pong       |            |     |               |     |      |          |
 
 
 # Acknowledgement
