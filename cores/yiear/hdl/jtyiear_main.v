@@ -94,7 +94,7 @@ wire signed
 assign irq_trigger = ~LVBL & dip_pause;
 assign nmi_trigger =  V16;
 assign cpu_rnw     = RnW;
-assign sample      = ti1_cen;
+assign sample      = ti2_cen;
 assign rom_addr    = A;
 
 always @(*) begin
@@ -217,7 +217,7 @@ end
 jt89 u_ti1(
     .rst    ( rst           ),
     .clk    ( clk           ),
-    .clk_en ( ti1_cen       ),
+    .clk_en ( ti2_cen       ),  // yes, ti2_cen (half the speed of ti1_cen)
     .wr_n   ( rdy1          ),
     .cs_n   ( ~ti1_cs       ),
     .din    ( ti1_data      ),
