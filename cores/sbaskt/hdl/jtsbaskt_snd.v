@@ -22,15 +22,14 @@ module jtsbaskt_snd(
     input               snd_cen,    // 3.5MHz
     input               psg_cen,    // 1.7MHz
     // ROM
-    output      [15:0]  rom_addr,
+    output      [12:0]  rom_addr,
     output reg          rom_cs,
     input       [ 7:0]  rom_data,
     input               rom_ok,
     // From main CPU
     input       [ 7:0]  main_dout,
     input               main2snd_data,
-    input               main2snd_on
-
+    input               main2snd_on,
     // Sound
     output     [15:0]   pcm_addr,
     input      [ 7:0]   pcm_data,
@@ -41,7 +40,10 @@ module jtsbaskt_snd(
     output               peak
 );
 
-reg  [ 7:0] sndcmd, psg_data;
+localparam CNTW=11;
+
+reg  [ 7:0] latch, psg_data, vlm_data, din;
+wire [ 7:0] ram_dout, vlm_mux, dout;
 wire        irq_ack, vlm_ceng;
 wire [ 2:0] pcm_nc;
 wire        vlm_ceng, vlm_me_b;
@@ -49,33 +51,44 @@ wire [10:0] psg_snd;
 reg         ram_cs;
 wire        mreq_n, iorq_n;
 wire [15:0] A;
-reg  [10:0] cnt;
+reg  [ 2:0] snd_en;
+wire        rdy1;
+reg         vlm_rst, vlm_st, vlm_sel;
+wire        vlm_bsy;
+reg         psgdata_cs, vlm_data_cs, vlm_ctrl_cs;
+reg         latch_cs, cnt_cs, rdac_cs, psg_cs;
+reg [CNTW-1:0] cnt;
 
 assign vlm_mux = vlm_sel ? vlm_data :
                ~vlm_me_b ? pcm_data : 8'hff;
 assign pcm_addr[15:13]=0;
 assign irq_ack = ~iorq_n & ~mreq_n;
 assign vlm_ceng = snd_cen & ( vlm_me_b | pcm_ok );
+assign rom_addr = A[12:0];
 
 always @(posedge clk, posedge rst) begin
     if( rst ) begin
-        sndcmd <= 0;
+        latch    <= 0;
         psg_data <= 0;
-        cnt <= 0;
+        cnt      <= 0;
+        snd_en   <= 0;
+        vlm_rst  <= 1;
+        vlm_st   <= 0;
+        vlm_sel  <= 0;
     end else begin
         if( psg_cen ) cnt<=cnt+1'd1;
         if( main2snd_data )
-            sndcmd <= main_dout;
+            latch <= main_dout;
         if( psgdata_cs  ) psg_data <= dout;
         if( vlm_data_cs ) vlm_data <= dout;
-        if( vlm_ctrl_cs ) vlm_ctrl <= { A[5:3] };
+        if( vlm_ctrl_cs ) { snd_en, vlm_rst, vlm_st, vlm_sel } <= A[8:3];
     end
 end
 
 always @* begin
     rom_cs      = 0;
     ram_cs      = 0;
-    cmd_cs      = 0;
+    latch_cs    = 0;
     cnt_cs      = 0;
     vlm_data_cs = 0;
     vlm_ctrl_cs = 0;
@@ -86,7 +99,7 @@ always @* begin
         case(A[15:13])
             0: rom_cs = 1;
             2: ram_cs = 1;
-            3: cmd_cs = 1;
+            3: latch_cs = 1;
             4: cnt_cs = 1;
             5: vlm_data_cs = 1;
             6: vlm_ctrl_cs = 1;
@@ -104,7 +117,7 @@ always @(posedge clk) begin
 
     din      <= rom_cs   ? rom_data : (
                 ram_cs   ? ram_dout : (
-                fm_cs    ? fm_dout  : (
+                cnt_cs   ? { 5'h1f, cnt[CNTW-1:CNTW-2], vlm_bsy }  : (
                 latch_cs ? latch    : (
                     8'hff ))));
 end
