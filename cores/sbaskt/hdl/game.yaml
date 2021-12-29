@@ -4,8 +4,18 @@ game:
       - jtsbaskt_game.v
       - jtsbaskt_main.v
       - jtsbaskt_video.v
+      - jtsbaskt_obj.v
   - from: kicker
     get:
-      - jtkicker_obj.v
-      - jtkicker_scroll.v
-      - jtkicker_vtimer.v
+      - common.yaml
+jtframe:
+  - from: cpu
+    get:
+      - jtframe_z80wait.v
+      - jtframe_z80.v
+      - t80/T80.qip
+modules:
+  jt:
+    - name: jt89
+  other:
+    - get: [ vlm5030/vlm5030.qip ]

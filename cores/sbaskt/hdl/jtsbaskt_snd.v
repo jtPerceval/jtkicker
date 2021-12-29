@@ -44,7 +44,7 @@ localparam CNTW=11;
 
 reg  [ 7:0] latch, psg_data, vlm_data, din;
 wire [ 7:0] ram_dout, vlm_mux, dout;
-wire        irq_ack, vlm_ceng;
+wire        irq_ack, int_n, vlm_ceng;
 wire [ 2:0] pcm_nc;
 wire        vlm_ceng, vlm_me_b;
 wire [10:0] psg_snd;
@@ -58,6 +58,8 @@ wire        vlm_bsy;
 reg         psgdata_cs, vlm_data_cs, vlm_ctrl_cs;
 reg         latch_cs, cnt_cs, rdac_cs, psg_cs;
 reg [CNTW-1:0] cnt;
+wire signed
+         [9:0] vlm_snd;
 
 assign vlm_mux = vlm_sel ? vlm_data :
                ~vlm_me_b ? pcm_data : 8'hff;
@@ -176,7 +178,7 @@ jtframe_ff u_irq(
     .cen      ( 1'b1        ),
     .din      ( 1'b1        ),
     .q        (             ),
-    .qn       ( irq_n       ),
+    .qn       ( int_n       ),
     .set      (             ),    // active high
     .clr      ( irq_ack     ),    // active high
     .sigedge  ( main2snd_on )     // signal whose edge will trigger the FF
@@ -193,19 +195,19 @@ jtframe_sysz80 #(.RAM_AW(10)) u_cpu(
     .m1_n       (             ),
     .mreq_n     ( mreq_n      ),
     .iorq_n     ( iorq_n      ),
-    .rd_n       ( rd_n        ),
-    .wr_n       ( wr_n        ),
+    .rd_n       (             ),
+    .wr_n       (             ),
     .rfsh_n     (             ),
     .halt_n     (             ),
     .busak_n    (             ),
     .A          ( A           ),
     .cpu_din    ( din         ),
-    .dout   ( dout        ),
+    .cpu_dout   ( dout        ),
     .ram_dout   ( ram_dout    ),
     // manage access to ROM data from SDRAM
     .ram_cs     ( ram_cs      ),
     .rom_cs     ( rom_cs      ),
-    .rom_ok     ( rom_good    )
+    .rom_ok     ( rom_ok      )
 );
 
 

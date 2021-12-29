@@ -104,6 +104,7 @@ wire        vscr_cs, vram_cs, obj1_cs, obj2_cs,
             prom_we, flip;
 wire [ 7:0] vscr_dout, vram_dout, obj_dout, cpu_dout;
 wire        vsync60;
+wire        snd_cen, psg_cen;
 
 // PCM - used by yiear
 wire [15:0] pcm_addr;
@@ -135,18 +136,10 @@ jtframe_crossclk_cen u_cpu_cen(
     .cen_out    ( cpu4_cen  )   // 6MHz
 );
 
-jtframe_crossclk_cen u_ti1_cen(
-    .clk_in     ( clk       ),
-    .cen_in     (cen_base[2]),
-    .clk_out    ( clk24     ),
-    .cen_out    ( ti1_cen   )   // 3MHz
-);
-
-jtframe_crossclk_cen u_ti2_cen(
-    .clk_in     ( clk       ),
-    .cen_in     (cen_base[3]),
-    .clk_out    ( clk24     ),
-    .cen_out    ( ti2_cen   )   // 1.5MHz
+jtframe_cen3p57 u_cen3p57(
+    .clk      ( clk     ),       // 48 MHz
+    .cen_3p57 ( snd_cen ),
+    .cen_1p78 ( psg_cen )
 );
 
 wire [21:0] pre_addr;
@@ -248,8 +241,35 @@ u_dwnld(
     assign pcm_addr= 0;
 `endif
 
-`ifndef PCM
-    assign pcm_addr = 0;
+`ifndef NOSOUND
+jtsbaskt_snd u_sound(
+    .rst        ( rst       ),
+    .clk        ( clk       ),
+    .snd_cen    ( snd_cen   ),    // 3.5MHz
+    .psg_cen    ( psg_cen   ),    // 1.7MHz
+    // ROM
+    .rom_addr   ( snd_addr  ),
+    .rom_cs     ( snd_cs    ),
+    .rom_data   ( snd_data  ),
+    .rom_ok     ( snd_ok    ),
+    // From main CPU
+    .main_dout      ( main_dout     ),
+    .main2snd_data  ( main2snd_data ),
+    .main2snd_on    ( main2snd_on   ),
+    // Sound
+    .pcm_addr   ( pcm_addr  ),
+    .pcm_data   ( pcm_data  ),
+    .pcm_ok     ( pcm_ok    ),
+
+    .snd        ( snd       ),
+    .sample     ( sample    ),
+);
+`else
+    assign snd_cs=0;
+    assign snd_addr=0;
+    assign pcm_addr=0;
+    assign snd=0;
+    assign sample=0;
 `endif
 
 `VIDEO_MODULE u_video(

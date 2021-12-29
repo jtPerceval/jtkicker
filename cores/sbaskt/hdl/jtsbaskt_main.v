@@ -26,6 +26,7 @@ module jtsbaskt_main(
     output reg          rom_cs,
     input       [ 7:0]  rom_data,
     input               rom_ok,
+
     // cabinet I/O
     input       [ 1:0]  start_button,
     input       [ 1:0]  coin_input,
@@ -38,11 +39,14 @@ module jtsbaskt_main(
     output      [ 7:0]  cpu_dout,
     output reg          vscr_cs,
     output reg          vram_cs,
-    output reg          obj1_cs,
-    output reg          obj2_cs,
+    output reg          obj_cs,
+
+    // Sound
+    output reg          snd_data_cs,
+    output reg          snd_on_cs,
 
     // configuration
-    output reg  [ 2:0]  pal_sel,
+    output reg  [ 3:0]  pal_sel,
     output reg          flip,
 
     // interrupt triggers
@@ -59,10 +63,11 @@ module jtsbaskt_main(
 );
 
 reg  [ 7:0] cabinet, cpu_din;
+wire [ 7:0] ram_dout;
 wire [15:0] A;
 wire        RnW, irq_n, nmi_n;
 wire        irq_trigger, nmi_trigger;
-reg         nmi_clrn, irq_clrn;
+reg         objche, irq_clrn, ram_cs;
 reg         ior_cs, in5_cs, in6_cs,
             intshow_cs,
             color_cs, iow_cs;
@@ -79,27 +84,24 @@ always @(*) begin
     iow_cs     = 0;
     // afe_cs     = 0;
     intshow_cs = 0;
-    ti2_cs     = 0;
-    ti1_cs     = 0;
-    in5_cs    = 0;
-    in6_cs    = 0;
+    in5_cs     = 0;
+    in6_cs     = 0;
     ior_cs     = 0;
     color_cs   = 0;
     vscr_cs    = 0;
-    obj1_cs    = 0;
-    obj2_cs    = 0;
+    obj_cs     = 0;
+    ram_cs     = 0;
     vram_cs    = 0;
     if( VMA && A[15:13]==1 ) begin // 2???
         case( A[12:11] )
-            0: obj1_cs    = 1;
-            1: obj2_cs    = 1;
-            2: vram_cs    = 1;
-            3: if( A[10] )
+            0,1: ram_cs = 1;
+            2: vram_cs  = 1;
+            3: if( A[10] ) begin
                 case( A[9:7] )
-                    0: case(6:4)
+                    0: case(A[6:4])
                         // 0: watchdog
                         1: int_cs = 1;
-                        2: colorset_cs = 1;
+                        2: color_cs = 1;
                         3: intshow_cs = 1;
                         default:;
                     endcase
@@ -111,8 +113,7 @@ always @(*) begin
                     6: in6_cs      = 1;
                     7: vgap_cs     = 1;
                 endcase
-                3: color_cs   = 1;
-                4: vscr_cs    = 1;  // vertical scroll position
+            end
         endcase
     end
 end
@@ -125,27 +126,28 @@ always @(posedge clk) begin
         3: cabinet <= 8'hff;
     endcase
     cpu_din <= rom_cs  ? rom_data  :
+               ram_cs  ? ram_dout  :
                vram_cs ? vram_dout :
                intshow_cs ? vscr_dout :
-               (obj1_cs | obj2_cs) ? obj_dout  :
-               ior_cs  ? cabinet :
-               in6_cs  ? dipsw_a :
-               in5_cs  ? dipsw_b : 8'hff;
+               obj_cs  ? obj_dout :
+               ior_cs  ? cabinet  :
+               in6_cs  ? dipsw_a  :
+               in5_cs  ? dipsw_b  : 8'hff;
 end
 
 always @(posedge clk) begin
     if( rst ) begin
-        nmi_clrn <= 0;
+        objche   <= 0;
         irq_clrn <= 0;
         flip     <= 0;
         pal_sel  <= 0;
     end else if(cpu_cen) begin
         if( iow_cs && !RnW ) begin
-            nmi_clrn <= cpu_dout[1];
-            irq_clrn <= cpu_dout[2];
+            objche   <= cpu_dout[5];
+            irq_clrn <= cpu_dout[1];
             flip     <= cpu_dout[0];
         end
-        if( color_cs ) pal_sel <= cpu_dout[2:0];
+        if( color_cs ) pal_sel <= cpu_dout[3:0];
     end
 end
 
@@ -161,7 +163,7 @@ jtframe_ff u_irq(
     .sigedge  ( irq_trigger )     // signal whose edge will trigger the FF
 );
 
-jtframe_sys6809 #(.RAM_AW(0)) u_cpu(
+jtframe_sys6809 #(.RAM_AW(12)) u_cpu(
     .rstn       ( ~rst      ),
     .clk        ( clk       ),
     .cen        ( cpu4_cen  ),   // This is normally the input clock to the CPU
@@ -179,11 +181,11 @@ jtframe_sys6809 #(.RAM_AW(0)) u_cpu(
     .A          ( A         ),
     .RnW        ( RnW       ),
     .VMA        ( VMA       ),
-    .ram_cs     ( 1'b0      ),
+    .ram_cs     ( ram_cs    ),
     .rom_cs     ( rom_cs    ),
     .rom_ok     ( rom_ok    ),
     // Bus multiplexer is external
-    .ram_dout   (           ),
+    .ram_dout   ( ram_dout  ),
     .cpu_dout   ( cpu_dout  ),
     .cpu_din    ( cpu_din   )
 );
