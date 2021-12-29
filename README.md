@@ -19,18 +19,18 @@ Screen synchronization can be a problem with the original PCB too. Connecting us
 
 Games based on 082, 083 and 503 graphic chips
 
-Game            | Date       |  ID | Palette PROM  | 085 | PSG  | VLM5030  | Sch                         | eBay price    |         YT views  |
+Game            | Date       | ID  | Palette PROM  | 085 | PSG  | VLM5030  | Sch                         | eBay price    |     YT views      |
 ----------------|------------|-----|---------------|-----|------|----------|-----------------------------|---------------|-------------------| 
 Mega Zone       |       1983 | No  |  Only output  | No  | x1   | No       | Yes, only 083               |25€            |10.614(2016)       |
 Yie Ar Kungfu   |19/Nov/1984 |GX407|  Only output  | No  | 74689| Yes      | Yes, only 082,083           |15€ cart       |3.6 M (2013) NES   |
 Shaolin's Road  |22/Mar/1985 |GX477| All elements  | Yes | 74689| No       | Yes                         |97.13€         |27.664(2018)       |
-Track'n Field   |10/Oct/1983 | No  | All elements  | No  |      | Yes      |Partial-Blurred              |7 a 60€ cart   |2.7 M (2015) NES   |
-Hyper Sports    |31/May/1984 | No  | All elements  | Yes |      | Yes      |Yes blurred,with labels      |80€            |41.562(2012)       |
-Road Fighter    |            |     |               |     |      |          |The schematic is not there   |15 a 70€ cart  |4 M (2010) NES     |
-Super Basketball|       1984 |GX405| All elements  | Yes | 74689| Yes      |Yes,with labels              |159€           |23.494 (2014)      |
-Mikie           |15/Nov/1984 | No  | All elements  | Yes |      | No       |Yes,with labels,little sharp |11€     cart   |50.381 (2010)      |
-Pandora's Palace|       1984 | No  | Only output   | Yes |      | No       |Yes,with labels              |      €        |14.167 (2010)      |
-Ping Pong       |            |     |               |     |      |          |The schematic is not there   |60€            |8.530 (2012) NES   |
+Track'n Field   |10/Oct/1983 | No  | All elements  | No  |      | Yes      | Partial-Blurred             |7 a 60€ cart   |2.7 M (2015) NES   |
+Hyper Sports    |31/May/1984 | No  | All elements  | Yes |      | Yes      | Yes blurred,with labels     |80€            |41.562(2012)       |
+Road Fighter    |            |     |               |     |      |          | No                          |15 a 70€ cart  |4 M (2010) NES     |
+Super Basketball|       1984 |GX405| All elements  | Yes | 74689| Yes      | Yes,with labels             |159€           |23.494 (2014)      |
+Mikie           |15/Nov/1984 | No  | All elements  | Yes |      | No       | Yes,with labels, small      |11€     cart   |50.381 (2010)      |
+Pandora's Palace|       1984 | No  | Only output   | Yes |      | No       | Yes,with labels             |      €        |14.167 (2010)      |
+Ping Pong       |            |     |               |     |      |          | No                          |60€            |8.530 (2012) NES   |
 Roc'n Rope      |       1984 | No  | Only output   | No  | 8910 | No       | Yes, only 082,083           |350€PCB 50€cart|43.873 (2011)      |
 
 # Acknowledgement
