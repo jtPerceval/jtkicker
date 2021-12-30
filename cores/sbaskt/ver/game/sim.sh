@@ -25,7 +25,7 @@ done
 export M6809=1
 
 # Generic simulation script from JTFRAME
-jtsim -mist -sysname sbaskt  \
+jtsim -mist -sysname sbaskt -load \
     $PROM_ONLY -d JTFRAME_SIM_ROMRQ_NOCHECK \
     -videow 256 -videoh 224 \
     $*

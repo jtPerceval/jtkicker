@@ -27,11 +27,11 @@ delete = [ "Unused", "Unknown" ]
 # values starting with $ refer to macro definitions in the .def file
 # or arguments passed to mame2mra
 regions = [
-    { name="maincpu", reverse=true },
-    { name="audiocpu" },
-    { name="gfx1", reverse=true }, # start=$GFX1_START
+    { name="maincpu" },
+    { name="audiocpu", reverse=true },
+    { name="gfx1" }, # start=$GFX1_START
     { name="gfx2" }, # start=$GFX2_START
-    { name="vlm", reverse=true },
+    { name="vlm" },
     { name="proms"          },
 ]
 

@@ -169,7 +169,7 @@ always @(*) begin
     end
 end
 
-jtframe_dwnld #(.PROM_START(PROM_START))
+jtframe_dwnld #(.PROM_START(PROM_START),.SWAB(1))
 u_dwnld(
     .clk            ( clk           ),
     .downloading    ( downloading   ),

@@ -70,8 +70,7 @@ wire        RnW, irq_n, nmi_n;
 wire        irq_trigger, nmi_trigger;
 reg         irq_clrn, ram_cs, vgap_cs;
 reg         ior_cs, in5_cs, in6_cs, int_cs,
-            intshow_cs,
-            color_cs, iow_cs;
+            color_cs, iow_cs, intshow_cs;
 // reg         afe_cs; // watchdog
 wire        VMA;
 
@@ -84,46 +83,48 @@ always @(*) begin
     rom_cs  = VMA && A[15:13]>2 && RnW && VMA; // ROM = 4000 - FFFF
     iow_cs     = 0;
     int_cs     = 0;
-    intshow_cs = 0;
     in5_cs     = 0;
     in6_cs     = 0;
     ior_cs     = 0;
     color_cs   = 0;
     vscr_cs    = 0;
-    objram_cs     = 0;
+    intshow_cs = 0;
+    objram_cs  = 0;
     ram_cs     = 0;
     vram_cs    = 0;
     if( VMA && A[15:13]==1 ) begin // 2???
         case( A[12:11] )
-            0,1: ram_cs = 1;
-            2: vram_cs  = 1;
+            0,1: ram_cs = 1;    // 2000-2FFF
+            2: vram_cs  = 1;    // 3000-37FF
             3: if( A[10] ) begin
-                case( A[9:7] )
+                case( A[9:7] )  // 3C??
                     0: case(A[6:4])
-                        // 0: watchdog
-                        1: int_cs = 1;
-                        2: color_cs = 1;
-                        3: intshow_cs = 1;
+                        // 0: watchdog    // 3c00
+                        1: int_cs   = 1;  // 3c10
+                        2: color_cs = 1;  // 3c20
+                        3: intshow_cs = 1;  // 3c30
                         default:;
                     endcase
-                    1: iow_cs      = 1;
-                    2: snd_data_cs = 1;
-                    3: snd_on_cs   = 1;
-                    4: ior_cs      = 1;
-                    5: in5_cs      = 1;
-                    6: in6_cs      = 1;
-                    7: vgap_cs     = 1;
+                    1: iow_cs      = 1; // 3c80
+                    2: snd_data_cs = 1; // 3d00
+                    3: snd_on_cs   = 1; // 3d80
+                    4: ior_cs      = 1; // 3e00
+                    5: in5_cs      = 1; // 3e80
+                    6: in6_cs      = 1; // 3f00
+                    7: vscr_cs     = 1; // 3f80
                 endcase
+            end else begin  // 38??
+                objram_cs = 1;
             end
         endcase
     end
 end
 
 always @(posedge clk) begin
-    case( A[6:5] )
+    case( A[1:0] )
         0: cabinet <= { ~3'd0, start_button, service, coin_input };
-        1: cabinet <= {2'b11, joystick1[5:4], joystick1[2], joystick1[3], joystick1[0], joystick1[1]};
-        2: cabinet <= {2'b11, joystick2[5:4], joystick2[2], joystick2[3], joystick2[0], joystick2[1]};
+        1: cabinet <= {1'b1, joystick1[6:4], joystick1[2], joystick1[3], joystick1[0], joystick1[1]};
+        2: cabinet <= {1'b1, joystick2[6:4], joystick2[2], joystick2[3], joystick2[0], joystick2[1]};
         3: cabinet <= 8'hff;
     endcase
     cpu_din <= rom_cs  ? rom_data  :
@@ -144,9 +145,12 @@ always @(posedge clk) begin
         pal_sel  <= 0;
     end else if(cpu_cen) begin
         if( iow_cs && !RnW ) begin
-            obj_frame <= cpu_dout[5];
-            irq_clrn  <= cpu_dout[1];
-            flip      <= cpu_dout[0];
+            case(A[2:0]) // 74LS259
+                5: obj_frame <= cpu_dout[0];
+                1: irq_clrn  <= cpu_dout[0];
+                0: flip      <= cpu_dout[0];
+                default:;
+            endcase
         end
         if( color_cs ) pal_sel <= cpu_dout[3:0];
     end

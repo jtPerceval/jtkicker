@@ -35,27 +35,17 @@
     <rom index="0" zip="sbaskete.zip|sbasketb.zip" md5="None">
         <!-- maincpu - starts at 0x0 -->
         <part repeat="0x6000"> FF</part>
-        <interleave output="16">
-            <part name="405e05.14j" crc="32ea5b71" map="12"/>
-        </interleave>
-        <interleave output="16">
-            <part name="405e04.13j" crc="7abf3087" map="12"/>
-        </interleave>
-        <interleave output="16">
-            <part name="405e03.11j" crc="9c6fcdcd" map="12"/>
-        </interleave>
-        <interleave output="16">
-            <part name="405e02.10j" crc="0f145648" map="12"/>
-        </interleave>
-        <interleave output="16">
-            <part name="405e01.9j" crc="6a27f1b1" map="12"/>
-        </interleave>
+        <part name="405e05.14j" crc="32ea5b71"/>
+        <part name="405e04.13j" crc="7abf3087"/>
+        <part name="405e03.11j" crc="9c6fcdcd"/>
+        <part name="405e02.10j" crc="0f145648"/>
+        <part name="405e01.9j" crc="6a27f1b1"/>
         <!-- audiocpu - starts at 0x10000 -->
-        <part name="405e13.7a" crc="1ec7458b"/>
-        <!-- gfx1 - starts at 0x12000 -->
         <interleave output="16">
-            <part name="405e12.22f" crc="e02c54da" map="12"/>
+            <part name="405e13.7a" crc="1ec7458b" map="12"/>
         </interleave>
+        <!-- gfx1 - starts at 0x12000 -->
+        <part name="405e12.22f" crc="e02c54da"/>
         <!-- gfx2 - starts at 0x16000 -->
         <part name="405e06.14g" crc="7e2f5bb2"/>
         <part name="405e07.16g" crc="963a44f9"/>
@@ -64,9 +54,7 @@
         <part name="405e10.20g" crc="824815e8"/>
         <part name="405e11.22g" crc="dca9b447"/>
         <!-- vlm - starts at 0x22000 -->
-        <interleave output="16">
-            <part name="405e15.11f" crc="01bb5ce9" map="12"/>
-        </interleave>
+        <part name="405e15.11f" crc="01bb5ce9"/>
         <!-- proms - starts at 0x24000 -->
         <part name="405e17.5a" crc="b4c36d57"/>
         <part name="405e16.4a" crc="0b7b03b8"/>
