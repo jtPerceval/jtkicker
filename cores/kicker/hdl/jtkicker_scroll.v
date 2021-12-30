@@ -49,7 +49,8 @@ module jtkicker_scroll(
     input        [31:0] rom_data,
     input               rom_ok,
 
-    output        [3:0] pxl
+    output        [3:0] pxl,
+    output reg          prio
 );
 
 parameter BYPASS_PROM=0, NOSCROLL=0;
@@ -71,6 +72,7 @@ wire        vram_we_low, vram_we_high;
 wire        vflip, hflip;
 wire        vram_we;
 wire [ 9:0] eff_addr;
+reg         scr_prio, cur_prio;
 
 assign eff_addr     = NOSCROLL ? cpu_addr[10:1] : cpu_addr[9:0];
 assign vram_we      = vram_cs & ~cpu_rnw;
@@ -85,18 +87,21 @@ generate
             assign hflip    = attr[4];
             assign code_msb = attr[7:6];
             assign pal_msb  = attr[3:0];
+            assign scr_prio = 0;
         end
         1: begin // Yie Ar Kungfu
             assign hflip    = attr[7];
             assign vflip    = attr[6];
             assign code_msb = {1'b0,attr[4]};
             assign pal_msb  = 0;
+            assign scr_prio = 0;
         end
         2: begin // Super Basketball
             assign code_msb = {1'b0,attr[5]};
             assign vflip    = attr[7];
             assign hflip    = ~attr[6];
             assign pal_msb  = attr[3:0];
+            assign scr_prio = attr[4];
         end
     endcase
 endgenerate
@@ -147,6 +152,7 @@ always @(posedge clk) if(pxl_cen) begin
         };
         cur_hf   <= hflip^flip;
         cur_pal  <= pal_msb;
+        cur_prio <= scr_prio;
     end else begin
         pxl_data <= cur_hf ? pxl_data>>4 : pxl_data<<4;
     end
@@ -185,6 +191,7 @@ jtframe_dual_ram #(.simfile("vram_hi.bin")) u_high(
 generate
     if( BYPASS_PROM ) begin
         assign pxl = pal_addr[3:0];
+        initial prio=0; // unused
     end else begin
         jtframe_prom #(
             .dw ( 4     ),
@@ -200,6 +207,7 @@ generate
             .rd_addr( pal_addr  ),
             .q      ( pxl       )
         );
+        always @(posedge clk) if(pxl_cen) prio <= cur_prio;
     end
 endgenerate
 

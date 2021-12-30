@@ -74,6 +74,7 @@ module jtsbaskt_video(
 wire       LHBL, hinit;
 wire [8:0] vdump, vrender, hdump;
 wire [3:0] obj_pxl, scr_pxl;
+wire       scr_prio;
 reg  [2:0] prog_rgb;
 reg        prog_scr, prog_obj;
 
@@ -119,7 +120,7 @@ jtkicker_scroll #(.LAYOUT(2)) u_scroll(
     .cpu_dout   ( cpu_dout  ),
     .cpu_rnw    ( cpu_rnw   ),
     .vram_cs    ( vram_cs   ),
-    .vscr_cs    ( 1'b0      ),  // No 085 chip, so no scroll
+    .vscr_cs    ( vscr_cs   ),
     .vram_dout  ( vram_dout ),
     .vscr_dout  ( vscr_dout ),
 
@@ -140,7 +141,8 @@ jtkicker_scroll #(.LAYOUT(2)) u_scroll(
     .rom_data   ( scr_data  ),
     .rom_ok     ( scr_ok    ),
 
-    .pxl        ( scr_pxl   )
+    .pxl        ( scr_pxl   ),
+    .prio       ( scr_prio  )
 );
 
 jtsbaskt_obj u_obj(
@@ -181,12 +183,12 @@ jtsbaskt_obj u_obj(
     .debug_bus  ( debug_bus )
 );
 
-jtkicker_colmix #(.PALSELW(4)) u_colmix(
+jtsbaskt_colmix u_colmix(
     .clk        ( clk       ),
 
     .pxl_cen    ( pxl_cen   ),
     .pal_sel    ( pal_sel   ),
-
+    .scr_prio   ( scr_prio  ),
     // video inputs
     .obj_pxl    ( obj_pxl   ),
     .scr_pxl    ( scr_pxl   ),

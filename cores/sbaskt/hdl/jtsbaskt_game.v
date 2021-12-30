@@ -151,13 +151,19 @@ wire [ 1:0] pre_mask;
 assign pxl2_cen = cen_base[0]; // ~12MHz
 assign pxl_cen  = cen_base[1]; // ~ 6MHz
 
+function [3:0] mirror( input [3:0] a );
+    // mirror = { a[0], a[1], a[2], a[3] };
+    mirror = { a[3], a[2], a[1], a[0] };
+endfunction
+
 always @(*) begin
     prog_addr = pre_addr;
     prog_data = pre_data;
     prog_mask = pre_mask;
     if( ioctl_addr[21:0] >= SCR_START && ioctl_addr[21:0]<OBJ_START ) begin
         //prog_mask = {pre_mask[0],pre_mask[1]};
-        prog_data = {pre_data[3:0], pre_data[7:4]};
+        //prog_data = { mirror(pre_data[3:0]), mirror(pre_data[7:4])};
+        prog_data = { mirror(pre_data[3:0]), mirror(pre_data[7:4])};
         // prog_addr[0] = pre_addr[0];
         // prog_addr[1] = pre_addr[1];
         //prog_addr[3:1] =  pre_addr[2:0];

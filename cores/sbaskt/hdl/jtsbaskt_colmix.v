@@ -16,15 +16,14 @@
     Version: 1.0
     Date: 14-11-2021 */
 
-module jtkicker_colmix #(
-    parameter PALSELW=3
-) (
+module jtsbaskt_colmix(
     input               clk,        // 48 MHz
 
     input               pxl_cen,
-    input [PALSELW-1:0] pal_sel,
+    input         [3:0] pal_sel,
 
     // video inputs
+    input               scr_prio,
     input         [3:0] obj_pxl,
     input         [3:0] scr_pxl,
     input               LHBL,
@@ -44,17 +43,18 @@ module jtkicker_colmix #(
 );
 
 wire [7:0] pal_addr;
-reg  [4:0] mux;
+reg  [3:0] mux;
 wire       obj_blank = obj_pxl[3:0]==0 || !gfx_en[3];
+wire       scr_blank = scr_pxl[3:0]==0 || !gfx_en[0];
 wire [3:0] scr_gated = gfx_en[0] ? scr_pxl : 4'd0;
 
-assign pal_addr = PALSELW==3 ?
-    { pal_sel, mux} :
-    { pal_sel, mux[3:0] };
+assign pal_addr = { obj_blank ? 4'hf : pal_sel, mux };
 
 always @(posedge clk) if(pxl_cen) begin
-    mux[4]   <= obj_blank;
-    mux[3:0] <= obj_blank ? scr_gated : obj_pxl;
+    if( scr_prio )
+        mux <=!scr_blank ? scr_gated : obj_pxl;
+    else
+        mux <= obj_blank ? scr_gated : obj_pxl;
 end
 
 wire [11:0] raw, rgb;

@@ -6,10 +6,10 @@ game:
       - jtsbaskt_video.v
       - jtsbaskt_obj.v
       - jtsbaskt_snd.v
+      - jtsbaskt_colmix.v
   - from: kicker
     get:
       - common.yaml
-      - jtkicker_colmix.v
 jtframe:
   - from: cpu
     get:
