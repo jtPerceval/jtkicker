@@ -53,7 +53,9 @@
         <!-- audiocpu - starts at 0x10000 -->
         <part name="405e13.7a" crc="1ec7458b"/>
         <!-- gfx1 - starts at 0x12000 -->
-        <part name="405e12.22f" crc="e02c54da"/>
+        <interleave output="16">
+            <part name="405e12.22f" crc="e02c54da" map="12"/>
+        </interleave>
         <!-- gfx2 - starts at 0x16000 -->
         <part name="405e06.14g" crc="7e2f5bb2"/>
         <part name="405e07.16g" crc="963a44f9"/>

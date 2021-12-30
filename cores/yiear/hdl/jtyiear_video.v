@@ -96,7 +96,6 @@ jtkicker_scroll #(.BYPASS_PROM(1),.NOSCROLL(1)) u_scroll(
     .clk24      ( clk24     ),
 
     .pxl_cen    ( pxl_cen   ),
-    .pal_sel    ( pal_sel   ),
 
     // CPU interface
     .cpu_addr   ( cpu_addr  ),

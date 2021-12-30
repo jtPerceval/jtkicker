@@ -22,7 +22,6 @@ module jtkicker_scroll(
     input               clk24,      // 24 MHz
 
     input               pxl_cen,
-    input         [2:0] pal_sel,
 
     // CPU interface
     input        [10:0] cpu_addr,
@@ -54,7 +53,11 @@ module jtkicker_scroll(
 );
 
 parameter BYPASS_PROM=0, NOSCROLL=0;
-localparam BSEL = NOSCROLL ? 0 : 10;
+parameter LAYOUT = !NOSCROLL ? 0 : 1;
+parameter BSEL =
+    LAYOUT==2 ? 10 :
+    NOSCROLL ? 0 : 10;
+parameter PACKED = LAYOUT==2;
 
 wire [ 7:0] code, attr, vram_high, vram_low, pal_addr;
 wire [ 3:0] pal_msb;
@@ -76,17 +79,26 @@ assign vram_we_high = vram_we &  cpu_addr[BSEL];
 assign vram_dout    = cpu_addr[BSEL] ? vram_high : vram_low;
 
 generate
-    if ( !NOSCROLL ) begin // Kicker
-        assign vflip    = attr[5];
-        assign hflip    = attr[4];
-        assign code_msb = attr[7:6];
-        assign pal_msb  = attr[3:0];
-    end else begin // Yie Ar Kungfu
-        assign hflip    = attr[7];
-        assign vflip    = attr[6];
-        assign code_msb = {1'b0,attr[4]};
-        assign pal_msb  = 0;
-    end
+    case( LAYOUT )
+        0: begin // Kicker
+            assign vflip    = attr[5];
+            assign hflip    = attr[4];
+            assign code_msb = attr[7:6];
+            assign pal_msb  = attr[3:0];
+        end
+        1: begin // Yie Ar Kungfu
+            assign hflip    = attr[7];
+            assign vflip    = attr[6];
+            assign code_msb = {1'b0,attr[4]};
+            assign pal_msb  = 0;
+        end
+        2: begin // Super Basketball
+            assign code_msb = {1'b0,attr[5]};
+            assign vflip    = attr[7];
+            assign hflip    = ~attr[6];
+            assign pal_msb  = attr[3:0];
+        end
+    endcase
 endgenerate
 
 always @(*) begin
@@ -122,7 +134,8 @@ always @(posedge clk) if(pxl_cen) begin
         rom_addr <= { code_msb, code, vscr[2:0]^{3{vflip}} }; // 2+8+3=13 bits
     end
     if( hdf[2:0]==4 ) begin // 2 pixel delay to grab data
-        pxl_data <= {
+        pxl_data <= PACKED ? rom_data
+        : {
             rom_data[27], rom_data[31], rom_data[19], rom_data[23],
             rom_data[26], rom_data[30], rom_data[18], rom_data[22],
             rom_data[25], rom_data[29], rom_data[17], rom_data[21],

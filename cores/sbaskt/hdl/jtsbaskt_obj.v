@@ -59,7 +59,7 @@ parameter [7:0] HOFFSET = 8'd6;
 wire [ 7:0] obj1_dout, obj2_dout,
             low_dout, hi_dout;
 wire        obj1_we, obj2_we;
-reg  [ 8:0] scan_addr;
+wire [ 8:0] scan_addr;
 wire        even_cs, odd_cs;
 
 // wire [ 7:0] pal_addr;

@@ -5,9 +5,11 @@ game:
       - jtsbaskt_main.v
       - jtsbaskt_video.v
       - jtsbaskt_obj.v
+      - jtsbaskt_snd.v
   - from: kicker
     get:
       - common.yaml
+      - jtkicker_colmix.v
 jtframe:
   - from: cpu
     get:

@@ -83,7 +83,7 @@ always @(*) begin
     prog_obj = 0;
     prog_scr = 0;
     prog_rgb = 0;
-    if( prog_en )
+    if( prom_en )
         case( prog_addr[10:8] )
             0: prog_rgb = 1;
             1: prog_rgb = 2;
@@ -107,13 +107,12 @@ jtkicker_vtimer u_vtimer(
     .VS     ( VS        )
 );
 
-jtkicker_scroll u_scroll(
+jtkicker_scroll #(.LAYOUT(2)) u_scroll(
     .rst        ( rst       ),
     .clk        ( clk       ),
     .clk24      ( clk24     ),
 
     .pxl_cen    ( pxl_cen   ),
-    .pal_sel    ( pal_sel   ),
 
     // CPU interface
     .cpu_addr   ( cpu_addr  ),

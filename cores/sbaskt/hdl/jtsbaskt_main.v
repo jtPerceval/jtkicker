@@ -39,7 +39,7 @@ module jtsbaskt_main(
     output      [ 7:0]  cpu_dout,
     output reg          vscr_cs,
     output reg          vram_cs,
-    output reg          obj_cs,
+    output reg          objram_cs,
     output reg          obj_frame,
 
     // Sound
@@ -68,8 +68,8 @@ wire [ 7:0] ram_dout;
 wire [15:0] A;
 wire        RnW, irq_n, nmi_n;
 wire        irq_trigger, nmi_trigger;
-reg         irq_clrn, ram_cs;
-reg         ior_cs, in5_cs, in6_cs,
+reg         irq_clrn, ram_cs, vgap_cs;
+reg         ior_cs, in5_cs, in6_cs, int_cs,
             intshow_cs,
             color_cs, iow_cs;
 // reg         afe_cs; // watchdog
@@ -83,14 +83,14 @@ assign rom_addr    = A;
 always @(*) begin
     rom_cs  = VMA && A[15:13]>2 && RnW && VMA; // ROM = 4000 - FFFF
     iow_cs     = 0;
-    // afe_cs     = 0;
+    int_cs     = 0;
     intshow_cs = 0;
     in5_cs     = 0;
     in6_cs     = 0;
     ior_cs     = 0;
     color_cs   = 0;
     vscr_cs    = 0;
-    obj_cs     = 0;
+    objram_cs     = 0;
     ram_cs     = 0;
     vram_cs    = 0;
     if( VMA && A[15:13]==1 ) begin // 2???
@@ -130,7 +130,7 @@ always @(posedge clk) begin
                ram_cs  ? ram_dout  :
                vram_cs ? vram_dout :
                intshow_cs ? vscr_dout :
-               obj_cs  ? obj_dout :
+               objram_cs  ? obj_dout :
                ior_cs  ? cabinet  :
                in6_cs  ? dipsw_a  :
                in5_cs  ? dipsw_b  : 8'hff;

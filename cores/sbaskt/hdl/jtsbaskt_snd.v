@@ -44,7 +44,7 @@ localparam CNTW=11;
 
 reg  [ 7:0] latch, psg_data, vlm_data, din;
 wire [ 7:0] ram_dout, vlm_mux, dout;
-wire        irq_ack, int_n, vlm_ceng;
+wire        irq_ack, int_n;
 wire [ 2:0] pcm_nc;
 wire        vlm_ceng, vlm_me_b;
 wire [10:0] psg_snd;

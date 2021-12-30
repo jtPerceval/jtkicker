@@ -33,8 +33,8 @@ module jtsbaskt_game(
     // cabinet I/O
     input   [ 1:0]  start_button,
     input   [ 1:0]  coin_input,
-    input   [ 5:0]  joystick1,
-    input   [ 5:0]  joystick2,
+    input   [ 6:0]  joystick1,
+    input   [ 6:0]  joystick2,
     // SDRAM interface
     input           downloading,
     output          dwnld_busy,
@@ -49,8 +49,8 @@ module jtsbaskt_game(
     input   [ 7:0]  ioctl_dout,
     input           ioctl_wr,
     output reg [21:0] prog_addr,
-    output  [ 7:0]  prog_data,
-    output  [ 1:0]  prog_mask,
+    output reg [ 7:0] prog_data,
+    output reg [ 1:0] prog_mask,
     output          prog_we,
     output          prog_rd,
     // DIP switches
@@ -94,7 +94,6 @@ wire [15:0] main_addr;
 wire [ 3:0] cen_base;
 
 wire [ 7:0] dipsw_a, dipsw_b;
-wire [ 3:0] dipsw_c;
 wire        LVBL, V16;
 
 wire [ 3:0] pal_sel;
@@ -107,14 +106,16 @@ wire [ 7:0] vscr_dout, vram_dout, obj_dout, cpu_dout;
 wire        vsync60;
 wire        snd_cen, psg_cen;
 
-// PCM - used by yiear
+// PCM
 wire [15:0] pcm_addr;
 wire [ 7:0] pcm_data;
 wire        pcm_ok;
 
+wire        m2s_on, m2s_data;
+
 assign prog_rd    = 0;
 assign dwnld_busy = downloading;
-assign { dipsw_c, dipsw_b, dipsw_a } = dipsw[19:0];
+assign { dipsw_b, dipsw_a } = dipsw[15:0];
 assign dip_flip = flip;
 assign vsync60  = status[13];   // high to use a 6MHz pixel clock, instead of 6.144MHz
 
@@ -144,16 +145,22 @@ jtframe_cen3p57 u_cen3p57(
 );
 
 wire [21:0] pre_addr;
-wire [ 7:0] nc;
+wire [ 7:0] nc, pre_data;
+wire [ 1:0] pre_mask;
 
 assign pxl2_cen = cen_base[0]; // ~12MHz
 assign pxl_cen  = cen_base[1]; // ~ 6MHz
 
 always @(*) begin
     prog_addr = pre_addr;
+    prog_data = pre_data;
+    prog_mask = pre_mask;
     if( ioctl_addr[21:0] >= SCR_START && ioctl_addr[21:0]<OBJ_START ) begin
-        prog_addr[0]   = ~pre_addr[3];
-        prog_addr[3:1] =  pre_addr[2:0];
+        //prog_mask = {pre_mask[0],pre_mask[1]};
+        prog_data = {pre_data[3:0], pre_data[7:4]};
+        // prog_addr[0] = pre_addr[0];
+        // prog_addr[1] = pre_addr[1];
+        //prog_addr[3:1] =  pre_addr[2:0];
     end
     if( ioctl_addr[21:0] >= OBJ_START && ioctl_addr[21:0]<PCM_START ) begin
         prog_addr[0]   = ~pre_addr[3];
@@ -170,8 +177,8 @@ u_dwnld(
     .ioctl_dout     ( ioctl_dout    ),
     .ioctl_wr       ( ioctl_wr      ),
     .prog_addr      ( pre_addr      ),
-    .prog_data      ( {nc,prog_data}),
-    .prog_mask      ( prog_mask     ), // active low
+    .prog_data      ( {nc,pre_data} ),
+    .prog_mask      ( pre_mask      ), // active low
     .prog_we        ( prog_we       ),
     .prom_we        ( prom_we       ),
     .sdram_ack      ( sdram_ack     ),
@@ -179,13 +186,11 @@ u_dwnld(
 );
 
 `ifndef NOMAIN
-`MAIN_MODULE u_main(
+jtsbaskt_main u_main(
     .rst            ( rst24         ),
     .clk            ( clk24         ),        // 24 MHz
     .cpu4_cen       ( cpu4_cen      ),
     .cpu_cen        ( cpu_cen       ),
-    .ti1_cen        ( ti1_cen       ),
-    .ti2_cen        ( ti2_cen       ),
     // ROM
     .rom_addr       ( main_addr     ),
     .rom_cs         ( main_cs       ),
@@ -208,6 +213,10 @@ u_dwnld(
 
     .objram_cs      ( objram_cs     ),
     .obj_dout       ( obj_dout      ),
+    .obj_frame      ( obj_frame     ),
+    // Sound control
+    .snd_data_cs    ( m2s_data      ),
+    .snd_on_cs      ( m2s_on        ),
     // GFX configuration
     .pal_sel        ( pal_sel       ),
     .flip           ( flip          ),
@@ -217,22 +226,11 @@ u_dwnld(
     // DIP switches
     .dip_pause      ( dip_pause     ),
     .dipsw_a        ( dipsw_a       ),
-    .dipsw_b        ( dipsw_b       ),
-    .dipsw_c        ( dipsw_c       ),
-    // Sound
-`ifdef PCM
-    .pcm_addr       ( pcm_addr      ),
-    .pcm_data       ( pcm_data      ),
-    .pcm_ok         ( pcm_ok        ),
-`endif
-    .snd            ( snd           ),
-    .sample         ( sample        ),
-    .peak           ( game_led      )
+    .dipsw_b        ( dipsw_b       )
 );
 `else
     assign main_cs = 0;
-    assign obj1_cs = 0;
-    assign obj2_cs = 0;
+    assign objram_cs = 0;
     assign snd     = 0;
     assign sample  = 0;
     assign game_led= 0;
@@ -253,7 +251,7 @@ jtsbaskt_snd u_sound(
     .rom_data   ( snd_data  ),
     .rom_ok     ( snd_ok    ),
     // From main CPU
-    .main_dout  ( main_dout ),
+    .main_dout  ( cpu_dout  ),
     .m2s_data   ( m2s_data  ),
     .m2s_on     ( m2s_on    ),
     // Sound
@@ -263,6 +261,7 @@ jtsbaskt_snd u_sound(
 
     .snd        ( snd       ),
     .sample     ( sample    ),
+    .peak       ( game_led  )
 );
 `else
     assign snd_cs=0;
@@ -294,7 +293,7 @@ jtsbaskt_video u_video(
     .vram_dout  ( vram_dout ),
     .vscr_dout  ( vscr_dout ),
     // Objects
-    .obj_cs     ( objram_cs ),
+    .objram_cs  ( objram_cs ),
     .obj_dout   ( obj_dout  ),
     .obj_frame  ( obj_frame ),
 
