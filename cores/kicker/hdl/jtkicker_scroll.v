@@ -53,12 +53,20 @@ module jtkicker_scroll(
     output reg          prio
 );
 
+// Layout
+// 0  Kicker
+// 1  Yie Ar Kungfu
+// 2  Super Basketball
+
 parameter BYPASS_PROM=0, NOSCROLL=0;
 parameter LAYOUT = !NOSCROLL ? 0 : 1;
 parameter BSEL =
     LAYOUT==2 ? 10 :
     NOSCROLL ? 0 : 10;
 parameter PACKED = LAYOUT==2;
+// Column at which the score table ends. This is set by fixed logic
+// in all games inspected so far. Thus, I encode it as a parameter
+localparam [8:0] SCRCOL = LAYOUT==2 ? 9'o60 : 9'o40;
 
 wire [ 7:0] code, attr, vram_high, vram_low, pal_addr;
 wire [ 3:0] pal_msb;
@@ -72,7 +80,8 @@ wire        vram_we_low, vram_we_high;
 wire        vflip, hflip;
 wire        vram_we;
 wire [ 9:0] eff_addr;
-reg         scr_prio, cur_prio;
+wire        scr_prio;
+reg         cur_prio;
 
 assign eff_addr     = NOSCROLL ? cpu_addr[10:1] : cpu_addr[9:0];
 assign vram_we      = vram_cs & ~cpu_rnw;
@@ -125,7 +134,7 @@ always @(posedge clk, posedge rst) begin
         vscr <= 0;
     end else begin
         if( vscr_cs  ) vpos <= cpu_dout;
-        if( NOSCROLL || (flip ? hdf<8'o40 : hdump<9'o40) ) begin
+        if( NOSCROLL || (flip ? hdf< SCRCOL[7:0] : hdump<SCRCOL) ) begin
             vscr <= {8{flip}} ^ vdump;
         end else begin
             // +1 needed to have a straight grid during boot up
