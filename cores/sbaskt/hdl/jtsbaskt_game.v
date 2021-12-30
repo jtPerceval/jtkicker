@@ -101,7 +101,7 @@ wire [ 3:0] pal_sel;
 wire        obj_frame;
 wire        cpu_cen, cpu4_cen, ti1_cen, ti2_cen;
 wire        cpu_rnw, cpu_irqn, cpu_nmin;
-wire        vscr_cs, vram_cs, obj1_cs, obj2_cs,
+wire        vscr_cs, vram_cs, objram_cs,
             prom_we, flip;
 wire [ 7:0] vscr_dout, vram_dout, obj_dout, cpu_dout;
 wire        vsync60;
@@ -206,8 +206,7 @@ u_dwnld(
     .vram_dout      ( vram_dout     ),
     .vscr_dout      ( vscr_dout     ),
 
-    .obj1_cs        ( obj1_cs       ),
-    .obj2_cs        ( obj2_cs       ),
+    .objram_cs      ( objram_cs     ),
     .obj_dout       ( obj_dout      ),
     // GFX configuration
     .pal_sel        ( pal_sel       ),
@@ -295,7 +294,7 @@ jtsbaskt_video u_video(
     .vram_dout  ( vram_dout ),
     .vscr_dout  ( vscr_dout ),
     // Objects
-    .obj_cs     ( obj_cs    ),
+    .obj_cs     ( objram_cs ),
     .obj_dout   ( obj_dout  ),
     .obj_frame  ( obj_frame ),
 
@@ -343,7 +342,7 @@ jtframe_rom #(
 
     .SLOT6_AW    ( 13              ),
     .SLOT6_DW    (  8              ),
-    .SLOT6_OFFSET( SND_START>>1    )  // Sound CPU
+    .SLOT6_OFFSET( SND_START>>1    ), // Sound CPU
 
     .SLOT7_AW    ( 16              ),
     .SLOT7_DW    (  8              ),

@@ -68,7 +68,7 @@ wire [ 7:0] ram_dout;
 wire [15:0] A;
 wire        RnW, irq_n, nmi_n;
 wire        irq_trigger, nmi_trigger;
-reg         obj_frame, irq_clrn, ram_cs;
+reg         irq_clrn, ram_cs;
 reg         ior_cs, in5_cs, in6_cs,
             intshow_cs,
             color_cs, iow_cs;

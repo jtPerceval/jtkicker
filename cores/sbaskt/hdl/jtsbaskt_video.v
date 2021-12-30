@@ -38,7 +38,7 @@ module jtsbaskt_video(
     output        [7:0] vram_dout,
     output        [7:0] vscr_dout,
 
-    input               obj_cs,
+    input               objram_cs,
     input               obj_frame,
     output        [7:0] obj_dout,
 
@@ -154,7 +154,7 @@ jtsbaskt_obj u_obj(
     // CPU interface
     .cpu_addr   ( cpu_addr[9:0] ),
     .cpu_dout   ( cpu_dout  ),
-    .obj_cs     ( obj_cs    ),
+    .obj_cs     ( objram_cs ),
     .cpu_rnw    ( cpu_rnw   ),
     .obj_dout   ( obj_dout  ),
     .obj_frame  ( obj_frame ),
