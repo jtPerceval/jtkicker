@@ -97,7 +97,8 @@ wire [ 7:0] dipsw_a, dipsw_b;
 wire [ 3:0] dipsw_c;
 wire        LVBL, V16;
 
-wire [ 2:0] pal_sel;
+wire [ 3:0] pal_sel;
+wire        obj_frame;
 wire        cpu_cen, cpu4_cen, ti1_cen, ti2_cen;
 wire        cpu_rnw, cpu_irqn, cpu_nmin;
 wire        vscr_cs, vram_cs, obj1_cs, obj2_cs,
@@ -253,9 +254,9 @@ jtsbaskt_snd u_sound(
     .rom_data   ( snd_data  ),
     .rom_ok     ( snd_ok    ),
     // From main CPU
-    .main_dout      ( main_dout     ),
-    .main2snd_data  ( main2snd_data ),
-    .main2snd_on    ( main2snd_on   ),
+    .main_dout  ( main_dout ),
+    .m2s_data   ( m2s_data  ),
+    .m2s_on     ( m2s_on    ),
     // Sound
     .pcm_addr   ( pcm_addr  ),
     .pcm_data   ( pcm_data  ),
@@ -272,7 +273,7 @@ jtsbaskt_snd u_sound(
     assign sample=0;
 `endif
 
-`VIDEO_MODULE u_video(
+jtsbaskt_video u_video(
     .rst        ( rst       ),
     .clk        ( clk       ),
     .clk24      ( clk24     ),
@@ -294,9 +295,9 @@ jtsbaskt_snd u_sound(
     .vram_dout  ( vram_dout ),
     .vscr_dout  ( vscr_dout ),
     // Objects
-    .obj1_cs    ( obj1_cs   ),
-    .obj2_cs    ( obj2_cs   ),
+    .obj_cs     ( obj_cs    ),
     .obj_dout   ( obj_dout  ),
+    .obj_frame  ( obj_frame ),
 
     // PROMs
     .prog_data  ( prog_data ),

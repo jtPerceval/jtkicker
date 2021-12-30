@@ -25,7 +25,7 @@ module jtsbaskt_video(
     input               pxl2_cen,
 
     // configuration
-    input         [2:0] pal_sel,
+    input         [3:0] pal_sel,
     input               flip,
 
     // CPU interface
@@ -38,8 +38,8 @@ module jtsbaskt_video(
     output        [7:0] vram_dout,
     output        [7:0] vscr_dout,
 
-    input               obj1_cs,
-    input               obj2_cs,
+    input               obj_cs,
+    input               obj_frame,
     output        [7:0] obj_dout,
 
     // PROMs
@@ -74,8 +74,25 @@ module jtsbaskt_video(
 wire       LHBL, hinit;
 wire [8:0] vdump, vrender, hdump;
 wire [3:0] obj_pxl, scr_pxl;
+reg  [2:0] prog_rgb;
+reg        prog_scr, prog_obj;
 
 assign V16 = vdump[4];
+
+always @(*) begin
+    prog_obj = 0;
+    prog_scr = 0;
+    prog_rgb = 0;
+    if( prog_en )
+        case( prog_addr[10:8] )
+            0: prog_rgb = 1;
+            1: prog_rgb = 2;
+            2: prog_rgb = 4;
+            3: prog_scr = 1;
+            4: prog_obj = 1;
+            default:;
+        endcase
+end
 
 jtkicker_vtimer u_vtimer(
     .clk    ( clk       ),
@@ -127,20 +144,20 @@ jtkicker_scroll u_scroll(
     .pxl        ( scr_pxl   )
 );
 
-jtkicker_obj u_obj(
+jtsbaskt_obj u_obj(
     .rst        ( rst       ),
-    .clk        ( clk       ),        // 48 MHz
+    .clk        ( clk       ),      // 48 MHz
     .clk24      ( clk24     ),      // 24 MHz
 
     .pxl_cen    ( pxl_cen   ),
 
     // CPU interface
-    .cpu_addr   ( cpu_addr  ),
+    .cpu_addr   ( cpu_addr[9:0] ),
     .cpu_dout   ( cpu_dout  ),
-    .obj1_cs    ( obj1_cs   ),
-    .obj2_cs    ( obj2_cs   ),
+    .obj_cs     ( obj_cs    ),
     .cpu_rnw    ( cpu_rnw   ),
     .obj_dout   ( obj_dout  ),
+    .obj_frame  ( obj_frame ),
 
     // video inputs
     .hinit      ( hinit     ),

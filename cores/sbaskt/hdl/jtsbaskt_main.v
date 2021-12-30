@@ -40,6 +40,7 @@ module jtsbaskt_main(
     output reg          vscr_cs,
     output reg          vram_cs,
     output reg          obj_cs,
+    output reg          obj_frame,
 
     // Sound
     output reg          snd_data_cs,
@@ -67,7 +68,7 @@ wire [ 7:0] ram_dout;
 wire [15:0] A;
 wire        RnW, irq_n, nmi_n;
 wire        irq_trigger, nmi_trigger;
-reg         objche, irq_clrn, ram_cs;
+reg         obj_frame, irq_clrn, ram_cs;
 reg         ior_cs, in5_cs, in6_cs,
             intshow_cs,
             color_cs, iow_cs;
@@ -137,15 +138,15 @@ end
 
 always @(posedge clk) begin
     if( rst ) begin
-        objche   <= 0;
+        obj_frame   <= 0;
         irq_clrn <= 0;
         flip     <= 0;
         pal_sel  <= 0;
     end else if(cpu_cen) begin
         if( iow_cs && !RnW ) begin
-            objche   <= cpu_dout[5];
-            irq_clrn <= cpu_dout[1];
-            flip     <= cpu_dout[0];
+            obj_frame <= cpu_dout[5];
+            irq_clrn  <= cpu_dout[1];
+            flip      <= cpu_dout[0];
         end
         if( color_cs ) pal_sel <= cpu_dout[3:0];
     end

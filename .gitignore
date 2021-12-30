@@ -11,6 +11,7 @@
 *.arc
 *.lxt
 *.vcd
+*.wav
 cheat/*.bin
 cheat/*.fmt
 history

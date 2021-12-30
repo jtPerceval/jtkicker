@@ -28,8 +28,8 @@ module jtsbaskt_snd(
     input               rom_ok,
     // From main CPU
     input       [ 7:0]  main_dout,
-    input               main2snd_data,
-    input               main2snd_on,
+    input               m2s_data,
+    input               m2s_on,
     // Sound
     output     [15:0]   pcm_addr,
     input      [ 7:0]   pcm_data,
@@ -78,9 +78,8 @@ always @(posedge clk, posedge rst) begin
         vlm_st   <= 0;
         vlm_sel  <= 0;
     end else begin
-        if( psg_cen ) cnt<=cnt+1'd1;
-        if( main2snd_data )
-            latch <= main_dout;
+        if( psg_cen     ) cnt<=cnt+1'd1;
+        if( m2s_data    ) latch <= main_dout;
         if( psgdata_cs  ) psg_data <= dout;
         if( vlm_data_cs ) vlm_data <= dout;
         if( vlm_ctrl_cs ) { snd_en, vlm_rst, vlm_st, vlm_sel } <= A[8:3];
@@ -181,7 +180,7 @@ jtframe_ff u_irq(
     .qn       ( int_n       ),
     .set      (             ),    // active high
     .clr      ( irq_ack     ),    // active high
-    .sigedge  ( main2snd_on )     // signal whose edge will trigger the FF
+    .sigedge  ( m2s_on )     // signal whose edge will trigger the FF
 );
 
 jtframe_sysz80 #(.RAM_AW(10)) u_cpu(
