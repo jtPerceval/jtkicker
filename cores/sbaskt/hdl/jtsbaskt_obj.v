@@ -56,54 +56,87 @@ module jtsbaskt_obj(
 
 parameter [7:0] HOFFSET = 8'd6;
 
-wire [ 7:0] obj1_dout, obj2_dout,
-            low_dout, hi_dout;
-wire        obj1_we, obj2_we;
-wire [ 8:0] scan_addr;
-wire        even_cs, odd_cs;
+reg fr; // write frame
+
+wire        obj_we;
+wire [ 9:0] scan_addr;
+wire [ 7:0] scan_dout, table_dout;
+wire        fr_we;
+reg         div_cen;
 
 // wire [ 7:0] pal_addr;
 // wire [ 3:0] pal_data;
 
-assign odd_cs   = obj_cs & cpu_addr[0];
-assign even_cs  = obj_cs & ~cpu_addr[0];
-assign obj_dout = cpu_addr[0] ? obj1_dout : obj2_dout;
-assign obj1_we  = odd_cs  & ~cpu_rnw;
-assign obj2_we  = even_cs & ~cpu_rnw;
-assign scan_addr = 0;
+assign obj_we    = obj_cs & ~cpu_rnw;
+assign scan_addr = { 1'b0, obj_frame, hdump[7:0] };
+assign fr_we     = vrender == 8'h40 && pxl_cen && LHBL;
+
+always @(posedge clk, posedge rst) begin
+    if( rst ) begin
+        fr <= 0;
+        div_cen <= 0;
+    end else begin
+        if( vrender==8 && hinit && pxl_cen ) fr <= ~fr;
+        div_cen <= ~div_cen;
+    end
+end
 
 // even address
-jtframe_dual_ram #(.aw(9),.simfile("obj2.bin")) u_hi(
+jtframe_dual_ram #(.aw(10),.simfile("obj.bin")) u_hi(
     // Port 0, CPU
     .clk0   ( clk24         ),
     .data0  ( cpu_dout      ),
-    .addr0  ( cpu_addr[8:0] ),
-    .we0    ( obj1_we       ),
-    .q0     ( obj1_dout     ),
+    .addr0  ( cpu_addr      ),
+    .we0    ( obj_we        ),
+    .q0     ( obj_dout      ),
     // Port 1
     .clk1   ( clk           ),
     .data1  (               ),
     .addr1  ( scan_addr     ),
     .we1    ( 1'b0          ),
-    .q1     ( hi_dout       )
+    .q1     ( scan_dout     )
 );
 
-// odd address
-jtframe_dual_ram #(.aw(9),.simfile("obj1.bin")) u_low(
-    // Port 0, CPU
-    .clk0   ( clk24         ),
+// frame buffer for 64 sprites (256 bytes)
+wire [8:0] fr_addr;
+
+jtframe_dual_ram #(.aw(9)) u_low(
+    // Port 0, write
+    .clk0   ( clk           ),
     .data0  ( cpu_dout      ),
-    .addr0  ( cpu_addr[8:0] ),
-    .we0    ( obj2_we       ),
-    .q0     ( obj2_dout     ),
+    .addr0  ({ fr,hdump[7:0]^8'h3}), // reorder: y,x,attr,code
+    .we0    ( fr_we         ),
+    .q0     (               ),
     // Port 1
     .clk1   ( clk           ),
     .data1  (               ),
-    .addr1  ( scan_addr     ),
+    .addr1  ( fr_addr       ),
     .we1    ( 1'b0          ),
-    .q1     ( low_dout      )
+    .q1     ( table_dout    )
 );
 
+// scan the current frame
+reg [5:0] obj_cnt;
+reg [1:0] sub;
 
+assign fr_addr = { ~fr, obj_cnt, sub };
+
+always @(posedge clk, posedge rst) begin
+    if( rst ) begin
+        obj_cnt <= 0;
+        sub <= 0;
+        rd_st <= 0;
+    end else if( div_cen ) begin
+        if( hinit ) begin
+            done <= 0;
+            obj_cnt <= 0;
+            sub <= 0;
+            rd_st <= 0;
+        end else if( !done ) begin
+            case( rd_st )
+            endcase
+        end
+    end
+end
 
 endmodule
