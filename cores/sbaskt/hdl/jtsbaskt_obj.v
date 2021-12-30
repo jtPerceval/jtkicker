@@ -60,7 +60,7 @@ reg fr; // write frame
 
 wire        obj_we;
 wire [ 9:0] scan_addr;
-wire [ 7:0] scan_dout, table_dout;
+wire [ 7:0] scan_dout, tbl_dout;
 wire        fr_we;
 reg         div_cen;
 
@@ -98,7 +98,7 @@ jtframe_dual_ram #(.aw(10),.simfile("obj.bin")) u_hi(
 );
 
 // frame buffer for 64 sprites (256 bytes)
-wire [8:0] fr_addr;
+wire [8:0] rd_addr;
 
 jtframe_dual_ram #(.aw(9)) u_low(
     // Port 0, write
@@ -110,30 +110,69 @@ jtframe_dual_ram #(.aw(9)) u_low(
     // Port 1
     .clk1   ( clk           ),
     .data1  (               ),
-    .addr1  ( fr_addr       ),
+    .addr1  ( rd_addr       ),
     .we1    ( 1'b0          ),
-    .q1     ( table_dout    )
+    .q1     ( tbl_dout      )
 );
 
 // scan the current frame
-reg [5:0] obj_cnt;
-reg [1:0] sub;
+reg  [5:0] obj_cnt;
+reg  [1:0] sub;
+reg  [7:0] xpos, code, attr;
+reg  [3:0] ysub;
+wire [7:0] ydiff;
+reg  [1:0] rd_st;
 
-assign fr_addr = { ~fr, obj_cnt, sub };
+wire       inzone;
+reg        busy=0;
+reg        done, draw;
+
+assign rd_addr = { ~fr, obj_cnt, sub };
+assign ydiff   = vrender-tbl_dout;
+assign inzone  = ydiff < 8'h10;
 
 always @(posedge clk, posedge rst) begin
     if( rst ) begin
+        done    <= 0;
         obj_cnt <= 0;
-        sub <= 0;
-        rd_st <= 0;
+        sub     <= 0;
+        rd_st   <= 0;
+        draw    <= 0;
     end else if( div_cen ) begin
+        draw <= 0;
         if( hinit ) begin
             done <= 0;
             obj_cnt <= 0;
             sub <= 0;
             rd_st <= 0;
         end else if( !done ) begin
+            rd_st <= rd_st + 2'd1;
             case( rd_st )
+                0: begin
+                    if( inzone ) begin
+                        sub  <= 1;
+                        ysub <= ydiff[3:0];
+                    end else begin
+                        obj_cnt <= obj_cnt + 6'd1;
+                        if( &obj_cnt ) done <= 1;
+                        rd_st <= 0;
+                    end
+                end
+                1: begin
+                    xpos <= tbl_dout;
+                    sub  <= 2;
+                end
+                2: begin
+                    code <= tbl_dout;
+                    sub <= 3;
+                end
+                3: if( !busy ) begin
+                    attr <= tbl_dout;
+                    sub <= 0;
+                    obj_cnt <= obj_cnt + 6'd1;
+                    if( &obj_cnt ) done <= 1;
+                    draw <= 1;
+                end
             endcase
         end
     end
