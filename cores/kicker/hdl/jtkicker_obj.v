@@ -53,9 +53,9 @@ module jtkicker_obj(
     input               prog_en,
 
     // SDRAM
-    output reg   [13:0] rom_addr,
+    output       [13:0] rom_addr,
     input        [31:0] rom_data,
-    output reg          rom_cs,
+    output              rom_cs,
     input               rom_ok,
 
     output        [3:0] pxl,
@@ -184,8 +184,11 @@ jtkicker_objdraw #(
     .clk        ( clk       ),        // 48 MHz
 
     .pxl_cen    ( pxl_cen   ),
+    .cen2       ( cen2      ),
     // video inputs
     .LHBL       ( LHBL      ),
+    .hinit_x    ( hinit_x   ),
+    .hdump      ( hdump     ),
 
     // control
     .draw       ( dr_start  ),
@@ -197,6 +200,7 @@ jtkicker_objdraw #(
     .pal        ( pal       ),
     .hflip      ( hflip     ),
     .vflip      ( vflip     ),
+    .ysub       ( dr_v      ),
 
     // PROMs
     .prog_data  ( prog_data ),
@@ -204,13 +208,12 @@ jtkicker_objdraw #(
     .prog_en    ( prog_en   ),
 
     // SDRAM
-    .rom_cs     ( obj_cs    ),
-    .rom_addr   ( obj_addr  ),
-    .rom_data   ( obj_data  ),
-    .rom_ok     ( obj_ok    ),
+    .rom_cs     ( rom_cs    ),
+    .rom_addr   ( rom_addr  ),
+    .rom_data   ( rom_data  ),
+    .rom_ok     ( rom_ok    ),
 
     .pxl        ( pxl       )
 );
-
 
 endmodule

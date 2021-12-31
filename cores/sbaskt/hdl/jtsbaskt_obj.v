@@ -45,9 +45,9 @@ module jtsbaskt_obj(
     input               prog_en,
 
     // SDRAM
-    output reg   [13:0] rom_addr,
+    output       [13:0] rom_addr,
     input        [31:0] rom_data,
-    output reg          rom_cs,
+    output              rom_cs,
     input               rom_ok,
 
     output        [3:0] pxl,
@@ -62,10 +62,7 @@ wire        obj_we;
 wire [ 9:0] scan_addr;
 wire [ 7:0] scan_dout, tbl_dout;
 wire        fr_we;
-reg         div_cen;
-
-// wire [ 7:0] pal_addr;
-// wire [ 3:0] pal_data;
+reg         cen2, hinit_x;
 
 assign obj_we    = obj_cs & ~cpu_rnw;
 assign scan_addr = { 1'b0, obj_frame, hdump[7:0] };
@@ -74,10 +71,12 @@ assign fr_we     = vrender == 8'h40 && pxl_cen && LHBL;
 always @(posedge clk, posedge rst) begin
     if( rst ) begin
         fr <= 0;
-        div_cen <= 0;
+        cen2 <= 0;
     end else begin
         if( vrender==8 && hinit && pxl_cen ) fr <= ~fr;
-        div_cen <= ~div_cen;
+        cen2 <= ~cen2;
+        if( hinit ) hinit_x <= 1;
+        else if(cen2) hinit_x <= 0;
     end
 end
 
@@ -103,7 +102,7 @@ wire [8:0] rd_addr;
 jtframe_dual_ram #(.aw(9)) u_low(
     // Port 0, write
     .clk0   ( clk           ),
-    .data0  ( cpu_dout      ),
+    .data0  ( scan_dout     ),
     .addr0  ({ fr,hdump[7:0]^8'h3}), // reorder: y,x,attr,code
     .we0    ( fr_we         ),
     .q0     (               ),
@@ -118,13 +117,16 @@ jtframe_dual_ram #(.aw(9)) u_low(
 // scan the current frame
 reg  [5:0] obj_cnt;
 reg  [1:0] sub;
-reg  [7:0] xpos, code, attr;
+reg  [7:0] xpos;
+reg  [8:0] code;
 reg  [3:0] ysub;
 wire [7:0] ydiff;
 reg  [1:0] rd_st;
+reg  [3:0] pal;
+reg        hflip, vflip;
 
 wire       inzone;
-reg        busy=0;
+wire       busy;
 reg        done, draw;
 
 assign rd_addr = { ~fr, obj_cnt, sub };
@@ -138,7 +140,7 @@ always @(posedge clk, posedge rst) begin
         sub     <= 0;
         rd_st   <= 0;
         draw    <= 0;
-    end else if( div_cen ) begin
+    end else if( cen2 ) begin
         draw <= 0;
         if( hinit ) begin
             done <= 0;
@@ -163,11 +165,14 @@ always @(posedge clk, posedge rst) begin
                     sub  <= 2;
                 end
                 2: begin
-                    code <= tbl_dout;
                     sub <= 3;
+                    pal     <= tbl_dout[3:0];
+                    code[8] <= tbl_dout[5];
+                    vflip   <= tbl_dout[7];
+                    hflip   <= tbl_dout[6];
                 end
                 3: if( !busy ) begin
-                    attr <= tbl_dout;
+                    code[7:0] <= tbl_dout;
                     sub <= 0;
                     obj_cnt <= obj_cnt + 6'd1;
                     if( &obj_cnt ) done <= 1;
@@ -180,25 +185,30 @@ end
 
 jtkicker_objdraw #(
     .BYPASS_PROM( 0         ),
+    .PACKED     ( 1         ),
     .HOFFSET    ( HOFFSET   )
 ) u_draw (
     .rst        ( rst       ),
     .clk        ( clk       ),        // 48 MHz
 
     .pxl_cen    ( pxl_cen   ),
+    .cen2       ( cen2      ),
     // video inputs
     .LHBL       ( LHBL      ),
+    .hinit_x    ( hinit_x   ),
+    .hdump      ( hdump     ),
 
     // control
-    .draw       ( dr_start  ),
-    .busy       ( dr_busy   ),
+    .draw       ( draw      ),
+    .busy       ( busy      ),
 
     // Object table data
-    .code       ( dr_code   ),
-    .xpos       ( dr_xpos   ),
+    .code       ( code      ),
+    .xpos       ( xpos      ),
     .pal        ( pal       ),
     .hflip      ( hflip     ),
     .vflip      ( vflip     ),
+    .ysub       ( ysub      ),
 
     // PROMs
     .prog_data  ( prog_data ),
@@ -206,10 +216,10 @@ jtkicker_objdraw #(
     .prog_en    ( prog_en   ),
 
     // SDRAM
-    .rom_cs     ( obj_cs    ),
-    .rom_addr   ( obj_addr  ),
-    .rom_data   ( obj_data  ),
-    .rom_ok     ( obj_ok    ),
+    .rom_cs     ( rom_cs    ),
+    .rom_addr   ( rom_addr  ),
+    .rom_data   ( rom_data  ),
+    .rom_ok     ( rom_ok    ),
 
     .pxl        ( pxl       )
 );

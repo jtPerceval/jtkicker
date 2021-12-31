@@ -67,7 +67,7 @@ reg  [ 7:0] cabinet, cpu_din;
 wire [ 7:0] ram_dout;
 wire [15:0] A;
 wire        RnW, irq_n, nmi_n;
-wire        irq_trigger, nmi_trigger;
+wire        irq_trigger;
 reg         irq_clrn, ram_cs, vgap_cs;
 reg         ior_cs, in5_cs, in6_cs, int_cs,
             color_cs, iow_cs, intshow_cs;
@@ -75,7 +75,6 @@ reg         ior_cs, in5_cs, in6_cs, int_cs,
 wire        VMA;
 
 assign irq_trigger = ~LVBL & dip_pause;
-assign nmi_trigger =  V16;
 assign cpu_rnw     = RnW;
 assign rom_addr    = A;
 

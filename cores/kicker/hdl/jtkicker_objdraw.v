@@ -17,16 +17,20 @@
     Date: 15-11-2021 */
 
 module jtkicker_objdraw #(
-    parameter       BYPASS_PROM=0,
-    parameter [7:0] HOFFSET = 8'd6
+    parameter       BYPASS_PROM= 0,
+                    PACKED     = 0,
+    parameter [7:0] HOFFSET    = 8'd6
 ) (
     input               rst,
     input               clk,        // 48 MHz
 
     input               pxl_cen,
+    input               cen2,
 
     // video inputs
+    input               hinit_x,
     input               LHBL,
+    input         [8:0] hdump,
 
     // control
     input               draw,
@@ -34,6 +38,7 @@ module jtkicker_objdraw #(
 
     // Object table data
     input         [7:0] xpos,
+    input         [3:0] ysub,
     input         [3:0] pal,
     input               hflip,
     input               vflip,
@@ -61,7 +66,7 @@ wire [ 7:0] pal_addr;
 reg  [31:0] pxl_data;
 reg  [ 2:0] cnt;
 
-assign pal_addr = { dr_attr[3:0], pxl_data[3:0] };
+assign pal_addr = { pal, pxl_data[3:0] };
 
 always @(posedge clk, posedge rst) begin
     if( rst ) begin
@@ -74,15 +79,15 @@ always @(posedge clk, posedge rst) begin
         cnt   <= 0;
     end else if( cen2 ) begin
         if( draw && !busy ) begin
-            rom_addr <= { code, dr_v^{4{vflip}}, 1'b0 };
+            rom_addr <= { code, ysub^{4{vflip}}, 1'b0 };
             rom_cs   <= 1;
             cnt      <= 7;
-            buf_a    <= dr_xpos + (hflip ? 8'd15 : 8'h0) + HOFFSET;
+            buf_a    <= xpos + (hflip ? 8'd15 : 8'h0) + HOFFSET;
             busy     <= 1;
         end
         if( busy && (!rom_cs || rom_ok) ) begin
             if( cnt==7 && rom_cs ) begin
-                pxl_data <= {
+                pxl_data <= PACKED ? rom_data : {
                     rom_data[27], rom_data[31], rom_data[19], rom_data[23],
                     rom_data[26], rom_data[30], rom_data[18], rom_data[22],
                     rom_data[25], rom_data[29], rom_data[17], rom_data[21],
