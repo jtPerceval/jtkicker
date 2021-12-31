@@ -177,9 +177,9 @@ jtframe_dcrm #(.SW(8)) u_dcrm(
     .dout   ( rdac_s    )
 );
 
-wire [7:0] gain_psg = !snd_en[2] ? 8'h18 : 8'h0;
-wire [7:0] vlm_psg  = !snd_en[1] ? 8'h1C : 8'h0;
-wire [7:0] rdac_psg = !snd_en[0] ? 8'h10 : 8'h0;
+wire [7:0] gain_psg  = !snd_en[2] ? 8'h18 : 8'h0;
+wire [7:0] gain_vlm  = !snd_en[1] ? 8'h1C : 8'h0;
+wire [7:0] gain_rdac = !snd_en[0] ? 8'h10 : 8'h0;
 
 jtframe_mixer #(.W0(11),.W1(10),.W2(8)) u_mixer(
     .rst    ( rst       ),
@@ -192,8 +192,8 @@ jtframe_mixer #(.W0(11),.W1(10),.W2(8)) u_mixer(
     .ch3    ( 16'd0     ),
     // gain for each channel in 4.4 fixed point format
     .gain0  ( gain_psg  ),
-    .gain1  ( vlm_psg   ),
-    .gain2  ( rdac_psg  ),
+    .gain1  ( gain_vlm  ),
+    .gain2  ( gain_rdac ),
     .gain3  ( 8'h00     ),
     .mixed  ( snd       ),
     .peak   ( peak      )
