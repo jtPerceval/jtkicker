@@ -178,7 +178,7 @@ jtframe_dcrm #(.SW(8)) u_dcrm(
 );
 
 wire [7:0] gain_psg  = !snd_en[2] ? 8'h18 : 8'h0;
-wire [7:0] gain_vlm  = !snd_en[1] ? 8'h1C : 8'h0;
+wire [7:0] gain_vlm  = !snd_en[1] ? 8'h18 : 8'h0;
 wire [7:0] gain_rdac = !snd_en[0] ? 8'h10 : 8'h0;
 
 jtframe_mixer #(.W0(11),.W1(10),.W2(8)) u_mixer(
