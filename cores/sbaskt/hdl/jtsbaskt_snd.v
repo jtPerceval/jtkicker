@@ -42,14 +42,14 @@ module jtsbaskt_snd(
 
 localparam CNTW=11;
 
-reg  [ 7:0] latch, psg_data, vlm_data, din;
+reg  [ 7:0] latch, psg_data, vlm_data, din, rdac;
 wire [ 7:0] ram_dout, vlm_mux, dout;
 wire        irq_ack, int_n;
 wire [ 2:0] pcm_nc;
 wire        vlm_ceng, vlm_me_b;
 wire [10:0] psg_snd;
 reg         ram_cs;
-wire        mreq_n, iorq_n;
+wire        mreq_n, iorq_n, m1_n;
 wire [15:0] A;
 reg  [ 2:0] snd_en;
 wire        rdy1;
@@ -64,7 +64,7 @@ wire signed
 assign vlm_mux = vlm_sel ? vlm_data :
                ~vlm_me_b ? pcm_data : 8'hff;
 assign pcm_addr[15:13]=0;
-assign irq_ack = ~iorq_n & ~mreq_n;
+assign irq_ack = ~iorq_n & ~m1_n;
 assign vlm_ceng = snd_cen & ( vlm_me_b | pcm_ok );
 assign rom_addr = A[12:0];
 
@@ -83,6 +83,7 @@ always @(posedge clk, posedge rst) begin
         if( psgdata_cs  ) psg_data <= dout;
         if( vlm_data_cs ) vlm_data <= dout;
         if( vlm_ctrl_cs ) { snd_en, vlm_rst, vlm_st, vlm_sel } <= A[8:3];
+        if( rdac_cs     ) rdac <= dout;
     end
 end
 
@@ -98,16 +99,16 @@ always @* begin
     psg_cs      = 0;
     if( !mreq_n ) begin
         case(A[15:13])
-            0: rom_cs = 1;
-            2: ram_cs = 1;
-            3: latch_cs = 1;
-            4: cnt_cs = 1;
-            5: vlm_data_cs = 1;
-            6: vlm_ctrl_cs = 1;
+            0: rom_cs      = 1;
+            2: ram_cs      = 1; // 4000
+            3: latch_cs    = 1; // 6000
+            4: cnt_cs      = 1; // 8000
+            5: vlm_data_cs = 1; // A000
+            6: vlm_ctrl_cs = 1; // C000
             7: case( A[2:0] )
-                0: rdac_cs = 1;
-                1: psgdata_cs = 1;
-                2: psg_cs = 1;
+                0: rdac_cs    = 1;  // E000
+                1: psgdata_cs = 1;  // E001
+                2: psg_cs     = 1;  // E002
                 default:;
             endcase
         endcase
@@ -117,7 +118,7 @@ end
 always @(posedge clk) begin
     din  <= rom_cs   ? rom_data :
             ram_cs   ? ram_dout :
-            cnt_cs   ? { 5'h1f, cnt[CNTW-1:CNTW-2], vlm_bsy }  :
+            cnt_cs   ? { 5'h1f, vlm_bsy, cnt[CNTW-1:CNTW-2] }  :
             latch_cs ? latch    :
             8'hff;
 end
@@ -133,6 +134,7 @@ jt89 u_psg(
     .ready  ( rdy1          )
 );
 
+`ifndef VERILATOR
 vlm5030_gl u_vlm(
     .i_rst   ( vlm_rst      ),
     .i_clk   ( clk          ),
@@ -151,20 +153,32 @@ vlm5030_gl u_vlm(
     .o_dao   (              ),
     .o_audio ( vlm_snd      )
 );
+`else
+reg busy_dummy=0;
+reg cnt_csl;
 
-jtframe_mixer #(.W0(11),.W1(10)) u_mixer(
+assign vlm_bsy = busy_dummy;
+
+always @(posedge clk) begin
+    cnt_csl <= cnt_cs;
+    if( cnt_cs && !cnt_csl ) busy_dummy <= ~busy_dummy;
+end
+
+`endif
+
+jtframe_mixer #(.W0(11),.W1(10),.W2(9)) u_mixer(
     .rst    ( rst       ),
     .clk    ( clk       ),
     .cen    ( psg_cen   ),
     // input signals
     .ch0    ( psg_snd   ),
     .ch1    ( vlm_snd   ),
-    .ch2    ( 16'd0     ),
+    .ch2    ( {1'b0,rdac} ), // I should remove the DC component
     .ch3    ( 16'd0     ),
     // gain for each channel in 4.4 fixed point format
     .gain0  ( 8'h18     ),
     .gain1  ( 8'h18     ),
-    .gain2  ( 8'h00     ),
+    .gain2  ( 8'h10     ),
     .gain3  ( 8'h00     ),
     .mixed  ( snd       ),
     .peak   ( peak      )
@@ -182,6 +196,8 @@ jtframe_ff u_irq(
     .sigedge  ( m2s_on      )
 );
 
+/* verilator tracing_off */
+
 jtframe_sysz80 #(.RAM_AW(10)) u_cpu(
     .rst_n      ( ~rst        ),
     .clk        ( clk         ),
@@ -190,7 +206,7 @@ jtframe_sysz80 #(.RAM_AW(10)) u_cpu(
     .int_n      ( int_n       ),
     .nmi_n      ( 1'b1        ),
     .busrq_n    ( 1'b1        ),
-    .m1_n       (             ),
+    .m1_n       ( m1_n        ),
     .mreq_n     ( mreq_n      ),
     .iorq_n     ( iorq_n      ),
     .rd_n       (             ),
@@ -207,6 +223,5 @@ jtframe_sysz80 #(.RAM_AW(10)) u_cpu(
     .rom_cs     ( rom_cs      ),
     .rom_ok     ( rom_ok      )
 );
-
 
 endmodule

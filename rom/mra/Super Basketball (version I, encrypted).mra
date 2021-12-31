@@ -39,9 +39,7 @@
         <part name="405i03.11j" crc="d33b82dd"/>
         <part name="405i01.9j" crc="1c09cc3f"/>
         <!-- audiocpu - starts at 0x10000 -->
-        <interleave output="16">
-            <part name="405e13.7a" crc="1ec7458b" map="12"/>
-        </interleave>
+        <part name="405e13.7a" crc="1ec7458b"/>
         <!-- gfx1 - starts at 0x12000 -->
         <part name="405e12.22f" crc="e02c54da"/>
         <!-- gfx2 - starts at 0x16000 -->

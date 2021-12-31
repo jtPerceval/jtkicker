@@ -91,6 +91,8 @@ always @(*) begin
     objram_cs  = 0;
     ram_cs     = 0;
     vram_cs    = 0;
+    snd_data_cs= 0;
+    snd_on_cs  = 0;
     if( VMA && A[15:13]==1 ) begin // 2???
         case( A[12:11] )
             0,1: ram_cs = 1;    // 2000-2FFF

@@ -175,22 +175,6 @@ always @(*) begin
     //end
 end
 
-jtframe_dwnld #(.PROM_START(PROM_START),.SWAB(1))
-u_dwnld(
-    .clk            ( clk           ),
-    .downloading    ( downloading   ),
-    .ioctl_addr     ( ioctl_addr    ),
-    .ioctl_dout     ( ioctl_dout    ),
-    .ioctl_wr       ( ioctl_wr      ),
-    .prog_addr      ( pre_addr      ),
-    .prog_data      ( {nc,pre_data} ),
-    .prog_mask      ( pre_mask      ), // active low
-    .prog_we        ( prog_we       ),
-    .prom_we        ( prom_we       ),
-    .sdram_ack      ( sdram_ack     ),
-    .header         (               )
-);
-
 `ifndef NOMAIN
 jtsbaskt_main u_main(
     .rst            ( rst24         ),
@@ -277,6 +261,7 @@ jtsbaskt_snd u_sound(
     assign sample=0;
 `endif
 
+/* verilator tracing_off */
 jtsbaskt_video u_video(
     .rst        ( rst       ),
     .clk        ( clk       ),
@@ -331,6 +316,21 @@ jtsbaskt_video u_video(
     .debug_bus  ( debug_bus )
 );
 
+jtframe_dwnld #(.PROM_START(PROM_START),.SWAB(1))
+u_dwnld(
+    .clk            ( clk           ),
+    .downloading    ( downloading   ),
+    .ioctl_addr     ( ioctl_addr    ),
+    .ioctl_dout     ( ioctl_dout    ),
+    .ioctl_wr       ( ioctl_wr      ),
+    .prog_addr      ( pre_addr      ),
+    .prog_data      ( {nc,pre_data} ),
+    .prog_mask      ( pre_mask      ), // active low
+    .prog_we        ( prog_we       ),
+    .prom_we        ( prom_we       ),
+    .sdram_ack      ( sdram_ack     ),
+    .header         (               )
+);
 
 jtframe_rom #(
     .SLOT0_AW    ( 14              ),
