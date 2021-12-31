@@ -43,18 +43,22 @@ module jtsbaskt_colmix(
 );
 
 wire [7:0] pal_addr;
-reg  [3:0] mux;
+reg  [4:0] mux, nx_mux;
 wire       obj_blank = obj_pxl[3:0]==0 || !gfx_en[3];
 wire       scr_blank = scr_pxl[3:0]==0 || !gfx_en[0];
 wire [3:0] scr_gated = gfx_en[0] ? scr_pxl : 4'd0;
 
-assign pal_addr = { obj_blank ? 4'hf : pal_sel, mux };
+assign pal_addr = { mux[4] ? 4'hf : pal_sel, mux[3:0] };
+
+always @* begin
+    // scr_prio is a guess, based on a signal going
+    // into the unknown 602 chip
+    nx_mux[4]   = obj_blank || !scr_prio;
+    nx_mux[3:0] = nx_mux[4] ? scr_gated : obj_pxl;
+end
 
 always @(posedge clk) if(pxl_cen) begin
-    if( scr_prio )
-        mux <=!scr_blank ? scr_gated : obj_pxl;
-    else
-        mux <= obj_blank ? scr_gated : obj_pxl;
+    mux <= nx_mux;
 end
 
 wire [11:0] raw, rgb;

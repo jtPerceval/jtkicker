@@ -33,6 +33,10 @@ Pandora's Palace|       1984 | No  | Only output   | Yes |      | No       | Yes
 Ping Pong       |            |     |               |     |      |          | No                          |60€            |8.530 (2012) NES   |
 Roc'n Rope      |       1984 | No  | Only output   | No  | 8910 | No       | Yes, only 082,083           |350€PCB 50€cart|43.873 (2011)      |
 
+# Test Mode
+
+* Super Basketball test mode is enabled by holding 1P and 2P while the game boots
+
 # Acknowledgement
 
 This development has been possible thanks to the board donated by yeahbuddy and the following patrons:

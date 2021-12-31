@@ -141,12 +141,12 @@ always @(posedge clk, posedge rst) begin
         rd_st   <= 0;
         draw    <= 0;
     end else if( cen2 ) begin
-        draw <= 0;
+        if( busy ) draw <= 0;
         if( hinit ) begin
-            done <= 0;
+            done    <= 0;
             obj_cnt <= 0;
-            sub <= 0;
-            rd_st <= 0;
+            sub     <= 0;
+            rd_st   <= 0;
         end else if( !done ) begin
             rd_st <= rd_st + 2'd1;
             case( rd_st )
@@ -165,7 +165,7 @@ always @(posedge clk, posedge rst) begin
                     sub  <= 2;
                 end
                 2: begin
-                    sub <= 3;
+                    sub     <= 3;
                     pal     <= tbl_dout[3:0];
                     code[8] <= tbl_dout[5];
                     vflip   <= tbl_dout[7];
@@ -173,10 +173,10 @@ always @(posedge clk, posedge rst) begin
                 end
                 3: if( !busy ) begin
                     code[7:0] <= tbl_dout;
-                    sub <= 0;
-                    obj_cnt <= obj_cnt + 6'd1;
+                    sub       <= 0;
+                    obj_cnt   <= obj_cnt + 6'd1;
+                    draw      <= 1;
                     if( &obj_cnt ) done <= 1;
-                    draw <= 1;
                 end else begin
                     rd_st <= 3;
                 end

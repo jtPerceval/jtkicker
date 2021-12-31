@@ -188,8 +188,7 @@ jtsbaskt_colmix u_colmix(
 
     .pxl_cen    ( pxl_cen   ),
     .pal_sel    ( pal_sel   ),
-    //.scr_prio   ( scr_prio  ),
-    .scr_prio   ( 1'b0  ),
+    .scr_prio   ( scr_prio  ),
     // video inputs
     .obj_pxl    ( obj_pxl   ),
     .scr_pxl    ( scr_pxl   ),

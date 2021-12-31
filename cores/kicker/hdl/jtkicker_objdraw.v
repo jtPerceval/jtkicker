@@ -66,17 +66,20 @@ wire [ 7:0] pal_addr;
 reg  [31:0] pxl_data;
 reg  [ 2:0] cnt;
 
-assign pal_addr = { pal, pxl_data[3:0] };
+reg  [ 3:0] cur_pal;
+reg         cur_hflip;
+
+assign pal_addr = { cur_pal, pxl_data[3:0] };
 
 always @(posedge clk, posedge rst) begin
     if( rst ) begin
-        busy  <= 0;
+        busy     <= 0;
         rom_cs   <= 0;
         rom_addr <= 0;
         pxl_data <= 0;
         buf_we   <= 0;
         buf_a    <= 0;
-        cnt   <= 0;
+        cnt      <= 0;
     end else if( cen2 ) begin
         if( draw && !busy ) begin
             rom_addr <= { code, ysub^{4{vflip}}, 1'b0 };
@@ -84,6 +87,8 @@ always @(posedge clk, posedge rst) begin
             cnt      <= 7;
             buf_a    <= xpos + (hflip ? 8'd15 : 8'h0) + HOFFSET;
             busy     <= 1;
+            cur_pal  <= pal;
+            cur_hflip<= hflip;
         end
         if( busy && (!rom_cs || rom_ok) ) begin
             if( cnt==7 && rom_cs ) begin
@@ -101,14 +106,14 @@ always @(posedge clk, posedge rst) begin
                 rom_cs <= 0;
             end else begin
                 pxl_data <= pxl_data>>4;
-                buf_a  <= hflip ? buf_a-8'd1 : buf_a+8'd1;
-                cnt <= cnt - 3'd1;
+                buf_a    <= cur_hflip ? buf_a-8'd1 : buf_a+8'd1;
+                cnt      <= cnt - 3'd1;
             end
             if( cnt==0 ) begin
                 if( rom_addr[0] ) begin
-                    buf_we  <= 0;
-                    busy <= 0;
-                    rom_cs  <= 0;
+                    buf_we <= 0;
+                    busy   <= 0;
+                    rom_cs <= 0;
                 end else begin
                     rom_addr[0] <= 1;
                     rom_cs      <= 1;
