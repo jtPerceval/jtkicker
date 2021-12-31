@@ -39,7 +39,7 @@ Roc'n Rope      |       1984 | No  | Only output   | No  | 8910 | No       | Yes
 
 # Acknowledgement
 
-This development has been possible thanks to the board donated by yeahbuddy and the following patrons:
+This development has been possible thanks to the board donated by Brian Schinzel and the following patrons:
 
 Adam Leslie          Adam Small           Adam Zorzin          Adrian Labastida    
 Alan Shurvinton      Alda Alesio          Alexander Lash       Alexander Upton     

@@ -1,12 +1,12 @@
 
-name: yiear for mist
+name: sbask1 for mist
 
 on:
   push:
     branches:
       - build
       - mist
-      - build_yiear
+      - build_sbask1
 
   workflow_dispatch:
 
@@ -42,4 +42,4 @@ jobs:
       - name: Get YAML package
         run: go get gopkg.in/yaml.v2
       - name: compile for mist
-        run: /docked_build.sh yiear -mist  
+        run: /docked_build.sh sbask1 -mist  

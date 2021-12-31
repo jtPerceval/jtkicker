@@ -1,12 +1,12 @@
 
-name: yiear for mist
+name: sbaskt for mc2
 
 on:
   push:
     branches:
       - build
-      - mist
-      - build_yiear
+      - mc2
+      - build_sbaskt
 
   workflow_dispatch:
 
@@ -15,7 +15,7 @@ on:
 
 jobs:
 
-  mist_compilation:
+  mc2_compilation:
 
     env:
       FTPUSER: ${{ secrets.FTPUSER }}
@@ -41,5 +41,5 @@ jobs:
           repository: ${{ github.repository }}
       - name: Get YAML package
         run: go get gopkg.in/yaml.v2
-      - name: compile for mist
-        run: /docked_build.sh yiear -mist  
+      - name: compile for mc2
+        run: /docked_build.sh sbaskt -mc2  

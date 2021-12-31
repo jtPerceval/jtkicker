@@ -1,12 +1,12 @@
 
-name: yiear for mist
+name: sbask1 for neptuno
 
 on:
   push:
     branches:
       - build
-      - mist
-      - build_yiear
+      - neptuno
+      - build_sbask1
 
   workflow_dispatch:
 
@@ -15,7 +15,7 @@ on:
 
 jobs:
 
-  mist_compilation:
+  neptuno_compilation:
 
     env:
       FTPUSER: ${{ secrets.FTPUSER }}
@@ -41,5 +41,5 @@ jobs:
           repository: ${{ github.repository }}
       - name: Get YAML package
         run: go get gopkg.in/yaml.v2
-      - name: compile for mist
-        run: /docked_build.sh yiear -mist  
+      - name: compile for neptuno
+        run: /docked_build.sh sbask1 -neptuno  
