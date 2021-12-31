@@ -115,12 +115,11 @@ always @* begin
 end
 
 always @(posedge clk) begin
-
-    din      <= rom_cs   ? rom_data : (
-                ram_cs   ? ram_dout : (
-                cnt_cs   ? { 5'h1f, cnt[CNTW-1:CNTW-2], vlm_bsy }  : (
-                latch_cs ? latch    : (
-                    8'hff ))));
+    din  <= rom_cs   ? rom_data :
+            ram_cs   ? ram_dout :
+            cnt_cs   ? { 5'h1f, cnt[CNTW-1:CNTW-2], vlm_bsy }  :
+            latch_cs ? latch    :
+            8'hff;
 end
 
 jt89 u_psg(
@@ -178,9 +177,9 @@ jtframe_ff u_irq(
     .din      ( 1'b1        ),
     .q        (             ),
     .qn       ( int_n       ),
-    .set      (             ),    // active high
-    .clr      ( irq_ack     ),    // active high
-    .sigedge  ( m2s_on )     // signal whose edge will trigger the FF
+    .set      (             ),
+    .clr      ( irq_ack     ),
+    .sigedge  ( m2s_on      )
 );
 
 jtframe_sysz80 #(.RAM_AW(10)) u_cpu(

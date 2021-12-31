@@ -65,7 +65,7 @@ module jtkicker_obj(
 parameter BYPASS_PROM=0, LARGE_ROM=0, REV_SCAN=1;
 parameter [7:0] HOFFSET = 8'd6;
 
-wire [ 7:0] obj1_dout, obj2_dout, pal_addr,
+wire [ 7:0] obj1_dout, obj2_dout,
             low_dout, hi_dout;
 wire        obj1_we, obj2_we;
 reg  [ 5:0] scan_addr;
@@ -110,20 +110,21 @@ jtframe_dual_ram #(.simfile("obj1.bin")) u_low(
 // Max sprites drawn before the raster line count moves
 localparam [4:0] HALF = 5'd19;
 
-wire [3:0] buf_in;
-reg  [7:0] buf_a;
-reg        buf_we;
 reg        cen2=0;
 wire       inzone, done;
 reg        hinit_x;
 reg  [1:0] scan_st;
 
-reg  [7:0] dr_attr, dr_code, dr_xpos;
+reg  [7:0] dr_attr, dr_xpos;
+reg  [8:0] dr_code;
 reg  [3:0] dr_v;
-reg        dr_start, dr_busy;
+reg        dr_start;
 wire [7:0] ydiff, dr_y;
 wire [7:0] vrf;
 wire       adj;
+
+wire       hflip, vflip, dr_busy;
+wire [3:0] pal;
 
 assign adj    = REV_SCAN ? scan_addr[5:1]<HALF : scan_addr[5:1]>HALF;
 assign vrf    = vrender ^ {8{flip}};
@@ -131,6 +132,10 @@ assign dr_y   = ~low_dout + ( adj ? ( flip ? 8'hff : 8'h1 ) : 8'h0 );
 assign inzone = dr_y>=vrf && dr_y<(vrf+8'h10);
 assign ydiff  = vrf-dr_y-8'd1;
 assign done   = REV_SCAN ? scan_addr[5:1]==0 : scan_addr[5:1]==23;
+
+assign hflip  = dr_attr[6];
+assign vflip  = dr_attr[7];
+assign pal    = dr_attr[3:0];
 
 always @(posedge clk) begin
     cen2 <= ~cen2;
@@ -157,7 +162,7 @@ always @(posedge clk, posedge rst) begin
                 scan_st   <= 2;
             end
             2: begin
-                dr_code   <= hi_dout;
+                dr_code   <= { LARGE_ROM ? dr_attr[0] : 1'b0, hi_dout };
                 dr_v      <= ydiff[3:0];
                 scan_addr[0] <= 0;
                 scan_addr[5:1] <= REV_SCAN ? scan_addr[5:1]-5'd1 : scan_addr[5:1]+5'd1;
@@ -171,110 +176,41 @@ always @(posedge clk, posedge rst) begin
     end
 end
 
-// Draw
-reg  [31:0] pxl_data;
-reg  [ 2:0] dr_cnt;
-wire        hflip, vflip;
+jtkicker_objdraw #(
+    .BYPASS_PROM    ( BYPASS_PROM   ),
+    .HOFFSET        ( HOFFSET       )
+) u_draw (
+    .rst        ( rst       ),
+    .clk        ( clk       ),        // 48 MHz
 
-assign pal_addr = { dr_attr[3:0], pxl_data[3:0] };
-assign hflip    = dr_attr[6];
-assign vflip    = dr_attr[7];
+    .pxl_cen    ( pxl_cen   ),
+    // video inputs
+    .LHBL       ( LHBL      ),
 
-always @(posedge clk, posedge rst) begin
-    if( rst ) begin
-        dr_busy  <= 0;
-        rom_cs   <= 0;
-        rom_addr <= 0;
-        pxl_data <= 0;
-        buf_we   <= 0;
-        buf_a    <= 0;
-        dr_cnt   <= 0;
-    end else if( cen2 ) begin
-        if( dr_start && !dr_busy ) begin
-            rom_addr <= { LARGE_ROM ? dr_attr[0] : 1'b0, dr_code, dr_v^{4{vflip}}, 1'b0 };
-            rom_cs   <= 1;
-            dr_cnt   <= 7;
-            buf_a    <= dr_xpos + (hflip ? 8'd15 : 8'h0) + HOFFSET;
-            dr_busy  <= 1;
-        end
-        if( dr_busy && (!rom_cs || rom_ok) ) begin
-            if( dr_cnt==7 && rom_cs ) begin
-                pxl_data <= {
-                    rom_data[27], rom_data[31], rom_data[19], rom_data[23],
-                    rom_data[26], rom_data[30], rom_data[18], rom_data[22],
-                    rom_data[25], rom_data[29], rom_data[17], rom_data[21],
-                    rom_data[24], rom_data[28], rom_data[16], rom_data[20],
-                    rom_data[11], rom_data[15], rom_data[ 3], rom_data[ 7],
-                    rom_data[10], rom_data[14], rom_data[ 2], rom_data[ 6],
-                    rom_data[ 9], rom_data[13], rom_data[ 1], rom_data[ 5],
-                    rom_data[ 8], rom_data[12], rom_data[ 0], rom_data[ 4]
-                };
-                buf_we <= 1;
-                rom_cs <= 0;
-            end else begin
-                pxl_data <= pxl_data>>4;
-                buf_a  <= hflip ? buf_a-8'd1 : buf_a+8'd1;
-                dr_cnt <= dr_cnt - 3'd1;
-            end
-            if( dr_cnt==0 ) begin
-                if( rom_addr[0] ) begin
-                    buf_we  <= 0;
-                    dr_busy <= 0;
-                    rom_cs  <= 0;
-                end else begin
-                    rom_addr[0] <= 1;
-                    rom_cs      <= 1;
-                end
-            end
-        end
-    end
-end
+    // control
+    .draw       ( dr_start  ),
+    .busy       ( dr_busy   ),
 
-wire buf_clr, LHBL_dly;
+    // Object table data
+    .code       ( dr_code   ),
+    .xpos       ( dr_xpos   ),
+    .pal        ( pal       ),
+    .hflip      ( hflip     ),
+    .vflip      ( vflip     ),
 
-assign buf_clr = pxl_cen & LHBL_dly;
+    // PROMs
+    .prog_data  ( prog_data ),
+    .prog_addr  ( prog_addr ),
+    .prog_en    ( prog_en   ),
 
-jtframe_sh #(.width(1),.stages(HOFFSET-1) ) u_dly(
-    .clk    ( clk       ),
-    .clk_en ( pxl_cen   ),
-    .din    ( LHBL      ),
-    .drop   ( LHBL_dly  )
+    // SDRAM
+    .rom_cs     ( obj_cs    ),
+    .rom_addr   ( obj_addr  ),
+    .rom_data   ( obj_data  ),
+    .rom_ok     ( obj_ok    ),
+
+    .pxl        ( pxl       )
 );
-
-jtframe_obj_buffer #(.AW(8),.DW(4), .ALPHA(0)) u_buffer(
-    .clk    ( clk       ),
-    .LHBL   ( ~hinit_x  ),  // change buffer right before writting the new line
-    .flip   ( 1'b0      ),
-    // New data writes
-    .wr_data( buf_in    ),
-    .wr_addr( buf_a     ),
-    .we     ( buf_we    ),
-    // Old data reads (and erases)
-    .rd_addr( hdump[7:0]),
-    .rd     ( buf_clr   ),  // data will be erased after the rd event
-    .rd_data( pxl       )
-);
-
-generate
-    if( BYPASS_PROM ) begin
-        assign buf_in = pal_addr[3:0];
-    end else begin
-        jtframe_prom #(
-            .dw     ( 4         ),
-            .aw     ( 8         )
-        //    simfile = "477j08.f16",
-        ) u_palette(
-            .clk    ( clk       ),
-            .cen    ( 1'b1      ),
-            .data   ( prog_data ),
-            .wr_addr( prog_addr ),
-            .we     ( prog_en   ),
-
-            .rd_addr( pal_addr  ),
-            .q      ( buf_in    )
-        );
-    end
-endgenerate
 
 
 endmodule

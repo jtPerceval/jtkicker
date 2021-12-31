@@ -178,4 +178,40 @@ always @(posedge clk, posedge rst) begin
     end
 end
 
+jtkicker_objdraw #(
+    .BYPASS_PROM( 0         ),
+    .HOFFSET    ( HOFFSET   )
+) u_draw (
+    .rst        ( rst       ),
+    .clk        ( clk       ),        // 48 MHz
+
+    .pxl_cen    ( pxl_cen   ),
+    // video inputs
+    .LHBL       ( LHBL      ),
+
+    // control
+    .draw       ( dr_start  ),
+    .busy       ( dr_busy   ),
+
+    // Object table data
+    .code       ( dr_code   ),
+    .xpos       ( dr_xpos   ),
+    .pal        ( pal       ),
+    .hflip      ( hflip     ),
+    .vflip      ( vflip     ),
+
+    // PROMs
+    .prog_data  ( prog_data ),
+    .prog_addr  ( prog_addr ),
+    .prog_en    ( prog_en   ),
+
+    // SDRAM
+    .rom_cs     ( obj_cs    ),
+    .rom_addr   ( obj_addr  ),
+    .rom_data   ( obj_data  ),
+    .rom_ok     ( obj_ok    ),
+
+    .pxl        ( pxl       )
+);
+
 endmodule

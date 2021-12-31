@@ -4,6 +4,7 @@ game:
       - jtkicker_vtimer.v
       - jtkicker_scroll.v
       - jtkicker_obj.v
+      - jtkicker_objdraw.v
 jtframe:
   - get:
       - jtframe_ff.v
