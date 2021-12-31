@@ -61,12 +61,13 @@ reg [CNTW-1:0] cnt;
 wire signed
          [9:0] vlm_snd;
 
-assign vlm_mux = vlm_sel ? vlm_data :
+assign vlm_mux = ~vlm_sel ? vlm_data :
                ~vlm_me_b ? pcm_data : 8'hff;
 assign pcm_addr[15:13]=0;
 assign irq_ack = ~iorq_n & ~m1_n;
 assign vlm_ceng = snd_cen & ( vlm_me_b | pcm_ok );
 assign rom_addr = A[12:0];
+assign sample   = psg_cen;
 
 always @(posedge clk, posedge rst) begin
     if( rst ) begin
@@ -111,6 +112,7 @@ always @* begin
                 2: psg_cs     = 1;  // E002
                 default:;
             endcase
+            default:;
         endcase
     end
 end
@@ -154,31 +156,44 @@ vlm5030_gl u_vlm(
     .o_audio ( vlm_snd      )
 );
 `else
-reg busy_dummy=0;
-reg cnt_csl;
+    reg busy_dummy=0;
+    reg cnt_csl;
 
-assign vlm_bsy = busy_dummy;
+    assign vlm_bsy = busy_dummy;
 
-always @(posedge clk) begin
-    cnt_csl <= cnt_cs;
-    if( cnt_cs && !cnt_csl ) busy_dummy <= ~busy_dummy;
-end
-
+    always @(posedge clk) begin
+        cnt_csl <= cnt_cs;
+        if( cnt_cs && !cnt_csl ) busy_dummy <= ~busy_dummy;
+    end
 `endif
 
-jtframe_mixer #(.W0(11),.W1(10),.W2(9)) u_mixer(
+wire signed [7:0] rdac_s;
+
+jtframe_dcrm #(.SW(8)) u_dcrm(
+    .rst    ( rst       ),
+    .clk    ( clk       ),
+    .sample ( cnt[6]    ),  // 14 kHz
+    .din    ( rdac      ),
+    .dout   ( rdac_s    )
+);
+
+wire [7:0] gain_psg = !snd_en[2] ? 8'h18 : 8'h0;
+wire [7:0] vlm_psg  = !snd_en[1] ? 8'h1C : 8'h0;
+wire [7:0] rdac_psg = !snd_en[0] ? 8'h10 : 8'h0;
+
+jtframe_mixer #(.W0(11),.W1(10),.W2(8)) u_mixer(
     .rst    ( rst       ),
     .clk    ( clk       ),
     .cen    ( psg_cen   ),
     // input signals
     .ch0    ( psg_snd   ),
     .ch1    ( vlm_snd   ),
-    .ch2    ( {1'b0,rdac} ), // I should remove the DC component
+    .ch2    ( rdac_s    ),
     .ch3    ( 16'd0     ),
     // gain for each channel in 4.4 fixed point format
-    .gain0  ( 8'h18     ),
-    .gain1  ( 8'h18     ),
-    .gain2  ( 8'h10     ),
+    .gain0  ( gain_psg  ),
+    .gain1  ( vlm_psg   ),
+    .gain2  ( rdac_psg  ),
     .gain3  ( 8'h00     ),
     .mixed  ( snd       ),
     .peak   ( peak      )

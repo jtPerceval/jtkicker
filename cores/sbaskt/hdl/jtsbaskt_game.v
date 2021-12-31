@@ -48,9 +48,9 @@ module jtsbaskt_game(
     input   [24:0]  ioctl_addr,
     input   [ 7:0]  ioctl_dout,
     input           ioctl_wr,
-    output reg [21:0] prog_addr,
+    output     [21:0] prog_addr,
     output reg [ 7:0] prog_data,
-    output reg [ 1:0] prog_mask,
+    output   [ 1:0] prog_mask,
     output          prog_we,
     output          prog_rd,
     // DIP switches
@@ -138,41 +138,22 @@ jtframe_crossclk_cen u_cpu_cen(
     .cen_out    ( cpu4_cen  )   // 6MHz
 );
 
-jtframe_cen3p57 u_cen3p57(
-    .clk      ( clk     ),       // 48 MHz
+jtframe_cen3p57 #(.CLK24(1)) u_cen3p57(
+    .clk      ( clk24   ),
     .cen_3p57 ( snd_cen ),
     .cen_1p78 ( psg_cen )
 );
 
-wire [21:0] pre_addr;
 wire [ 7:0] nc, pre_data;
-wire [ 1:0] pre_mask;
 
 assign pxl2_cen = cen_base[0]; // ~12MHz
 assign pxl_cen  = cen_base[1]; // ~ 6MHz
 
-function [3:0] mirror( input [3:0] a );
-    // mirror = { a[0], a[1], a[2], a[3] };
-    mirror = { a[3], a[2], a[1], a[0] };
-endfunction
-
 always @(*) begin
-    prog_addr = pre_addr;
     prog_data = pre_data;
-    prog_mask = pre_mask;
     if( ioctl_addr[21:0] >= SCR_START && ioctl_addr[21:0]<PCM_START ) begin
-        //prog_mask = {pre_mask[0],pre_mask[1]};
-        //prog_data = { mirror(pre_data[3:0]), mirror(pre_data[7:4])};
-        prog_data = { mirror(pre_data[3:0]), mirror(pre_data[7:4])};
-        // prog_addr[0] = pre_addr[0];
-        // prog_addr[1] = pre_addr[1];
-        //prog_addr[3:1] =  pre_addr[2:0];
+        prog_data = { pre_data[3:0], pre_data[7:4] };
     end
-    //if( ioctl_addr[21:0] >= OBJ_START && ioctl_addr[21:0]<PCM_START ) begin
-    //    prog_addr[0]   = ~pre_addr[3];
-    //    prog_addr[1]   = ~pre_addr[4];
-    //    prog_addr[5:2] =  { pre_addr[5], pre_addr[2:0] }; // making [5] explicit for now
-    //end
 end
 
 `ifndef NOMAIN
@@ -232,7 +213,7 @@ jtsbaskt_main u_main(
 `ifndef NOSOUND
 jtsbaskt_snd u_sound(
     .rst        ( rst       ),
-    .clk        ( clk       ),
+    .clk        ( clk24     ),
     .snd_cen    ( snd_cen   ),    // 3.5MHz
     .psg_cen    ( psg_cen   ),    // 1.7MHz
     // ROM
@@ -323,9 +304,9 @@ u_dwnld(
     .ioctl_addr     ( ioctl_addr    ),
     .ioctl_dout     ( ioctl_dout    ),
     .ioctl_wr       ( ioctl_wr      ),
-    .prog_addr      ( pre_addr      ),
+    .prog_addr      ( prog_addr     ),
     .prog_data      ( {nc,pre_data} ),
-    .prog_mask      ( pre_mask      ), // active low
+    .prog_mask      ( prog_mask     ), // active low
     .prog_we        ( prog_we       ),
     .prom_we        ( prom_we       ),
     .sdram_ack      ( sdram_ack     ),
