@@ -177,6 +177,8 @@ always @(posedge clk, posedge rst) begin
                     obj_cnt <= obj_cnt + 6'd1;
                     if( &obj_cnt ) done <= 1;
                     draw <= 1;
+                end else begin
+                    rd_st <= 3;
                 end
             endcase
         end

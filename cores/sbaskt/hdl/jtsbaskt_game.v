@@ -160,7 +160,7 @@ always @(*) begin
     prog_addr = pre_addr;
     prog_data = pre_data;
     prog_mask = pre_mask;
-    if( ioctl_addr[21:0] >= SCR_START && ioctl_addr[21:0]<OBJ_START ) begin
+    if( ioctl_addr[21:0] >= SCR_START && ioctl_addr[21:0]<PCM_START ) begin
         //prog_mask = {pre_mask[0],pre_mask[1]};
         //prog_data = { mirror(pre_data[3:0]), mirror(pre_data[7:4])};
         prog_data = { mirror(pre_data[3:0]), mirror(pre_data[7:4])};
