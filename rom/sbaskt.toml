@@ -18,6 +18,7 @@ names=[
 
 [rbf]
 name="jtsbaskt"
+dev=[ {dev="konami1", rbf="jtsbask1"} ]
 
 [dipsw]
 delete = [ "Unused", "Unknown" ]

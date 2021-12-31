@@ -1,0 +1,4 @@
+game:
+  - from: sbaskt
+    get:
+      - game.yaml
