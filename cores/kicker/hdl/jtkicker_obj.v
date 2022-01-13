@@ -168,7 +168,8 @@ always @(posedge clk, posedge rst) begin
         dr_start <= 0;
         case( scan_st )
             0: if( hinit_x ) begin
-                scan_addr <= REV_SCAN ? {5'd23, 1'd0} : 6'd0;
+                scan_addr <= LAYOUT==3 ? {5'd31, 1'd0} :
+                             REV_SCAN  ? {5'd23, 1'd0} : 6'd0;
                 scan_st   <= 1;
             end
             1: if(!dr_busy) begin

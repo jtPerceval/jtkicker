@@ -178,6 +178,7 @@ jtkicker_obj #(.LAYOUT(LAYOUT)) u_obj(
     .rom_addr   ( obj_addr  ),
     .rom_data   ( obj_data  ),
     .rom_ok     ( obj_ok    ),
+    .debug_bus  ( debug_bus ),
 
     .pxl        ( obj_pxl   )
 );

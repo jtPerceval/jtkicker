@@ -157,12 +157,12 @@ always @(*) begin
         dwn_addr[15]  =  ioctl_addr[0];
         dwn_addr[14]  =  ioctl_addr[15];
         dwn_addr[0]   =  ioctl_addr[14];
-        dwn_addr[1]   =  ioctl_addr[4]^debug_bus[0];
-        dwn_addr[2]   =  ioctl_addr[5]^debug_bus[1];
-        //if(debug_bus[4]) begin
-        //    dwn_addr[1]   =  ioctl_addr[4]^debug_bus[1];
-        //    dwn_addr[2]   =  ioctl_addr[5]^debug_bus[1];
-        //end
+        case( ioctl_addr[5:4])
+            0: {dwn_addr[2:1]} = 1;
+            1: {dwn_addr[2:1]} = 2;
+            2: {dwn_addr[2:1]} = 3;
+            3: {dwn_addr[2:1]} = 0;
+        endcase
         dwn_addr[6:3] =  { ioctl_addr[6], ioctl_addr[3:1] };
     end
 end
