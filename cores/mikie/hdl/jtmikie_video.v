@@ -93,7 +93,6 @@ always @* begin
         2: fix_addr = 2; // code
         3: fix_addr = 0; // y
     endcase
-    fix_addr = fix_addr ^ debug_bus[1:0];
 end
 
 jtkicker_vtimer u_vtimer(
