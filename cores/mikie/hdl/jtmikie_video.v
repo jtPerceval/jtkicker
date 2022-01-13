@@ -74,11 +74,11 @@ wire       LHBL, hinit;
 wire [8:0] vdump, vrender, hdump;
 wire [3:0] obj_pxl, scr_pxl;
 reg  [4:0] prom_we;
-wire       obj1_cs, obj2_cs;
+wire       obj1_cs, obj2_cs, prio;
 
 assign V16 = vdump[4];
-assign obj1_cs = objram_cs & ~cpu_addr[0];
-assign obj2_cs = objram_cs &  cpu_addr[0];
+assign obj1_cs = objram_cs &  cpu_addr[0];
+assign obj2_cs = objram_cs & ~cpu_addr[0];
 
 always @* begin
     prom_we = 0;
@@ -131,7 +131,7 @@ jtkicker_scroll #(.LAYOUT(3)) u_scroll(
     .rom_data   ( scr_data  ),
     .rom_ok     ( scr_ok    ),
 
-    .prio       (           ),
+    .prio       ( prio      ),
     .pxl        ( scr_pxl   )
 );
 

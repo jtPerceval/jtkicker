@@ -106,7 +106,7 @@ generate
             assign pal_msb  = 0;
             assign scr_prio = 0;
         end
-        2: begin // Super Basketball
+        2,3: begin // Super Basketball & Mikie
             assign code_msb = {1'b0,attr[5]};
             assign vflip    = attr[7];
             assign hflip    = ~attr[6];
