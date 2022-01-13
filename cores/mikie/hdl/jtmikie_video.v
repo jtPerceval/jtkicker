@@ -70,6 +70,8 @@ module jtmikie_video(
     input         [7:0] debug_bus
 );
 
+localparam LAYOUT=3;
+
 wire       LHBL, hinit;
 wire [8:0] vdump, vrender, hdump;
 wire [3:0] obj_pxl, scr_pxl;
@@ -77,8 +79,8 @@ reg  [4:0] prom_we;
 wire       obj1_cs, obj2_cs, prio;
 
 assign V16 = vdump[4];
-assign obj1_cs = objram_cs &  cpu_addr[0];
-assign obj2_cs = objram_cs & ~cpu_addr[0];
+assign obj1_cs = objram_cs & ( cpu_addr[0]^debug_bus[0]);
+assign obj2_cs = objram_cs & (~cpu_addr[0]^debug_bus[0]);
 
 always @* begin
     prom_we = 0;
@@ -98,7 +100,7 @@ jtkicker_vtimer u_vtimer(
     .VS     ( VS        )
 );
 
-jtkicker_scroll #(.LAYOUT(3)) u_scroll(
+jtkicker_scroll #(.LAYOUT(LAYOUT)) u_scroll(
     .rst        ( rst       ),
     .clk        ( clk       ),
     .clk24      ( clk24     ),
@@ -135,7 +137,7 @@ jtkicker_scroll #(.LAYOUT(3)) u_scroll(
     .pxl        ( scr_pxl   )
 );
 
-jtkicker_obj u_obj(
+jtkicker_obj #(.LAYOUT(LAYOUT)) u_obj(
     .rst        ( rst       ),
     .clk        ( clk       ),        // 48 MHz
     .clk24      ( clk24     ),      // 24 MHz
@@ -143,7 +145,7 @@ jtkicker_obj u_obj(
     .pxl_cen    ( pxl_cen   ),
 
     // CPU interface
-    .cpu_addr   ( {cpu_addr[0],cpu_addr[10:1]}  ),
+    .cpu_addr   ( {cpu_addr[0],cpu_addr[10:2],~cpu_addr[1]^debug_bus[1]}  ),
     .cpu_dout   ( cpu_dout  ),
     .obj1_cs    ( obj1_cs   ),
     .obj2_cs    ( obj2_cs   ),

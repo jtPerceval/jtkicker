@@ -90,8 +90,7 @@ always @(*) begin
     snd_cs     = 0;
     if( VMA && A[15:13]==1 ) begin // 2000-3FFF
         case( A[12:11] )
-            0:
-                case( A[10:8] )  // 2000-27FF
+            0:  case( A[10:8] )  // 2000-27FF
                     0: iow_cs      = 1; // 2000
                     // 1: watchdog    // 2100
                     2: color_cs = 1;  // 2200
@@ -101,6 +100,7 @@ always @(*) begin
                         snd_cs = ~RnW;
                     end
                     5: { in6_cs, in5_cs } = { A[0], ~A[0] };
+                    default:;
                 endcase
             1: objram_cs = 1;   // 2800-2FFF
             2: ram_cs   = 1;    // 3800-3BFF    - part of VRAM chip

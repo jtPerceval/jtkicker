@@ -64,6 +64,8 @@ module jtkicker_obj(
 
 parameter BYPASS_PROM=0, LARGE_ROM=0, REV_SCAN=1;
 parameter [7:0] HOFFSET = 8'd6;
+parameter LAYOUT=0; // 0 other games
+                    // 3 Mikie
 
 wire [ 7:0] obj1_dout, obj2_dout,
             low_dout, hi_dout;
@@ -116,14 +118,15 @@ reg        hinit_x;
 reg  [1:0] scan_st;
 
 reg  [7:0] dr_attr, dr_xpos;
-reg  [8:0] dr_code;
+reg  [8:0] dr_code, pre_code;
 reg  [3:0] dr_v;
 reg        dr_start;
 wire [7:0] ydiff, dr_y;
 wire [7:0] vrf;
 wire       adj;
 
-wire       hflip, vflip, dr_busy;
+reg        hflip, vflip;
+wire       dr_busy;
 wire [3:0] pal;
 
 assign adj    = REV_SCAN ? scan_addr[5:1]<HALF : scan_addr[5:1]>HALF;
@@ -133,9 +136,22 @@ assign inzone = dr_y>=vrf && dr_y<(vrf+8'h10);
 assign ydiff  = vrf-dr_y-8'd1;
 assign done   = REV_SCAN ? scan_addr[5:1]==0 : scan_addr[5:1]==23;
 
-assign hflip  = dr_attr[6];
-assign vflip  = dr_attr[7];
 assign pal    = dr_attr[3:0];
+
+always @* begin
+    case( LAYOUT )
+        3: begin // Mikie
+            hflip = dr_attr[4];
+            vflip = dr_attr[5];
+            pre_code = { hi_dout[6], dr_attr[6], hi_dout[7], hi_dout[5:0] };
+        end
+        default: begin
+            hflip = dr_attr[6];
+            vflip = dr_attr[7];
+            pre_code = { LARGE_ROM ? dr_attr[0] : 1'b0, hi_dout };
+        end
+    endcase
+end
 
 always @(posedge clk) begin
     cen2 <= ~cen2;
@@ -162,7 +178,7 @@ always @(posedge clk, posedge rst) begin
                 scan_st   <= 2;
             end
             2: begin
-                dr_code   <= { LARGE_ROM ? dr_attr[0] : 1'b0, hi_dout };
+                dr_code   <= pre_code;
                 dr_v      <= ydiff[3:0];
                 scan_addr[0] <= 0;
                 scan_addr[5:1] <= REV_SCAN ? scan_addr[5:1]-5'd1 : scan_addr[5:1]+5'd1;

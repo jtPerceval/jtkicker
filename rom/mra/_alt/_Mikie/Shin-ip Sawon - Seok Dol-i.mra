@@ -42,18 +42,19 @@
         <part name="n10.6e" crc="2cf9d670"/>
         <!-- gfx1 - starts at 0x12000 -->
         <part name="q11.8i" crc="29286fce"/>
-        <!-- gfx2 - starts at 0x16000 -->
+        <part repeat="0xA000"> FF</part>
+        <!-- gfx2 - starts at 0x20000 -->
         <part name="q01.f1" crc="31551987"/>
         <part name="q03.f3" crc="707cc98e"/>
         <part name="q05.h1" crc="f9e1ebb1"/>
         <part name="q07.h3" crc="44502ca9"/>
-        <!-- proms - starts at 0x26000 -->
+        <!-- proms - starts at 0x30000 -->
         <part name="d19.1i" crc="8b83e7cf"/>
         <part name="d21.3i" crc="3556304a"/>
         <part name="d20.2i" crc="676a0669"/>
         <part name="d22.12h" crc="872be05c"/>
         <part name="d18.f9" crc="7396b374"/>
-        <!-- Total 0x26500 bytes - 153 kBytes -->
+        <!-- Total 0x30500 bytes - 193 kBytes -->
     </rom>
     <rom index="17" zip="jtbeta.zip" md5="None">
         <part name="beta.bin"/>

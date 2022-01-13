@@ -75,8 +75,7 @@ module jtmikie_game(
 // SDRAM offsets
 localparam [21:0] SND_START   =  `SND_START,
                   SCR_START   =  `SCR_START,
-                  OBJ_START   =  `OBJ_START,
-                  PCM_START   =  `PCM_START;
+                  OBJ_START   =  `OBJ_START;
 localparam [24:0] PROM_START  =  `PROM_START;
 
 wire        main_cs, main_ok;
@@ -142,6 +141,7 @@ jtframe_cen3p57 #(.CLK24(1)) u_cen3p57(
     .cen_1p78 ( psg_cen )
 );
 
+reg  [24:0] dwn_addr;
 wire [ 7:0] nc, pre_data;
 
 assign pxl2_cen = cen_base[0]; // ~12MHz
@@ -149,8 +149,15 @@ assign pxl_cen  = cen_base[1]; // ~ 6MHz
 
 always @(*) begin
     prog_data = pre_data;
+    dwn_addr  = ioctl_addr;
     if( ioctl_addr[21:0] >= SCR_START && ioctl_addr[21:0]<OBJ_START ) begin
         prog_data = { pre_data[3:0], pre_data[7:4] };
+    end
+    if( ioctl_addr[21:0] >= OBJ_START && ioctl_addr[21:0]<PROM_START ) begin
+        dwn_addr[14]  =  ioctl_addr[0];
+        dwn_addr[0]   = ~ioctl_addr[4];
+        dwn_addr[1]   = ~ioctl_addr[5];
+        dwn_addr[5:2] =  { ioctl_addr[6], ioctl_addr[3:1] };
     end
 end
 
@@ -296,7 +303,7 @@ jtframe_dwnld #(.PROM_START(PROM_START),.SWAB(1))
 u_dwnld(
     .clk            ( clk           ),
     .downloading    ( downloading   ),
-    .ioctl_addr     ( ioctl_addr    ),
+    .ioctl_addr     ( dwn_addr      ),
     .ioctl_dout     ( ioctl_dout    ),
     .ioctl_wr       ( ioctl_wr      ),
     .prog_addr      ( prog_addr     ),
