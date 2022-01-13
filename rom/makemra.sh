@@ -12,7 +12,7 @@ mkdir -p mra/_alt
 # jtcfgstr -target=mist -output=bash -def $DEF|grep _START > $AUXTMP
 # source $AUXTMP
 
-for i in kicker yiear; do
+for i in kicker yiear sbaskt mikie; do
     mame2mra -toml $i.toml -outdir mra $*
 done
 

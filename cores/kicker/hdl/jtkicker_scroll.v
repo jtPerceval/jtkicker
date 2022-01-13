@@ -57,13 +57,14 @@ module jtkicker_scroll(
 // 0  Kicker
 // 1  Yie Ar Kungfu
 // 2  Super Basketball
+// 3  Mikie
 
 parameter BYPASS_PROM=0, NOSCROLL=0;
 parameter LAYOUT = !NOSCROLL ? 0 : 1;
 parameter BSEL =
     LAYOUT==2 ? 10 :
     NOSCROLL ? 0 : 10;
-parameter PACKED = LAYOUT==2;
+parameter PACKED = LAYOUT==2 || LAYOUT==3;
 // Column at which the score table ends. This is set by fixed logic
 // in all games inspected so far. Thus, I encode it as a parameter
 localparam [8:0] SCRCOL = LAYOUT==2 ? 9'o60 : 9'o40;

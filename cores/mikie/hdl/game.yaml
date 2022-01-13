@@ -1,0 +1,13 @@
+game:
+  - from: kicker
+    get:
+      - jtkicker_colmix.v
+      - common.yaml
+  - from: mikie
+    get:
+      - jtmikie_game.v
+      - jtmikie_main.v
+      - jtmikie_video.v
+modules:
+  jt:
+    - name: jt89
