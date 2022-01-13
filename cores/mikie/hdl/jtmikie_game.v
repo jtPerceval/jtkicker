@@ -154,10 +154,12 @@ always @(*) begin
         prog_data = { pre_data[3:0], pre_data[7:4] };
     end
     if( ioctl_addr[21:0] >= OBJ_START && ioctl_addr[21:0]<PROM_START ) begin
-        dwn_addr[14]  =  ioctl_addr[0];
-        dwn_addr[0]   = ~ioctl_addr[4];
-        dwn_addr[1]   = ~ioctl_addr[5];
-        dwn_addr[5:2] =  { ioctl_addr[6], ioctl_addr[3:1] };
+        dwn_addr[15]  =  ioctl_addr[0];
+        dwn_addr[14]  =  ioctl_addr[15];
+        dwn_addr[0]   =  ioctl_addr[14];
+        dwn_addr[1]   = ~ioctl_addr[4];
+        dwn_addr[2]   = ~ioctl_addr[5];
+        dwn_addr[6:3] =  { ioctl_addr[6], ioctl_addr[3:1] };
     end
 end
 

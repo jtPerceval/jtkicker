@@ -77,14 +77,23 @@ wire [8:0] vdump, vrender, hdump;
 wire [3:0] obj_pxl, scr_pxl;
 reg  [4:0] prom_we;
 wire       obj1_cs, obj2_cs, prio;
+reg  [1:0] fix_addr;
 
 assign V16 = vdump[4];
-assign obj1_cs = objram_cs & ( cpu_addr[0]^debug_bus[0]);
-assign obj2_cs = objram_cs & (~cpu_addr[0]^debug_bus[0]);
+assign obj1_cs = objram_cs & ~fix_addr[0];
+assign obj2_cs = objram_cs &  fix_addr[0];
 
 always @* begin
     prom_we = 0;
     prom_we[ prog_addr[10:8] ] = prom_en;
+
+    case( cpu_addr[1:0] )
+        0: fix_addr = 0; // attr
+        1: fix_addr = 2; // x
+        2: fix_addr = 3; // code
+        3: fix_addr = 1; // y
+    endcase
+    fix_addr = fix_addr ^ debug_bus[1:0];
 end
 
 jtkicker_vtimer u_vtimer(
@@ -145,7 +154,7 @@ jtkicker_obj #(.LAYOUT(LAYOUT)) u_obj(
     .pxl_cen    ( pxl_cen   ),
 
     // CPU interface
-    .cpu_addr   ( {cpu_addr[0],cpu_addr[10:2],~cpu_addr[1]^debug_bus[1]}  ),
+    .cpu_addr   ( {cpu_addr[0],cpu_addr[10:2],fix_addr[1]}  ),
     .cpu_dout   ( cpu_dout  ),
     .obj1_cs    ( obj1_cs   ),
     .obj2_cs    ( obj2_cs   ),
