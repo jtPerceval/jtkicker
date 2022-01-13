@@ -88,10 +88,10 @@ always @* begin
     prom_we[ prog_addr[10:8] ] = prom_en;
 
     case( cpu_addr[1:0] )
-        0: fix_addr = 0; // attr
-        1: fix_addr = 2; // x
-        2: fix_addr = 3; // code
-        3: fix_addr = 1; // y
+        0: fix_addr = 1; // attr
+        1: fix_addr = 3; // x
+        2: fix_addr = 2; // code
+        3: fix_addr = 0; // y
     endcase
     fix_addr = fix_addr ^ debug_bus[1:0];
 end
