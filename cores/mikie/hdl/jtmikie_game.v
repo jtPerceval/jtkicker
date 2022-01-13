@@ -113,7 +113,7 @@ wire        m2s_on;
 assign prog_rd    = 0;
 assign dwnld_busy = downloading;
 assign { dipsw_c, dipsw_b, dipsw_a } = dipsw[18:0];
-assign dip_flip = flip;
+assign dip_flip = ~flip;
 assign vsync60  = status[13];   // high to use a 6MHz pixel clock, instead of 6.144MHz
 
 // Using an integer divider for the 6.144MHz
@@ -157,8 +157,12 @@ always @(*) begin
         dwn_addr[15]  =  ioctl_addr[0];
         dwn_addr[14]  =  ioctl_addr[15];
         dwn_addr[0]   =  ioctl_addr[14];
-        dwn_addr[1]   = ~ioctl_addr[4];
-        dwn_addr[2]   = ~ioctl_addr[5];
+        dwn_addr[1]   =  ioctl_addr[4]^debug_bus[0];
+        dwn_addr[2]   =  ioctl_addr[5]^debug_bus[1];
+        //if(debug_bus[4]) begin
+        //    dwn_addr[1]   =  ioctl_addr[4]^debug_bus[1];
+        //    dwn_addr[2]   =  ioctl_addr[5]^debug_bus[1];
+        //end
         dwn_addr[6:3] =  { ioctl_addr[6], ioctl_addr[3:1] };
     end
 end

@@ -45,8 +45,8 @@
         <part repeat="0xA000"> FF</part>
         <!-- gfx2 - starts at 0x20000 -->
         <part name="001.f1" crc="a2ba0df5"/>
-        <part name="003.f3" crc="9775ab32"/>
         <part name="005.h1" crc="ba44aeef"/>
+        <part name="003.f3" crc="9775ab32"/>
         <part name="007.h3" crc="31afc153"/>
         <!-- proms - starts at 0x30000 -->
         <part name="d19.1i" crc="8b83e7cf"/>

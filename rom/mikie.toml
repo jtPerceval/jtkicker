@@ -30,7 +30,7 @@ regions = [
     { name="maincpu" },
     { name="audiocpu" },
     { name="gfx1" }, # start=$GFX1_START
-    { name="gfx2", start=$OBJ_START },
+    { name="gfx2", start=$OBJ_START, sort_even=true, no_offset=true },
     { name="proms"          },
 ]
 
