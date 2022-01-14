@@ -109,7 +109,7 @@ end
 always @(posedge clk) begin
     din  <= rom_cs   ? rom_data   :
             ram_cs   ? ram_dout   :
-            cnt_cs   ? { 5'h1f, cnt[2:1], 1'b1 } :
+            cnt_cs   ? { 5'h1f, cnt[3:2], 1'b1 } :
             latch_cs ? main_latch :
             8'hff;
 end
