@@ -77,5 +77,5 @@
         <dip name="Flip Screen" bits="16" ids="Off,On"/>
         <dip name="Upright Controls" bits="17" ids="Dual,Single"/>
     </switches>
-    <buttons names="A,B,Start,Coin,Core credits" default="Y,X,Start,Select,-" count="2"/>
+    <buttons names="Door,Headbutt,Start,Coin,Core credits" default="Y,X,Start,Select,-" count="2"/>
 </misterromdescription>
