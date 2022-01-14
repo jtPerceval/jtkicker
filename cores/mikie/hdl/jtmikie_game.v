@@ -292,6 +292,8 @@ jtmikie_video u_video(
     .debug_bus  ( debug_bus )
 );
 
+/* verilator tracing_on */
+
 jtframe_dwnld #(.PROM_START(PROM_START),.SWAB(1))
 u_dwnld(
     .clk            ( clk           ),
@@ -307,6 +309,8 @@ u_dwnld(
     .sdram_ack      ( sdram_ack     ),
     .header         (               )
 );
+/* verilator tracing_off */
+
 
 jtframe_rom #(
     .SLOT0_AW    ( 14              ),

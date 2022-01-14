@@ -67,7 +67,7 @@ parameter [7:0] HOFFSET = 8'd6;
 parameter LAYOUT=0; // 0 other games
                     // 3 Mikie
 parameter REV_SCAN= LAYOUT == 3 ? 0 : 1;
-localparam [7:0] VOFFSET = LAYOUT==3 ? 8'd2 : 8'd0;
+localparam [7:0] VOFFSET = LAYOUT==3 ? 8'd3 : 8'd0;
 localparam [4:0] MAXOBJ = LAYOUT==3 ? 5'd31 : 5'd23;
 // Mikie can
 

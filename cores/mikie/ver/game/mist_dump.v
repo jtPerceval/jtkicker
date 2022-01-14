@@ -18,6 +18,7 @@ module mist_dump(
     initial begin
         $display("iverilog: DUMP starts");
         $dumpvars(1,mist_test.UUT.u_game);
+        $dumpvars(1,mist_test.UUT.u_game.u_dwnld);
         $dumpon;
     end
     `else
