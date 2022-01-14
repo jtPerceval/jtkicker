@@ -76,13 +76,14 @@ wire       LHBL, hinit;
 wire [8:0] vdump, vrender, hdump;
 wire [3:0] obj_pxl, scr_pxl, obj_pre;
 reg  [4:0] prom_we;
-wire       obj1_cs, obj2_cs, prio;
+wire       obj1_cs, obj2_cs, prio, obj_en;
 reg  [1:0] fix_addr;
 
 assign V16 = vdump[4];
 assign obj1_cs = objram_cs & ~fix_addr[0];
 assign obj2_cs = objram_cs &  fix_addr[0];
 assign obj_pxl = { obj_pre[0], obj_pre[1], obj_pre[2], obj_pre[3] };
+assign obj_en  = gfx_en[3] & ~prio;
 
 always @* begin
     prom_we = 0;
@@ -206,7 +207,7 @@ jtkicker_colmix u_colmix(
     .blue       ( blue      ),
     .LHBL_dly   ( LHBL_dly  ),
     .LVBL_dly   ( LVBL_dly  ),
-    .gfx_en     ( gfx_en    )
+    .gfx_en     ( { obj_en, gfx_en[2:0] } )
 );
 
 endmodule
