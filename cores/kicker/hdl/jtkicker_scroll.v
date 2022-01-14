@@ -68,7 +68,6 @@ parameter PACKED = LAYOUT==2 || LAYOUT==3;
 // Column at which the score table ends. This is set by fixed logic
 // in all games inspected so far. Thus, I encode it as a parameter
 localparam [8:0] SCRCOL = LAYOUT==2 ? 9'o60 : // Super Basketball
-                          LAYOUT==3 ? 9'o00 : // Mikie - doesn't use this feature
                           9'o40;
 
 wire [ 7:0] code, attr, vram_high, vram_low, pal_addr;

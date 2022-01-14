@@ -84,7 +84,7 @@ wire [12:0] scr_addr;
 wire [13:0] obj_addr;
 wire [31:0] scr_data, obj_data;
 wire        scr_ok, obj_ok, objrom_cs;
-wire [12:0] snd_addr;
+wire [13:0] snd_addr;
 wire [ 7:0] snd_data;
 wire        snd_ok, snd_cs;
 
@@ -93,7 +93,7 @@ wire [15:0] main_addr;
 wire [ 3:0] cen_base;
 
 wire [ 7:0] dipsw_a, dipsw_b;
-wire [ 2:0] dipsw_c;
+wire [ 1:0] dipsw_c;
 wire        LVBL, V16;
 
 wire [ 2:0] pal_sel;
@@ -135,12 +135,6 @@ jtframe_crossclk_cen u_cpu_cen(
     .cen_out    ( cpu4_cen  )   // 6MHz
 );
 
-jtframe_cen3p57 #(.CLK24(1)) u_cen3p57(
-    .clk      ( clk24   ),
-    .cen_3p57 ( snd_cen ),
-    .cen_1p78 ( psg_cen )
-);
-
 reg  [24:0] dwn_addr;
 wire [ 7:0] nc, pre_data;
 
@@ -153,7 +147,7 @@ always @(*) begin
     if( ioctl_addr[21:0] >= SCR_START && ioctl_addr[21:0]<OBJ_START ) begin
         prog_data = { pre_data[3:0], pre_data[7:4] };
     end
-    if( ioctl_addr[21:0] >= OBJ_START && ioctl_addr[21:0]<PROM_START ) begin
+    if( ioctl_addr[21:0] >= OBJ_START && ioctl_addr<PROM_START ) begin
         dwn_addr[15]  =  ioctl_addr[0];
         dwn_addr[14]  =  ioctl_addr[15];
         dwn_addr[0]   =  ioctl_addr[14];
@@ -220,25 +214,18 @@ jtmikie_main u_main(
 `endif
 
 `ifndef NOSOUND
-jtsbaskt_snd u_sound(
+jtmikie_snd u_sound(
     .rst        ( rst       ),
-    .clk        ( clk24     ),
-    .snd_cen    ( snd_cen   ),    // 3.5MHz
-    .psg_cen    ( psg_cen   ),    // 1.7MHz
+    .clk        ( clk       ),
     // ROM
     .rom_addr   ( snd_addr  ),
     .rom_cs     ( snd_cs    ),
     .rom_data   ( snd_data  ),
     .rom_ok     ( snd_ok    ),
     // From main CPU
-    .main_dout  ( cpu_dout  ),
-    .m2s_data   ( m2s_data  ),
+    .main_latch ( snd_latch ),
     .m2s_on     ( m2s_on    ),
     // Sound
-    .pcm_addr   ( pcm_addr  ),
-    .pcm_data   ( pcm_data  ),
-    .pcm_ok     ( pcm_ok    ),
-
     .snd        ( snd       ),
     .sample     ( sample    ),
     .peak       ( game_led  )
@@ -330,7 +317,7 @@ jtframe_rom #(
     .SLOT1_DW    ( 32              ),
     .SLOT1_OFFSET( OBJ_START>>1    ),
 
-    .SLOT6_AW    ( 13              ),
+    .SLOT6_AW    ( 14              ),
     .SLOT6_DW    (  8              ),
     .SLOT6_OFFSET( SND_START>>1    ), // Sound CPU
 

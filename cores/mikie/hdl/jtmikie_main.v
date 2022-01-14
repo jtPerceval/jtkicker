@@ -42,7 +42,7 @@ module jtmikie_main(
 
     // Sound
     output reg  [ 7:0]  snd_latch,
-    output reg  [ 7:0]  snd_on,
+    output reg          snd_on,
 
     // configuration
     output reg  [ 2:0]  pal_sel,
@@ -112,8 +112,8 @@ end
 always @(posedge clk) begin
     case( A[1:0] )
         0: cabinet <= { ~3'd0, start_button, service, coin_input };
-        1: cabinet <= {3'd3, joystick1[5:4], joystick1[2], joystick1[3], joystick1[0], joystick1[1]};
-        2: cabinet <= {3'd3, joystick2[5:4], joystick2[2], joystick2[3], joystick2[0], joystick2[1]};
+        1: cabinet <= { 2'd3, joystick1[5:4], joystick1[2], joystick1[3], joystick1[0], joystick1[1]};
+        2: cabinet <= { 2'd3, joystick2[5:4], joystick2[2], joystick2[3], joystick2[0], joystick2[1]};
         3: cabinet <= {6'h3f,dipsw_c};
     endcase
     cpu_din <= rom_cs  ? rom_data  :

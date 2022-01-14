@@ -52,7 +52,7 @@ module jtmikie_video(
     input               scr_ok,
 
     // Objects
-    output       [13:0] obj_addr, // MSB always zero
+    output       [13:0] obj_addr,
     input        [31:0] obj_data,
     output              obj_cs,
     input               obj_ok,
@@ -116,7 +116,7 @@ jtkicker_vtimer #(.LAYOUT(LAYOUT)) u_vtimer(
     .VS     ( VS        )
 );
 
-jtkicker_scroll #(.LAYOUT(LAYOUT)) u_scroll(
+jtkicker_scroll #(.LAYOUT(LAYOUT),.NOSCROLL(1)) u_scroll(
     .rst        ( rst       ),
     .clk        ( clk       ),
     .clk24      ( clk24     ),
@@ -204,7 +204,7 @@ jtkicker_colmix u_colmix(
     .LVBL       ( LVBL      ),
 
     // PROMs
-    .prog_data  ( prog_data ),
+    .prog_data  (prog_data[3:0]),
     .prog_addr  (prog_addr[7:0]),
     .prog_en    (prom_we[2:0]),
 
