@@ -13,7 +13,7 @@ sourcefile="mikie.cpp"
 [buttons]
 core=2 # max number of buttons supported by the core
 names=[
-    { names="A,B" }
+    { names="Door,Headbutt" }
 ]
 
 [rbf]
