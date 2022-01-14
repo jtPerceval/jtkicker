@@ -29,14 +29,19 @@ module jtkicker_vtimer(
     output              VS
 );
 
+parameter LAYOUT = 0;
+
+localparam [8:0] VB_START = LAYOUT==3 ? 9'd238 : 9'd239,
+                 VB_END   = LAYOUT==3 ? 9'd014 : 9'd015;
+
 // The original counter keeps hdump[7] high
 // while hdump[8] is hight (i.e. during HBLANK)
 // The rest of the count should match quite well
 // the original, particularly VBLANK, H period
 // and V period
 jtframe_vtimer #(
-    .VB_START   (  9'd239   ),
-    .VB_END     (  9'd015   ),
+    .VB_START   (  VB_START ),
+    .VB_END     (  VB_END   ),
     .VCNT_END   (  9'd263   ),
     .VS_START   (  9'd254   ),
     .VS_END     (  9'd2     ),

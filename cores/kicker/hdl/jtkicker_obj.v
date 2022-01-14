@@ -62,10 +62,14 @@ module jtkicker_obj(
     input         [7:0] debug_bus
 );
 
-parameter BYPASS_PROM=0, LARGE_ROM=0, REV_SCAN=1;
+parameter BYPASS_PROM=0, LARGE_ROM=0;
 parameter [7:0] HOFFSET = 8'd6;
 parameter LAYOUT=0; // 0 other games
                     // 3 Mikie
+parameter REV_SCAN= LAYOUT == 3 ? 0 : 1;
+localparam [7:0] VOFFSET = LAYOUT==3 ? 8'd2 : 8'd0;
+localparam [4:0] MAXOBJ = LAYOUT==3 ? 5'd31 : 5'd23;
+// Mikie can
 
 wire [ 7:0] obj1_dout, obj2_dout,
             low_dout, hi_dout;
@@ -129,12 +133,13 @@ reg        hflip, vflip;
 wire       dr_busy;
 wire [3:0] pal;
 
-assign adj    = REV_SCAN ? scan_addr[5:1]<HALF : scan_addr[5:1]>HALF;
+assign adj    = LAYOUT==3 ? 0 : // Y adjustment on KONAMI 503 based games only
+                REV_SCAN ? scan_addr[5:1]<HALF : scan_addr[5:1]>HALF;
 assign vrf    = vrender ^ {8{flip}};
-assign dr_y   = ~low_dout + ( adj ? ( flip ? 8'hff : 8'h1 ) : 8'h0 );
+assign dr_y   = ~low_dout + ( adj ? ( flip ? 8'hff : 8'h1 ) : 8'h0 )+VOFFSET;
 assign inzone = dr_y>=vrf && dr_y<(vrf+8'h10);
 assign ydiff  = vrf-dr_y-8'd1;
-assign done   = REV_SCAN ? scan_addr[5:1]==0 : scan_addr[5:1]==23;
+assign done   = REV_SCAN ? scan_addr[5:1]==0 : scan_addr[5:1]==MAXOBJ;
 
 assign pal    = dr_attr[3:0];
 
@@ -168,8 +173,7 @@ always @(posedge clk, posedge rst) begin
         dr_start <= 0;
         case( scan_st )
             0: if( hinit_x ) begin
-                scan_addr <= LAYOUT==3 ? {5'd31, 1'd0} :
-                             REV_SCAN  ? {5'd23, 1'd0} : 6'd0;
+                scan_addr <= REV_SCAN  ? {MAXOBJ, 1'd0} : 6'd0;
                 scan_st   <= 1;
             end
             1: if(!dr_busy) begin

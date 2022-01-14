@@ -84,7 +84,13 @@ assign obj1_cs = objram_cs & ~fix_addr[0];
 assign obj2_cs = objram_cs &  fix_addr[0];
 assign obj_pxl = { obj_pre[0], obj_pre[1], obj_pre[2], obj_pre[3] };
 assign obj_en  = gfx_en[3] & ~prio;
-
+/*
+jtframe_sort u_sort(
+    .debug_bus(debug_bus),
+    .busin    (obj_pre),
+    .busout   (obj_pxl)
+);
+*/
 always @* begin
     prom_we = 0;
     prom_we[ prog_addr[10:8] ] = prom_en;
@@ -97,7 +103,7 @@ always @* begin
     endcase
 end
 
-jtkicker_vtimer u_vtimer(
+jtkicker_vtimer #(.LAYOUT(LAYOUT)) u_vtimer(
     .clk    ( clk       ),
     .pxl_cen( pxl_cen   ),
     .vdump  ( vdump     ),
