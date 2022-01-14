@@ -8,6 +8,9 @@ game:
       - jtmikie_game.v
       - jtmikie_main.v
       - jtmikie_video.v
+jtframe:
+  - get:
+    - jtframe_sort.v
 modules:
   jt:
     - name: jt89

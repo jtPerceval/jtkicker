@@ -74,7 +74,7 @@ localparam LAYOUT=3;
 
 wire       LHBL, hinit;
 wire [8:0] vdump, vrender, hdump;
-wire [3:0] obj_pxl, scr_pxl;
+wire [3:0] obj_pxl, scr_pxl, obj_pre;
 reg  [4:0] prom_we;
 wire       obj1_cs, obj2_cs, prio;
 reg  [1:0] fix_addr;
@@ -82,6 +82,7 @@ reg  [1:0] fix_addr;
 assign V16 = vdump[4];
 assign obj1_cs = objram_cs & ~fix_addr[0];
 assign obj2_cs = objram_cs &  fix_addr[0];
+assign obj_pxl = { obj_pre[0], obj_pre[1], obj_pre[2], obj_pre[3] };
 
 always @* begin
     prom_we = 0;
@@ -180,7 +181,7 @@ jtkicker_obj #(.LAYOUT(LAYOUT)) u_obj(
     .rom_ok     ( obj_ok    ),
     .debug_bus  ( debug_bus ),
 
-    .pxl        ( obj_pxl   )
+    .pxl        ( obj_pre   )
 );
 
 jtkicker_colmix u_colmix(
