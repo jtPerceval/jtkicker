@@ -112,7 +112,7 @@ wire        m2s_on;
 
 assign prog_rd    = 0;
 assign dwnld_busy = downloading;
-assign { dipsw_c, dipsw_b, dipsw_a } = dipsw[18:0];
+assign { dipsw_c, dipsw_b, dipsw_a } = dipsw[17:0];
 assign dip_flip = ~flip;
 assign vsync60  = status[13];   // high to use a 6MHz pixel clock, instead of 6.144MHz
 

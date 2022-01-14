@@ -58,7 +58,7 @@ module jtmikie_main(
     input               dip_pause,
     input      [7:0]    dipsw_a,
     input      [7:0]    dipsw_b,
-    input      [2:0]    dipsw_c
+    input      [1:0]    dipsw_c
 );
 
 reg  [ 7:0] cabinet, cpu_din;
@@ -114,7 +114,7 @@ always @(posedge clk) begin
         0: cabinet <= { ~3'd0, start_button, service, coin_input };
         1: cabinet <= {1'b1, joystick1[6:4], joystick1[2], joystick1[3], joystick1[0], joystick1[1]};
         2: cabinet <= {1'b1, joystick2[6:4], joystick2[2], joystick2[3], joystick2[0], joystick2[1]};
-        3: cabinet <= {5'h1f,dipsw_c};
+        3: cabinet <= {6'h3f,dipsw_c};
     endcase
     cpu_din <= rom_cs  ? rom_data  :
                vram_cs ? vram_dout :
