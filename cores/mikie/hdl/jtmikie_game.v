@@ -238,7 +238,6 @@ jtmikie_snd u_sound(
     assign game_led=0;
 `endif
 
-/* verilator tracing_off */
 jtmikie_video u_video(
     .rst        ( rst       ),
     .clk        ( clk       ),
@@ -309,7 +308,6 @@ u_dwnld(
     .sdram_ack      ( sdram_ack     ),
     .header         (               )
 );
-/* verilator tracing_off */
 
 
 jtframe_rom #(

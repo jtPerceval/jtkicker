@@ -55,6 +55,7 @@ module jtkicker_objdraw #(
     output reg          rom_cs,
     input               rom_ok,
 
+    input         [7:0] debug_bus,
     output        [3:0] pxl
 );
 
