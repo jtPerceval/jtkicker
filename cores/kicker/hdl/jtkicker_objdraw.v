@@ -134,14 +134,17 @@ jtframe_sh #(.width(1),.stages(HOFFSET-1) ) u_dly(
     .drop   ( LHBL_dly  )
 );
 
+reg [7:0] buf_al;
+reg       buf_wel;
+
 jtframe_obj_buffer #(.AW(8),.DW(4), .ALPHA(0)) u_buffer(
     .clk    ( clk       ),
     .LHBL   ( ~hinit_x  ),  // change buffer right before writting the new line
     .flip   ( 1'b0      ),
     // New data writes
     .wr_data( buf_in    ),
-    .wr_addr( buf_a     ),
-    .we     ( buf_we    ),
+    .wr_addr( buf_al    ),
+    .we     ( buf_wel   ),
     // Old data reads (and erases)
     .rd_addr( hdump[7:0]),
     .rd     ( buf_clr   ),  // data will be erased after the rd event
@@ -151,7 +154,16 @@ jtframe_obj_buffer #(.AW(8),.DW(4), .ALPHA(0)) u_buffer(
 generate
     if( BYPASS_PROM ) begin
         assign buf_in = pal_addr[3:0];
+        always @* begin
+            buf_al = buf_a;
+            buf_wel = buf_we;
+        end
     end else begin
+        always @(posedge clk) begin
+            buf_al <= buf_a;
+            buf_wel <= buf_we;
+        end
+
         jtframe_prom #(
             .dw     ( 4         ),
             .aw     ( 8         )
