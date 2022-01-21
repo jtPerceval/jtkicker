@@ -63,7 +63,7 @@ module jtkicker_scroll(
 parameter BYPASS_PROM=0, NOSCROLL=0;
 parameter LAYOUT = !NOSCROLL ? 0 : 1;
 parameter BSEL =
-    LAYOUT==2 ? 10 :
+    LAYOUT==2 || LAYOUT==3 ? 10 :
     NOSCROLL ? 0 : 10;
 parameter PACKED = LAYOUT==2 || LAYOUT==3;
 // Column at which the score table ends. This is set by fixed logic
@@ -83,19 +83,18 @@ reg         cur_hf;
 wire        vram_we_low, vram_we_high;
 reg         vflip, hflip;
 wire        vram_we;
-wire [ 9:0] eff_addr;
+reg  [ 9:0] eff_addr;
 reg         scr_prio;
 reg         cur_prio;
 
-assign eff_addr     = NOSCROLL ? cpu_addr[10:1] : cpu_addr[9:0];
 assign vram_we      = vram_cs & ~cpu_rnw;
 assign vram_we_low  = vram_we & ~cpu_addr[BSEL];
 assign vram_we_high = vram_we &  cpu_addr[BSEL];
 assign vram_dout    = cpu_addr[BSEL] ? vram_high : vram_low;
 
 always @* begin
-    //hdf = flip ? (~hdump[7:0]+aux-8'd8) : hdump[7:0];
     hdf = flip ? (~hdump[7:0]-8'd3) : hdump[7:0];
+    eff_addr = (NOSCROLL && LAYOUT!=3) ? cpu_addr[10:1] : cpu_addr[9:0];
     case( LAYOUT )
         0: begin // Kicker
             vflip    = attr[5];
