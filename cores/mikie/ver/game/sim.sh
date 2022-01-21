@@ -36,6 +36,6 @@ fi
 
 export M6809=1
 
-jtsim -mist -sysname $SYSNAME -load $SIMULATOR \
+jtsim -mist -sysname $SYSNAME $SIMULATOR -load \
     -d JTFRAME_SIM_ROMRQ_NOCHECK \
     -videow 256 -videoh 224 $OTHER

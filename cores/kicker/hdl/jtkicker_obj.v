@@ -67,13 +67,17 @@ parameter [7:0] HOFFSET = 8'd6;
 parameter LAYOUT=0; // 0 other games
                     // 3 Mikie
 parameter REV_SCAN= LAYOUT == 3 ? 0 : 1;
-localparam [4:0] MAXOBJ = LAYOUT==3 ? 5'd31 : 5'd23;
+localparam [5:0] MAXOBJ = LAYOUT==3 ? 6'd35 : 6'd23;
 // Mikie can
 
 wire [ 7:0] obj1_dout, obj2_dout,
             low_dout, hi_dout;
 wire        obj1_we, obj2_we;
-reg  [ 5:0] scan_addr;
+reg  [ 6:0] scan_addr;  // most games only scan 32 objects, but Mikie scans a bit further
+                        // the schematics are a bit blurry, so it isn't clear how it goes
+                        // about it. It may well be that it is scanning 32 objects too but
+                        // the table has blanks and it spans over more than 32 entries
+reg  [ 9:0] eff_scan;
 wire [ 3:0] pal_data;
 
 assign obj_dout = obj1_cs ? obj1_dout : obj2_dout;
@@ -91,7 +95,7 @@ jtframe_dual_ram #(.simfile("obj2.bin")) u_hi(
     // Port 1
     .clk1   ( clk           ),
     .data1  (               ),
-    .addr1  ({4'd0,scan_addr}),
+    .addr1  ( eff_scan      ),
     .we1    ( 1'b0          ),
     .q1     ( hi_dout       )
 );
@@ -107,7 +111,7 @@ jtframe_dual_ram #(.simfile("obj1.bin")) u_low(
     // Port 1
     .clk1   ( clk           ),
     .data1  (               ),
-    .addr1  ({4'd0,scan_addr}),
+    .addr1  ( eff_scan      ),
     .we1    ( 1'b0          ),
     .q1     ( low_dout      )
 );
@@ -133,22 +137,25 @@ reg        hflip, vflip;
 wire       dr_busy;
 wire [3:0] pal;
 
-assign adj    = LAYOUT==3 ? 0 : // Y adjustment on KONAMI 503 based games only
+assign adj    = LAYOUT==3 ? 0 :
+                // Y adjustment on KONAMI 503 based games only:
                 REV_SCAN ? scan_addr[5:1]<HALF : scan_addr[5:1]>HALF;
 assign vrf    = vrender ^ {8{flip}};
 assign inzone = dr_y>=vrf && dr_y<(vrf+8'h10);
 assign ydiff  = vrf-dr_y-8'd1;
-assign done   = REV_SCAN ? scan_addr[5:1]==0 : scan_addr[5:1]==MAXOBJ;
+assign done   = REV_SCAN ? scan_addr[6:1]==0 : scan_addr[6:1]==MAXOBJ;
 
 assign pal    = dr_attr[3:0];
 
 always @* begin
+    eff_scan = {3'd0,scan_addr};
     case( LAYOUT )
         3: begin // Mikie
             hflip = dr_attr[4];
             vflip = dr_attr[5];
             pre_code = { hi_dout[6], dr_attr[6], hi_dout[7], hi_dout[5:0] };
             dr_y   = ~low_dout + (flip ? 8'h1 : 8'h3);
+            //eff_scan = eff_scan + 10'd2;
         end
         default: begin
             hflip = dr_attr[6];
@@ -174,7 +181,7 @@ always @(posedge clk, posedge rst) begin
         dr_start <= 0;
         case( scan_st )
             0: if( hinit_x ) begin
-                scan_addr <= REV_SCAN  ? {MAXOBJ, 1'd0} : 6'd0;
+                scan_addr <= REV_SCAN  ? {MAXOBJ, 1'd0} : 7'd0;
                 scan_st   <= 1;
             end
             1: if(!dr_busy) begin
@@ -187,7 +194,7 @@ always @(posedge clk, posedge rst) begin
                 dr_code   <= pre_code;
                 dr_v      <= ydiff[3:0];
                 scan_addr[0] <= 0;
-                scan_addr[5:1] <= REV_SCAN ? scan_addr[5:1]-5'd1 : scan_addr[5:1]+5'd1;
+                scan_addr[6:1] <= REV_SCAN ? scan_addr[6:1]-6'd1 : scan_addr[6:1]+6'd1;
                 if( inzone ) begin
                     dr_start <= 1;
                 end
