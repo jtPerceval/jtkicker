@@ -109,6 +109,8 @@ jtkicker_vtimer #(.LAYOUT(LAYOUT)) u_vtimer(
     .VS     ( VS        )
 );
 
+wire [7:0] vdumpx = flip ? (vdump[7:0]+8'd1) : vdump[7:0];
+
 jtkicker_scroll #(.LAYOUT(LAYOUT)) u_scroll(
     .rst        ( rst       ),
     .clk        ( clk       ),
@@ -128,7 +130,7 @@ jtkicker_scroll #(.LAYOUT(LAYOUT)) u_scroll(
     // video inputs
     .LHBL       ( LHBL      ),
     .LVBL       ( LVBL      ),
-    .vdump      ( vdump[7:0]),
+    .vdump      ( vdumpx    ),
     .hdump      ( hdump     ),
     .flip       ( flip      ),
 

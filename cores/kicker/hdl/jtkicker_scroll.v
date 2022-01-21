@@ -73,18 +73,18 @@ localparam [8:0] SCRCOL = LAYOUT==2 ? 9'o60 : // Super Basketball
                           9'o40;
 
 wire [ 7:0] code, attr, vram_high, vram_low, pal_addr;
-wire [ 3:0] pal_msb;
+reg  [ 3:0] pal_msb;
 reg  [ 3:0] cur_pal;
-wire [ 1:0] code_msb;
+reg  [ 1:0] code_msb;
 reg  [31:0] pxl_data;
 wire [ 9:0] rd_addr;
 reg  [ 7:0] hdf, vpos, vscr;
 reg         cur_hf;
 wire        vram_we_low, vram_we_high;
-wire        vflip, hflip;
+reg         vflip, hflip;
 wire        vram_we;
 wire [ 9:0] eff_addr;
-wire        scr_prio;
+reg         scr_prio;
 reg         cur_prio;
 
 assign eff_addr     = NOSCROLL ? cpu_addr[10:1] : cpu_addr[9:0];
@@ -93,34 +93,32 @@ assign vram_we_low  = vram_we & ~cpu_addr[BSEL];
 assign vram_we_high = vram_we &  cpu_addr[BSEL];
 assign vram_dout    = cpu_addr[BSEL] ? vram_high : vram_low;
 
-generate
+always @* begin
+    //hdf = flip ? (~hdump[7:0]+aux-8'd8) : hdump[7:0];
+    hdf = flip ? (~hdump[7:0]-8'd3) : hdump[7:0];
     case( LAYOUT )
         0: begin // Kicker
-            assign vflip    = attr[5];
-            assign hflip    = attr[4];
-            assign code_msb = attr[7:6];
-            assign pal_msb  = attr[3:0];
-            assign scr_prio = 0;
+            vflip    = attr[5];
+            hflip    = attr[4];
+            code_msb = attr[7:6];
+            pal_msb  = attr[3:0];
+            scr_prio = 0;
         end
         1: begin // Yie Ar Kungfu
-            assign hflip    = attr[7];
-            assign vflip    = attr[6];
-            assign code_msb = {1'b0,attr[4]};
-            assign pal_msb  = 0;
-            assign scr_prio = 0;
+            hflip    = attr[7];
+            vflip    = attr[6];
+            code_msb = {1'b0,attr[4]};
+            pal_msb  = 0;
+            scr_prio = 0;
         end
         2,3: begin // Super Basketball & Mikie
-            assign code_msb = {1'b0,attr[5]};
-            assign vflip    = attr[7];
-            assign hflip    = ~attr[6];
-            assign pal_msb  = attr[3:0];
-            assign scr_prio = attr[4];
+            code_msb = {1'b0,attr[5]};
+            vflip    = attr[7];
+            hflip    = ~attr[6];
+            pal_msb  = attr[3:0];
+            scr_prio = attr[4];
         end
     endcase
-endgenerate
-
-always @(*) begin
-    hdf = flip ? (~hdump[7:0])-8'd7+debug_bus[3:0] : hdump[7:0];
 end
 
 assign rd_addr  = { vscr[7:3], hdf[7:3] }; // 5+5 = 10
@@ -128,7 +126,7 @@ assign vscr_dout= NOSCROLL ? 8'd0 : vscr; // this could be vdump instead of vscr
                         // measure it in a test program because vscr=vdump
                         // for the first rows, which is when the NMI occurs
 assign pal_addr =
-    flip && hdump<9'o20 ? 8'd0 :   // removes the first columns in flip mode
+    //flip && hdump<9'o20 ? 8'd0 :   // removes the first columns in flip mode
     { cur_pal, cur_hf ? pxl_data[3:0] : pxl_data[31:28] };
 
 // scroll register in custom chip 085
@@ -148,10 +146,10 @@ always @(posedge clk, posedge rst) begin
 end
 
 always @(posedge clk) if(pxl_cen) begin
-    if( hdf[2:0]==0 ) begin
+    if( hdump[2:0]==0 ) begin
         rom_addr <= { code_msb, code, vscr[2:0]^{3{vflip}} }; // 2+8+3=13 bits
     end
-    if( hdf[2:0]==4 ) begin // 2 pixel delay to grab data
+    if( hdump[2:0]==4 ) begin // 2 pixel delay to grab data
         pxl_data <= PACKED ? rom_data
         : {
             rom_data[27], rom_data[31], rom_data[19], rom_data[23],

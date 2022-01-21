@@ -154,7 +154,7 @@ always @* begin
             hflip = dr_attr[4];
             vflip = dr_attr[5];
             pre_code = { hi_dout[6], dr_attr[6], hi_dout[7], hi_dout[5:0] };
-            dr_y   = ~low_dout + (flip ? 8'h1 : 8'h3);
+            dr_y   = ~low_dout + (flip ? 8'h0 : 8'h3);
             //eff_scan = eff_scan + 10'd2;
         end
         default: begin

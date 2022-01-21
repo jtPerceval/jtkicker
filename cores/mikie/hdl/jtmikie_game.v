@@ -251,6 +251,7 @@ jtmikie_video u_video(
     // configuration
     .pal_sel    ( pal_sel   ),
     .flip       ( flip      ),
+    //.flip       ( 1'b1      ),
 
     // CPU interface
     .cpu_addr   ( main_addr[10:0]  ),
