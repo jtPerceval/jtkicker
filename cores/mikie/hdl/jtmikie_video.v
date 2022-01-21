@@ -74,7 +74,7 @@ localparam LAYOUT=3;
 
 wire       LHBL, hinit;
 wire [8:0] vdump, vrender, hdump;
-wire [3:0] obj_pxl, scr_pxl, obj_pre;
+wire [3:0] obj_pxl, scr_pxl;
 reg  [4:0] prom_we;
 wire       obj1_cs, obj2_cs, prio, obj_en;
 reg  [1:0] fix_addr;
@@ -82,15 +82,8 @@ reg  [1:0] fix_addr;
 assign V16 = vdump[4];
 assign obj1_cs = objram_cs & ~fix_addr[0];
 assign obj2_cs = objram_cs &  fix_addr[0];
-assign obj_pxl = { obj_pre[0], obj_pre[1], obj_pre[2], obj_pre[3] };
 assign obj_en  = gfx_en[3] & ~prio;
-/*
-jtframe_sort u_sort(
-    .debug_bus(debug_bus),
-    .busin    (obj_pre),
-    .busout   (obj_pxl)
-);
-*/
+
 always @* begin
     prom_we = 0;
     prom_we[ prog_addr[10:8] ] = prom_en;
@@ -179,7 +172,12 @@ jtkicker_obj #(.LAYOUT(LAYOUT)) u_obj(
 
     // PROMs
     .prog_data  ( prog_data[3:0] ),
-    .prog_addr  ( prog_addr[7:0] ),
+    // In order to keep the bit plane order in jtkicker_obj intact,
+    // I am sorting the bits in the colour PROM
+    .prog_addr  ( {prog_addr[7:4],
+        prog_addr[2], prog_addr[3],
+        prog_addr[0], prog_addr[1]
+        } ),
     .prog_en    ( prom_we[4]),
 
     // SDRAM
@@ -189,7 +187,7 @@ jtkicker_obj #(.LAYOUT(LAYOUT)) u_obj(
     .rom_ok     ( obj_ok    ),
     .debug_bus  ( debug_bus ),
 
-    .pxl        ( obj_pre   )
+    .pxl        ( obj_pxl   )
 );
 
 jtkicker_colmix u_colmix(

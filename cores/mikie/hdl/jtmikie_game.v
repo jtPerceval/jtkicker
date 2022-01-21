@@ -150,7 +150,7 @@ always @(*) begin
     if( ioctl_addr[21:0] >= OBJ_START && ioctl_addr<PROM_START ) begin
         dwn_addr[15]  =  ioctl_addr[0];
         dwn_addr[14]  =  ioctl_addr[15];
-        dwn_addr[0]   =  ioctl_addr[14];
+        dwn_addr[0]   =  ~ioctl_addr[14];
         case( ioctl_addr[5:4])
             0: {dwn_addr[2:1]} = 1;
             1: {dwn_addr[2:1]} = 2;
