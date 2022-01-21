@@ -53,7 +53,7 @@ assign pal_addr = PALSELW==3 ?
     { pal_sel, mux[3:0] };
 
 always @(posedge clk) if(pxl_cen) begin
-    mux[4]   <= obj_blank;
+    mux[4]   <= ~obj_blank;
     mux[3:0] <= obj_blank ? scr_gated : obj_pxl;
 end
 
