@@ -50,7 +50,8 @@ module jtkicker_scroll(
     input               rom_ok,
 
     output        [3:0] pxl,
-    output reg          prio
+    output reg          prio,
+    input         [7:0] debug_bus
 );
 
 // Layout
@@ -119,7 +120,7 @@ generate
 endgenerate
 
 always @(*) begin
-    hdf = flip ? (~hdump[7:0])-8'd7 : hdump[7:0];
+    hdf = flip ? (~hdump[7:0])-8'd7+debug_bus[3:0] : hdump[7:0];
 end
 
 assign rd_addr  = { vscr[7:3], hdf[7:3] }; // 5+5 = 10

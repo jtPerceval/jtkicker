@@ -150,7 +150,8 @@ jtkicker_scroll #(.LAYOUT(LAYOUT)) u_scroll(
     .rom_ok     ( scr_ok    ),
 
     .prio       ( prio      ),
-    .pxl        ( scr_pxl   )
+    .pxl        ( scr_pxl   ),
+    .debug_bus  ( debug_bus )
 );
 
 jtkicker_obj #(.LAYOUT(LAYOUT)) u_obj(
@@ -174,7 +175,7 @@ jtkicker_obj #(.LAYOUT(LAYOUT)) u_obj(
     .LVBL       ( LVBL      ),
     .vrender    (vrender[7:0]),
     .hdump      ( hdump     ),
-    .flip       ( 1'b0      ),      // unconnected in the original
+    .flip       ( flip      ),      // unconnected in the original
 
     // PROMs
     .prog_data  ( prog_data[3:0] ),

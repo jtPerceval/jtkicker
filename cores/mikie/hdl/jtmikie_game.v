@@ -208,9 +208,11 @@ jtmikie_main u_main(
     assign snd     = 0;
     assign sample  = 0;
     assign game_led= 0;
-    assign pal_sel = 0;
+    `ifndef PALSEL
+    `define PALSEL 0
+    `endif
+    assign pal_sel = `PALSEL;
     assign flip    = 0;
-    assign pcm_addr= 0;
 `endif
 
 `ifndef NOSOUND

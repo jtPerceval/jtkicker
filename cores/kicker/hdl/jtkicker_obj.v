@@ -67,7 +67,6 @@ parameter [7:0] HOFFSET = 8'd6;
 parameter LAYOUT=0; // 0 other games
                     // 3 Mikie
 parameter REV_SCAN= LAYOUT == 3 ? 0 : 1;
-localparam [7:0] VOFFSET = LAYOUT==3 ? 8'd3 : 8'd0;
 localparam [4:0] MAXOBJ = LAYOUT==3 ? 5'd31 : 5'd23;
 // Mikie can
 
@@ -125,7 +124,8 @@ reg  [7:0] dr_attr, dr_xpos;
 reg  [8:0] dr_code, pre_code;
 reg  [3:0] dr_v;
 reg        dr_start;
-wire [7:0] ydiff, dr_y;
+wire [7:0] ydiff;
+reg  [7:0] dr_y;
 wire [7:0] vrf;
 wire       adj;
 
@@ -136,7 +136,6 @@ wire [3:0] pal;
 assign adj    = LAYOUT==3 ? 0 : // Y adjustment on KONAMI 503 based games only
                 REV_SCAN ? scan_addr[5:1]<HALF : scan_addr[5:1]>HALF;
 assign vrf    = vrender ^ {8{flip}};
-assign dr_y   = ~low_dout + ( adj ? ( flip ? 8'hff : 8'h1 ) : 8'h0 )+VOFFSET;
 assign inzone = dr_y>=vrf && dr_y<(vrf+8'h10);
 assign ydiff  = vrf-dr_y-8'd1;
 assign done   = REV_SCAN ? scan_addr[5:1]==0 : scan_addr[5:1]==MAXOBJ;
@@ -149,11 +148,13 @@ always @* begin
             hflip = dr_attr[4];
             vflip = dr_attr[5];
             pre_code = { hi_dout[6], dr_attr[6], hi_dout[7], hi_dout[5:0] };
+            dr_y   = ~low_dout + (flip ? 8'h1 : 8'h3);
         end
         default: begin
             hflip = dr_attr[6];
             vflip = dr_attr[7];
             pre_code = { LARGE_ROM ? dr_attr[0] : 1'b0, hi_dout };
+            dr_y   = ~low_dout + ( adj ? ( flip ? 8'hff : 8'h1 ) : 8'h0 );
         end
     endcase
 end
@@ -234,7 +235,7 @@ jtkicker_objdraw #(
     .rom_data   ( rom_data  ),
     .rom_ok     ( rom_ok    ),
 
-    .debug_bus(debug_bus),
+    .debug_bus  ( debug_bus ),
     .pxl        ( pxl       )
 );
 
