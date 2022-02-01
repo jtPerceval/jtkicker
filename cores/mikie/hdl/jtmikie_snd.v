@@ -33,7 +33,7 @@ module jtmikie_snd(
     output               peak
 );
 
-localparam CNTW=7;
+localparam CNTW=14;
 localparam [7:0] PSG_GAIN = 8'h18,
                  DAC_GAIN = 8'H10;
 
@@ -49,13 +49,15 @@ reg  [ 3:0] snd_en;
 wire        rdy1, rdy2;
 reg         latch_cs, cnt_cs, rdac_cs, snden_cs,
             psgdata_cs, psg1_cs, psg2_cs;
-reg [CNTW-1:0] cnt;
+reg  [CNTW-1:0] cnt;
+wire [CNTW-1:0] cnt_sel;
 wire signed
          [9:0] vlm_snd;
 
 assign irq_ack = ~iorq_n & ~m1_n;
 assign rom_addr = A[13:0];
 assign sample   = psg1_cen;
+assign cnt_sel  = cnt>>8;
 
 jtframe_cen3p57 u_cen3p57(
     .clk      ( clk      ),
@@ -91,14 +93,14 @@ always @* begin
         case(A[15:13])
             0,1: rom_cs    = 1;
             2: ram_cs      = 1; // 4000
-            4: case({A[0],A[1],A[2]})
+            4: case({A[0],A[1],A[2]}) // 8000
                 0: psgdata_cs = 1; // 0
-                1: psg1_cs    = 1; // 4
-                2: psg2_cs    = 1; // 2
-                3: rdac_cs    = 1; // 6
                 4: snden_cs   = 1; // 1
-                5: cnt_cs     = 1; // 5
+                2: psg2_cs    = 1; // 2
                 6: latch_cs   = 1; // 3
+                1: psg1_cs    = 1; // 4
+                5: cnt_cs     = 1; // 5
+                3: rdac_cs    = 1; // 6
                 default:;
             endcase
             default:;
@@ -109,7 +111,7 @@ end
 always @(posedge clk) begin
     din  <= rom_cs   ? rom_data   :
             ram_cs   ? ram_dout   :
-            cnt_cs   ? { 5'h1f, cnt[3:2], 1'b1 } :
+            cnt_cs   ? { 5'h1f, cnt_sel[2:1], 1'b1 } :
             latch_cs ? main_latch :
             8'hff;
 end
