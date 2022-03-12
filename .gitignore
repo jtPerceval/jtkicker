@@ -31,3 +31,5 @@ core.def
 jtsim.f
 jtsim_vhdl.f
 mame.xml
+.DS_Store
+*.cfg

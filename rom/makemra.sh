@@ -7,7 +7,7 @@ echo "------------"
 
 mkdir -p mra/_alt
 
-for i in mikie kicker yiear sbaskt; do
+for i in mikie kicker yiear sbaskt roadf; do
     mame2mra -toml $i.toml -outdir mra -core $i $*
 done
 

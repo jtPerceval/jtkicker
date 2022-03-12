@@ -117,6 +117,13 @@ always @* begin
             pal_msb  = attr[3:0];
             scr_prio = attr[4];
         end
+        4: begin // Road Fighter
+            code_msb = {1'b0,attr[5]};
+            vflip    = 0;
+            hflip    = attr[4];
+            pal_msb  = attr[3:0];
+            scr_prio = attr[4];
+        end
     endcase
 end
 

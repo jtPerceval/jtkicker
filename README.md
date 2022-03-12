@@ -26,7 +26,7 @@ Yie Ar Kungfu   |19/Nov/1984 |GX407|  Only output  | No  | 6809 |          | 746
 Shaolin's Road  |22/Mar/1985 |GX477| All elements  | Yes | 6809 |          | 74689 | No       | Yes                         |97.13€         |27.664(2018)       |
 Track'n Field   |10/Oct/1983 | No  | All elements  | No  |      |          |       | Yes      | Partial-Blurred             |7 a 60€ cart   |2.7 M (2015) NES   |
 Hyper Sports    |31/May/1984 | No  | All elements  | Yes |      |          |       | Yes      | Yes blurred,with labels     |80€            |41.562(2012)       |
-Road Fighter    |            |     |               |     |      |          |       |          | No                          |15 a 70€ cart  |4 M (2010) NES     |
+Road Fighter    |22/Nov/1984 |GX461| All elements  |     | 6809 | Z80      | 74689 | Yes      | Yes                         |15 a 70€ cart  |4 M (2010) NES     |
 Super Basketball|       1984 |GX405| All elements  | Yes | 6809 | Z80      | 74689 | Yes      | Yes,with labels             |159€           |23.494 (2014)      |
 Mikie           |15/Nov/1984 | No  | All elements  | Yes | 6809 | Z80      |2x74689| No       | Yes,with labels, small      |11€     cart   |50.381 (2010)      |
 Pandora's Palace|       1984 | No  | Only output   | Yes |      |          |       | No       | Yes,with labels             |      €        |14.167 (2010)      |
@@ -41,6 +41,7 @@ Roc'n Rope      |       1984 | No  | Only output   | No  |      |          | 891
 
 This development has been possible thanks to the board donated by Brian Schinzel and the following patrons:
 
+``
 8bits4ever             Adam Leslie            Adam Small             Adam Zorzin
 Adrian Labastida       Alan Shurvinton        Alda Alesio            Alden
 Alex Mandic            Alexander Lash         Alexander Upton        Alfonso Clemente
@@ -137,4 +138,4 @@ metal                  natalie                nonamebear             pacoarcade
 patrick pejic          qzxcvbn                retroPREZ              retrod00d
 rsn8887                slayer213              taal.M                 tonitellezb
 troy coberly           turbochop3300          type78                 yoaarond
-
+```

@@ -24,7 +24,7 @@
     <name>Kicker</name>
     <setname>kicker</setname>
     <rbf>jtkicker</rbf>
-    <mameversion>0232</mameversion>
+    <mameversion>0237</mameversion>
     <year>1985</year>
     <manufacturer>Konami</manufacturer>
     <players>2</players>
@@ -61,6 +61,7 @@
         <part name="477j09.b8" crc="aa900724"/>
         <part name="477j08.f16" crc="80009cf5"/>
         <!-- Total 0x1C500 bytes - 113 kBytes -->
+        <patch offset="0x58C6">3d 3d</patch>
     </rom>
     <!-- Vertical game -->
     <rom index="1">
