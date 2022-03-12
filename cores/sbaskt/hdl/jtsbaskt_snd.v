@@ -100,7 +100,7 @@ always @* begin
     psg_cs      = 0;
     if( !mreq_n ) begin
         case(A[15:13])
-            0: rom_cs      = 1;
+            0,1: rom_cs    = 1;
             2: ram_cs      = 1; // 4000
             3: latch_cs    = 1; // 6000
             4: cnt_cs      = 1; // 8000

@@ -1,0 +1,19 @@
+game:
+  - from: roadf
+    get:
+      - jtroadf_game.v
+      - jtroadf_main.v
+      - jtroadf_video.v
+      - jtroadf_obj.v
+  - from: yiear
+    get:
+      - jtyiear_colmix.v
+  - from: kicker
+    get:
+      - common.yaml
+  - from: sbaskt
+    get:
+      - jtsbaskt_snd.v
+modules:
+  jt:
+    - name: jt89

@@ -40,6 +40,7 @@ module jtroadf_video(
 
     input               objram_cs,
     output        [7:0] obj_dout,
+    input               obj_frame,
 
     // PROMs
     input         [7:0] prog_data,
@@ -76,24 +77,14 @@ wire       LHBL, hinit;
 wire [8:0] vdump, vrender, hdump;
 wire [3:0] obj_pxl, scr_pxl;
 reg  [3:0] prom_we;
-wire       obj1_cs, obj2_cs, prio, obj_en;
-reg  [1:0] fix_addr;
 
 assign V16 = vdump[4];
 assign obj1_cs = objram_cs & ~fix_addr[0];
 assign obj2_cs = objram_cs &  fix_addr[0];
-assign obj_en  = gfx_en[3] & ~prio;
 
 always @* begin
     prom_we = 0;
     prom_we[ prog_addr[9:8] ] = prom_en;
-
-    case( cpu_addr[1:0] )
-        0: fix_addr = 1; // attr
-        1: fix_addr = 3; // x
-        2: fix_addr = 2; // code
-        3: fix_addr = 0; // y
-    endcase
 end
 
 jtkicker_vtimer #(.LAYOUT(LAYOUT)) u_vtimer(
@@ -151,7 +142,7 @@ jtkicker_scroll #(.LAYOUT(LAYOUT),.NOSCROLL(1)) u_scroll(
     .debug_bus  ( debug_bus )
 );
 
-jtkicker_obj #(.LAYOUT(LAYOUT)) u_obj(
+jtroadf_obj #(.LAYOUT(LAYOUT)) u_obj(
     .rst        ( rst       ),
     .clk        ( clk       ),      // 48 MHz
     .clk24      ( clk24     ),      // 24 MHz
@@ -159,12 +150,12 @@ jtkicker_obj #(.LAYOUT(LAYOUT)) u_obj(
     .pxl_cen    ( pxl_cen   ),
 
     // CPU interface
-    .cpu_addr   ( {cpu_addr[0],cpu_addr[10:2],fix_addr[1]}  ),
+    .cpu_addr   ( cpu_addr[9:0] ),
     .cpu_dout   ( cpu_dout  ),
-    .obj1_cs    ( obj1_cs   ),
-    .obj2_cs    ( obj2_cs   ),
+    .obj_cs     ( objram_cs ),
     .cpu_rnw    ( cpu_rnw   ),
     .obj_dout   ( obj_dout  ),
+    .obj_frame  ( obj_frame ),
 
     // video inputs
     .hinit      ( hinit     ),
@@ -172,16 +163,11 @@ jtkicker_obj #(.LAYOUT(LAYOUT)) u_obj(
     .LVBL       ( LVBL      ),
     .vrender    (vrender[7:0]),
     .hdump      ( hdump     ),
-    .flip       ( flip      ),      // unconnected in the original
+    .flip       ( flip      ),
 
     // PROMs
     .prog_data  ( prog_data[3:0] ),
-    // In order to keep the bit plane order in jtkicker_obj intact,
-    // I am sorting the bits in the colour PROM
-    .prog_addr  ( {prog_addr[7:4],
-        prog_addr[2], prog_addr[3],
-        prog_addr[0], prog_addr[1]
-        } ),
+    .prog_addr  ( prog_addr ),
     .prog_en    ( prom_we[1]),
 
     // SDRAM
@@ -194,7 +180,7 @@ jtkicker_obj #(.LAYOUT(LAYOUT)) u_obj(
     .pxl        ( obj_pxl   )
 );
 
-jtkicker_colmix u_colmix(
+jtyiear_colmix u_colmix(
     .clk        ( clk       ),
 
     .pxl_cen    ( pxl_cen   ),
@@ -216,7 +202,7 @@ jtkicker_colmix u_colmix(
     .blue       ( blue      ),
     .LHBL_dly   ( LHBL_dly  ),
     .LVBL_dly   ( LVBL_dly  ),
-    .gfx_en     ( { obj_en, gfx_en[2:0] } )
+    .gfx_en     ( gfx_en    )
 );
 
 endmodule

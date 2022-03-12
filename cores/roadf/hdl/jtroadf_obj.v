@@ -25,10 +25,10 @@
 // position in the sprite table
 
 // Road Fighter uses two object RAMs selectable
-// by a bit called INTST. Each table is 1kB long
+// by a bit called obj_frame. Each table is 1kB long
 // but only the lower quarter is readable by
 // the sprite hardware. The rest is available to
-// the CPU. INTST must mean something, but I cannot
+// the CPU. obj_frame must mean something, but I cannot
 // make up what it is
 
 module jtroadf_obj(
@@ -42,7 +42,7 @@ module jtroadf_obj(
     input         [9:0] cpu_addr,
     input         [7:0] cpu_dout,
     input               obj_cs,
-    input               intst,
+    input               obj_frame, // called INTST in the schematics
     input               cpu_rnw,
     output        [7:0] obj_dout,
 
@@ -70,23 +70,22 @@ module jtroadf_obj(
 );
 
 parameter [7:0] HOFFSET = 8'd6;
-parameter REV_SCAN= LAYOUT == 3 ? 0 : 1;
-localparam [5:0] MAXOBJ = LAYOUT==3 ? 6'd35 : 6'd23;
-// Mikie can
+localparam [5:0] MAXOBJ = 6'd23;
 
 wire [ 7:0] obj1_dout, obj2_dout,
-            low_dout, hi_dout;
+            rd1_dout, rd2_dout, scan_dout;
 wire        obj1_we, obj2_we;
-reg  [ 6:0] scan_addr;  // most games only scan 32 objects, but Mikie scans a bit further
-                        // the schematics are a bit blurry, so it isn't clear how it goes
-                        // about it. It may well be that it is scanning 32 objects too but
-                        // the table has blanks and it spans over more than 32 entries
+reg  [ 6:0] scan_addr;  // although the DMA bus in the schematics has 8 bits
+    // it shouldn't be able to pass sprite count 23, as the line buffers
+    // are written at the pixel clock and the table scan count is reset
+    // to zero at the beginning of each raster line
 reg  [ 9:0] eff_scan;
 wire [ 3:0] pal_data;
 
-assign obj_dout = intst ? obj1_dout : obj2_dout;
-assign obj1_we  = obj_cs &  intst & ~cpu_rnw;
-assign obj2_we  = obj_cs & ~intst & ~cpu_rnw;
+assign obj_dout = obj_frame ? obj1_dout : obj2_dout;
+assign obj1_we  = obj_cs &  obj_frame & ~cpu_rnw;
+assign obj2_we  = obj_cs & ~obj_frame & ~cpu_rnw;
+assign scan_dout= obj_frame ? rd2_dout : rd1_dout;
 
 jtframe_dual_ram #(.simfile("obj.bin")) u_hi(
     // Port 0, CPU
@@ -100,7 +99,7 @@ jtframe_dual_ram #(.simfile("obj.bin")) u_hi(
     .data1  (               ),
     .addr1  ( eff_scan      ),
     .we1    ( 1'b0          ),
-    .q1     ( hi_dout       )
+    .q1     ( rd1_dout      )
 );
 
 jtframe_dual_ram #(.simfile("obj.bin")) u_low(
@@ -115,7 +114,7 @@ jtframe_dual_ram #(.simfile("obj.bin")) u_low(
     .data1  (               ),
     .addr1  ( eff_scan      ),
     .we1    ( 1'b0          ),
-    .q1     ( low_dout      )
+    .q1     ( rd2_dout      )
 );
 
 // Max sprites drawn before the raster line count moves
@@ -131,7 +130,7 @@ reg  [8:0] dr_code, pre_code;
 reg  [3:0] dr_v;
 reg        dr_start;
 wire [7:0] ydiff;
-reg  [7:0] dr_y;
+reg  [7:0] dr_y, ypos;
 wire [7:0] vrf;
 wire       adj;
 
@@ -139,33 +138,18 @@ reg        hflip, vflip;
 wire       dr_busy;
 wire [3:0] pal;
 
-assign adj    = LAYOUT==3 ? 0 :
-                // Y adjustment on KONAMI 503 based games only:
-                REV_SCAN ? scan_addr[5:1]<HALF : scan_addr[5:1]>HALF;
 assign vrf    = vrender ^ {8{flip}};
 assign inzone = dr_y>=vrf && dr_y<(vrf+8'h10);
 assign ydiff  = vrf-dr_y-8'd1;
-assign done   = REV_SCAN ? scan_addr[6:1]==0 : scan_addr[6:1]==MAXOBJ;
-
+assign done   = scan_addr[6:2]==24;
 assign pal    = dr_attr[3:0];
 
 always @* begin
     eff_scan = {3'd0,scan_addr};
-    case( LAYOUT )
-        3: begin // Mikie
-            hflip = dr_attr[4];
-            vflip = dr_attr[5];
-            pre_code = { hi_dout[6], dr_attr[6], hi_dout[7], hi_dout[5:0] };
-            dr_y   = ~low_dout + (flip ? 8'h0 : 8'h3);
-            //eff_scan = eff_scan + 10'd2;
-        end
-        default: begin
-            hflip = dr_attr[6];
-            vflip = dr_attr[7];
-            pre_code = { LARGE_ROM ? dr_attr[0] : 1'b0, hi_dout };
-            dr_y   = ~low_dout + ( adj ? ( flip ? 8'hff : 8'h1 ) : 8'h0 );
-        end
-    endcase
+    hflip = dr_attr[6];
+    vflip = dr_attr[7];
+    pre_code = { LARGE_ROM ? dr_attr[0] : 1'b0, scan_dout };
+    dr_y   = ~ypos + ( adj ? ( flip ? 8'hff : 8'h1 ) : 8'h0 );
 end
 
 always @(posedge clk) begin
@@ -181,35 +165,46 @@ always @(posedge clk, posedge rst) begin
         dr_start <= 0;
     end else if( cen2 ) begin
         dr_start <= 0;
+        if( cnt_en ) scan_addr <= scan_addr+1'd1;
         case( scan_st )
             0: if( hinit_x ) begin
-                scan_addr <= REV_SCAN  ? {MAXOBJ, 1'd0} : 7'd0;
+                scan_addr <= 0;
                 scan_st   <= 1;
+                cnt_en    <= 1;
             end
             1: if(!dr_busy) begin
                 dr_xpos   <= hi_dout;
-                dr_attr   <= low_dout;
-                scan_addr[0] <= ~scan_addr[0];
+                dr_attr   <= scan_dout;
                 scan_st   <= 2;
             end
             2: begin
+                dr_code <= scan_dout;
+                scan_st <= 3;
+            end
+            3: begin
+                ypos <= scan_dout;
+                scan_st <= 4;
+                cnt_en  <= 0;
+            end
+            4: begin
                 dr_code   <= pre_code;
                 dr_v      <= ydiff[3:0];
-                scan_addr[0] <= 0;
-                scan_addr[6:1] <= REV_SCAN ? scan_addr[6:1]-6'd1 : scan_addr[6:1]+6'd1;
                 if( inzone ) begin
                     dr_start <= 1;
                 end
-                scan_st   <= done ? 0 : 3;
+                scan_st   <= done ? 0 : 4;
             end
-            3: scan_st <= 1; // give time to dr_busy to rise
+            5: begin
+                scan_st <= 1; // give time to dr_busy to rise
+                cnt_en  <= 1;
+            end
         endcase
     end
 end
 
 jtkicker_objdraw #(
-    .BYPASS_PROM    ( BYPASS_PROM   ),
-    .HOFFSET        ( HOFFSET       )
+    .BYPASS_PROM    ( 0        ),
+    .HOFFSET        ( HOFFSET  )
 ) u_draw (
     .rst        ( rst       ),
     .clk        ( clk       ),        // 48 MHz

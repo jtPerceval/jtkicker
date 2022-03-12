@@ -39,6 +39,7 @@ module jtroadf_main(
     output      [ 7:0]  cpu_dout,
     output reg          vram_cs,
     output reg          objram_cs,
+    output reg          obj_frame,
 
     // Sound
     output reg  [ 7:0]  snd_latch,
@@ -58,7 +59,7 @@ module jtroadf_main(
     input               dip_pause,
     input      [7:0]    dipsw_a,
     input      [7:0]    dipsw_b,
-    input      [1:0]    dipsw_c
+    input      [2:0]    dipsw_c // three jumpers at the board
 );
 
 reg  [ 7:0] cabinet, cpu_din;
@@ -67,7 +68,7 @@ wire [15:0] A;
 wire        RnW, irq_n, nmi_n;
 wire        irq_trigger;
 reg         irq_clrn, ram_cs, snd_cs;
-reg         ior_cs, in5_cs, in6_cs,
+reg         ior_cs, in5_cs, intst_cs, intst_l,
             color_cs, iow_cs, intshow_cs;
 // reg         afe_cs; // watchdog
 wire        VMA;
@@ -82,7 +83,7 @@ always @(*) begin
     rom_cs  = VMA && A[15:13]>2 && RnW && VMA; // ROM = 4000 - FFFF
     iow_cs     = 0;
     in5_cs     = 0;
-    in6_cs     = 0;
+    intst_cs   = 0;
     ior_cs     = 0;
     color_cs   = 0;
     intshow_cs = 0;
@@ -109,11 +110,11 @@ always @(*) begin
             case( A[12:10] ) // chip H14
                 4: objram_cs = 1;
                 5: case( A[9:7]) // chip H8
-                    0: // intst / afe, two signals on board B, the same signal on board A
-                    1: iow_cs = 1;
-                    2: snd_cs=1;
-                    4: in5_cs=1;
-                    5: ior_cs=1;
+                    0: intst_cs= 1; // intst / afe, two signals on board B, the same signal on board A
+                    1: iow_cs  = 1;
+                    2: snd_cs  = 1;
+                    4: in5_cs  = 1;
+                    5: ior_cs  = 1;
                     default:;
                 endcase
                 default:;
@@ -144,10 +145,10 @@ end
 
 always @(posedge clk) begin
     case( A[1:0] )
-        0: cabinet <= { ~3'd0, start_button, service, coin_input };
-        1: cabinet <= { 2'd3, joystick1[5:4], joystick1[2], joystick1[3], joystick1[0], joystick1[1]};
-        2: cabinet <= { 2'd3, joystick2[5:4], joystick2[2], joystick2[3], joystick2[0], joystick2[1]};
-        3: cabinet <= {6'h3f,dipsw_c};
+        0: cabinet <= { dipsw_c, start_button, service, coin_input };
+        1: cabinet <= { 1'b1, joystick1[6:4], joystick1[2], joystick1[3], joystick1[0], joystick1[1]};
+        2: cabinet <= { 1'b1, joystick2[6:4], joystick2[2], joystick2[3], joystick2[0], joystick2[1]};
+        3: cabinet <= dipsw_a;
     endcase
     cpu_din <= rom_cs  ? rom_data  :
                vram_cs ? vram_dout :
@@ -155,8 +156,7 @@ always @(posedge clk) begin
                intshow_cs ? vscr_dout :
                objram_cs  ? obj_dout :
                ior_cs  ? cabinet  :
-               in6_cs  ? dipsw_b  :
-               in5_cs  ? dipsw_a  : 8'hff;
+               in5_cs  ? dipsw_b  : 8'hff;
 end
 
 always @(posedge clk) begin
@@ -166,7 +166,11 @@ always @(posedge clk) begin
         snd_on   <= 0;
         pal_sel  <= 0;
         snd_latch<= 0;
+        obj_frame<= 0;
+        intst_l  <= 0;
     end else if(cpu_cen) begin
+        intst_l <= intst_cs;
+        if( intst_cs && !intst_l ) obj_frame <= ~obj_frame;
         if( iow_cs && !RnW ) begin
             case(A[2:0]) // 74LS259 @ F2
                 0: flip      <= cpu_dout[0];
