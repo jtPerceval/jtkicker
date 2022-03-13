@@ -122,11 +122,11 @@ localparam [4:0] HALF = 5'd19;
 
 reg        cen2=0;
 wire       inzone, done;
-reg        hinit_x;
-reg  [1:0] scan_st;
+reg        hinit_x, cnt_en;
+reg  [2:0] scan_st;
 
 reg  [7:0] dr_attr, dr_xpos;
-reg  [8:0] dr_code, pre_code;
+reg  [8:0] dr_code;
 reg  [3:0] dr_v;
 reg        dr_start;
 wire [7:0] ydiff;
@@ -143,12 +143,12 @@ assign inzone = dr_y>=vrf && dr_y<(vrf+8'h10);
 assign ydiff  = vrf-dr_y-8'd1;
 assign done   = scan_addr[6:2]==24;
 assign pal    = dr_attr[3:0];
+assign adj    = 0;
 
 always @* begin
     eff_scan = {3'd0,scan_addr};
     hflip = dr_attr[6];
     vflip = dr_attr[7];
-    pre_code = { LARGE_ROM ? dr_attr[0] : 1'b0, scan_dout };
     dr_y   = ~ypos + ( adj ? ( flip ? 8'hff : 8'h1 ) : 8'h0 );
 end
 
@@ -173,12 +173,12 @@ always @(posedge clk, posedge rst) begin
                 cnt_en    <= 1;
             end
             1: if(!dr_busy) begin
-                dr_xpos   <= hi_dout;
+                dr_xpos   <= scan_dout;
                 dr_attr   <= scan_dout;
                 scan_st   <= 2;
             end
             2: begin
-                dr_code <= scan_dout;
+                dr_code <= { dr_attr[5], scan_dout };
                 scan_st <= 3;
             end
             3: begin
@@ -187,7 +187,6 @@ always @(posedge clk, posedge rst) begin
                 cnt_en  <= 0;
             end
             4: begin
-                dr_code   <= pre_code;
                 dr_v      <= ydiff[3:0];
                 if( inzone ) begin
                     dr_start <= 1;

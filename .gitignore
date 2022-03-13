@@ -33,3 +33,8 @@ jtsim_vhdl.f
 mame.xml
 .DS_Store
 *.cfg
+cores/roadf/ver/game/defmacros.h
+cores/roadf/ver/game/filtered.f
+cores/roadf/ver/game/game.f
+cores/roadf/ver/game/mist.f
+cores/roadf/ver/game/waiver

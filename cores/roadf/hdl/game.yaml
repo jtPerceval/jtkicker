@@ -13,7 +13,4 @@ game:
       - common.yaml
   - from: sbaskt
     get:
-      - jtsbaskt_snd.v
-modules:
-  jt:
-    - name: jt89
+      - sound.yaml

@@ -29,7 +29,7 @@ module jtsbaskt_snd(
     // From main CPU
     input       [ 7:0]  main_dout,
     input               m2s_data,
-    input               m2s_on,
+    input               m2s_irq,
     // Sound
     output     [15:0]   pcm_addr,
     input      [ 7:0]   pcm_data,
@@ -45,7 +45,6 @@ localparam CNTW=11;
 reg  [ 7:0] latch, psg_data, vlm_data, din, rdac;
 wire [ 7:0] ram_dout, vlm_mux, dout;
 wire        irq_ack, int_n;
-wire [ 2:0] pcm_nc;
 wire        vlm_ceng, vlm_me_b;
 wire [10:0] psg_snd;
 reg         ram_cs;
@@ -137,6 +136,8 @@ jt89 u_psg(
 );
 
 `ifndef VERILATOR
+wire [ 2:0] pcm_nc;
+
 vlm5030_gl u_vlm(
     .i_rst   ( vlm_rst      ),
     .i_clk   ( clk          ),
@@ -160,6 +161,9 @@ vlm5030_gl u_vlm(
     reg cnt_csl;
 
     assign vlm_bsy = busy_dummy;
+    assign pcm_addr = 0;
+    assign vlm_snd  = 0;
+    assign vlm_me_b = 0;
 
     always @(posedge clk) begin
         cnt_csl <= cnt_cs;
@@ -208,7 +212,7 @@ jtframe_ff u_irq(
     .qn       ( int_n       ),
     .set      (             ),
     .clr      ( irq_ack     ),
-    .sigedge  ( m2s_on      )
+    .sigedge  ( m2s_irq     )
 );
 
 /* verilator tracing_off */

@@ -30,8 +30,8 @@ module jtroadf_main(
     // cabinet I/O
     input       [ 1:0]  start_button,
     input       [ 1:0]  coin_input,
-    input       [ 5:0]  joystick1,
-    input       [ 5:0]  joystick2,
+    input       [ 6:0]  joystick1,
+    input       [ 6:0]  joystick2,
     input               service,
 
     // GFX
@@ -42,18 +42,16 @@ module jtroadf_main(
     output reg          obj_frame,
 
     // Sound
-    output reg  [ 7:0]  snd_latch,
-    output reg          snd_on,
+    output reg          snd_data_cs,
+    output reg          snd_irq,
 
     // configuration
-    output reg  [ 2:0]  pal_sel,
     output reg          flip,
 
     // interrupt triggers
     input               LVBL,
 
     input      [7:0]    vram_dout,
-    input      [7:0]    vscr_dout,  // output from Konami 085 custom chip
     input      [7:0]    obj_dout,
     // DIP switches
     input               dip_pause,
@@ -67,7 +65,7 @@ wire [ 7:0] ram_dout;
 wire [15:0] A;
 wire        RnW, irq_n, nmi_n;
 wire        irq_trigger;
-reg         irq_clrn, ram_cs, snd_cs;
+reg         irq_clrn, ram_cs;
 reg         ior_cs, in5_cs, intst_cs, intst_l,
             color_cs, iow_cs, intshow_cs;
 // reg         afe_cs; // watchdog
@@ -90,7 +88,7 @@ always @(*) begin
     objram_cs  = 0;
     vram_cs    = 0;
     ram_cs     = 0;
-    snd_cs     = 0;
+    snd_data_cs     = 0;
 
     if( VMA ) begin
         if( A[15:13]==1 )
@@ -112,34 +110,13 @@ always @(*) begin
                 5: case( A[9:7]) // chip H8
                     0: intst_cs= 1; // intst / afe, two signals on board B, the same signal on board A
                     1: iow_cs  = 1;
-                    2: snd_cs  = 1;
+                    2: snd_data_cs  = 1;
                     4: in5_cs  = 1;
                     5: ior_cs  = 1;
                     default:;
                 endcase
                 default:;
             endcase
-    end
-
-
-    if( VMA && A[15:13]==1 ) begin // 2000-3FFF
-        case( A[12:11] )
-            0:  case( A[10:8] )  // 2000-27FF
-                    0: iow_cs      = 1; // 2000
-                    // 1: watchdog    // 2100
-                    2: color_cs = 1;  // 2200
-                    3: intshow_cs = 1;
-                    4: begin
-                        ior_cs = 1;    // 2400-2403
-                        snd_cs = ~RnW;
-                    end
-                    5: { in6_cs, in5_cs } = { A[0], ~A[0] };
-                    default:;
-                endcase
-            1: objram_cs = 1;   // 2800-2FFF
-            2: ram_cs   = 1;    // 3800-3BFF    - part of VRAM chip
-            3: vram_cs  = 1;    // 3C00-3FFF
-        endcase
     end
 end
 
@@ -153,7 +130,6 @@ always @(posedge clk) begin
     cpu_din <= rom_cs  ? rom_data  :
                vram_cs ? vram_dout :
                ram_cs  ? ram_dout  :
-               intshow_cs ? vscr_dout :
                objram_cs  ? obj_dout :
                ior_cs  ? cabinet  :
                in5_cs  ? dipsw_b  : 8'hff;
@@ -163,9 +139,7 @@ always @(posedge clk) begin
     if( rst ) begin
         irq_clrn <= 0;
         flip     <= 0;
-        snd_on   <= 0;
-        pal_sel  <= 0;
-        snd_latch<= 0;
+        snd_irq  <= 0;
         obj_frame<= 0;
         intst_l  <= 0;
     end else if(cpu_cen) begin
@@ -174,7 +148,7 @@ always @(posedge clk) begin
         if( iow_cs && !RnW ) begin
             case(A[2:0]) // 74LS259 @ F2
                 0: flip      <= cpu_dout[0];
-                1: snd_on    <= cpu_dout[0];
+                1: snd_irq   <= cpu_dout[0];
                 // 2: END - this must be some test output
                 // 3: coin 1 counter
                 // 4: coin 2 counter
@@ -184,8 +158,6 @@ always @(posedge clk) begin
                 default:;
             endcase
         end
-        if( color_cs ) pal_sel <= cpu_dout[2:0];
-        if( snd_cs   ) snd_latch <= cpu_dout;
     end
 end
 
@@ -216,7 +188,6 @@ jtframe_sys6809 #(.RAM_AW(13)) u_cpu(
     .irq_ack    (           ),
     // Bus sharing
     .bus_busy   ( 1'b0      ),
-    .waitn      (           ),
     // memory interface
     .A          ( A         ),
     .RnW        ( RnW       ),

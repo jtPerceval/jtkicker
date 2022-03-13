@@ -94,14 +94,15 @@ wire [15:0] main_addr;
 wire [ 3:0] cen_base;
 
 wire [ 7:0] dipsw_a, dipsw_b;
-wire        LVBL, V16;
+wire [ 2:0] dipsw_c;
+wire        LVBL;
 
 wire        obj_frame;
 wire        cpu_cen, cpu4_cen, ti1_cen, ti2_cen;
 wire        cpu_rnw, cpu_irqn, cpu_nmin;
-wire        vscr_cs, vram_cs, objram_cs,
+wire        vram_cs, objram_cs,
             prom_we, flip;
-wire [ 7:0] vscr_dout, vram_dout, obj_dout, cpu_dout;
+wire [ 7:0] vram_dout, obj_dout, cpu_dout;
 wire        vsync60;
 wire        snd_cen, psg_cen;
 
@@ -110,11 +111,11 @@ wire [15:0] pcm_addr;
 wire [ 7:0] pcm_data;
 wire        pcm_ok;
 
-wire        m2s_on, m2s_data;
+wire        m2s_irq, m2s_data;
 
 assign prog_rd    = 0;
 assign dwnld_busy = downloading;
-assign { dipsw_b, dipsw_a } = dipsw[15:0];
+assign { dipsw_c, dipsw_b, dipsw_a } = dipsw[18:0];
 assign dip_flip = flip;
 assign vsync60  = status[13];   // high to use a 6MHz pixel clock, instead of 6.144MHz
 
@@ -176,26 +177,24 @@ jtroadf_main u_main(
     .cpu_dout       ( cpu_dout      ),
     .cpu_rnw        ( cpu_rnw       ),
 
-    .vscr_cs        ( vscr_cs       ),
     .vram_cs        ( vram_cs       ),
     .vram_dout      ( vram_dout     ),
-    .vscr_dout      ( vscr_dout     ),
 
     .objram_cs      ( objram_cs     ),
     .obj_dout       ( obj_dout      ),
     .obj_frame      ( obj_frame     ),
     // Sound control
     .snd_data_cs    ( m2s_data      ),
-    .snd_on_cs      ( m2s_on        ),
+    .snd_irq        ( m2s_irq       ),
     // GFX configuration
     .flip           ( flip          ),
     // interrupt triggers
     .LVBL           ( LVBL          ),
-    .V16            ( V16           ),
     // DIP switches
     .dip_pause      ( dip_pause     ),
     .dipsw_a        ( dipsw_a       ),
-    .dipsw_b        ( dipsw_b       )
+    .dipsw_b        ( dipsw_b       ),
+    .dipsw_c        ( dipsw_c       )
 );
 `else
     assign main_cs = 0;
@@ -221,7 +220,7 @@ jtsbaskt_snd u_sound(
     // From main CPU
     .main_dout  ( cpu_dout  ),
     .m2s_data   ( m2s_data  ),
-    .m2s_on     ( m2s_on    ),
+    .m2s_irq    ( m2s_irq   ),
     // Sound
     .pcm_addr   ( pcm_addr  ),
     .pcm_data   ( pcm_data  ),
@@ -256,9 +255,7 @@ jtroadf_video u_video(
     .cpu_rnw    ( cpu_rnw   ),
     // Scroll
     .vram_cs    ( vram_cs   ),
-    .vscr_cs    ( vscr_cs   ),
     .vram_dout  ( vram_dout ),
-    .vscr_dout  ( vscr_dout ),
     // Objects
     .objram_cs  ( objram_cs ),
     .obj_dout   ( obj_dout  ),
@@ -280,7 +277,6 @@ jtroadf_video u_video(
     .obj_ok     ( obj_ok    ),
 
     .LVBL       ( LVBL      ),
-    .V16        ( V16       ),
     .HS         ( HS        ),
     .VS         ( VS        ),
     .LHBL_dly   ( LHBL_dly  ),

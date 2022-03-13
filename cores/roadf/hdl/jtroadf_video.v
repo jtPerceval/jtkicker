@@ -25,7 +25,6 @@ module jtroadf_video(
     input               pxl2_cen,
 
     // configuration
-    input         [2:0] pal_sel,
     input               flip,
 
     // CPU interface
@@ -34,9 +33,7 @@ module jtroadf_video(
     input               cpu_rnw,
 
     input               vram_cs,
-    input               vscr_cs,
     output        [7:0] vram_dout,
-    output        [7:0] vscr_dout,
 
     input               objram_cs,
     output        [7:0] obj_dout,
@@ -60,7 +57,6 @@ module jtroadf_video(
 
     output              HS,
     output              VS,
-    output              V16,
     output              LVBL,
     output              LHBL_dly,
     output              LVBL_dly,
@@ -75,16 +71,14 @@ localparam LAYOUT=4;
 
 wire       LHBL, hinit;
 wire [8:0] vdump, vrender, hdump;
+wire       vscr_cs=0;
 wire [3:0] obj_pxl, scr_pxl;
 reg  [3:0] prom_we;
-
-assign V16 = vdump[4];
-assign obj1_cs = objram_cs & ~fix_addr[0];
-assign obj2_cs = objram_cs &  fix_addr[0];
 
 always @* begin
     prom_we = 0;
     prom_we[ prog_addr[9:8] ] = prom_en;
+    if( prom_we[0] && prog_addr[7:5]!=0 ) prom_we = 0;
 end
 
 jtkicker_vtimer #(.LAYOUT(LAYOUT)) u_vtimer(
@@ -112,13 +106,13 @@ jtkicker_scroll #(.LAYOUT(LAYOUT),.NOSCROLL(1)) u_scroll(
     .pxl_cen    ( pxl_cen   ),
 
     // CPU interface
-    .cpu_addr   ( cpu_addr  ),
+    .cpu_addr   ( vscr_addr ),
     .cpu_dout   ( cpu_dout  ),
     .cpu_rnw    ( cpu_rnw   ),
     .vram_cs    ( vram_cs   ),
     .vscr_cs    ( vscr_cs   ),
     .vram_dout  ( vram_dout ),
-    .vscr_dout  ( vscr_dout ),
+    .vscr_dout  (           ),
 
     // video inputs
     .LHBL       ( LHBL      ),
@@ -137,12 +131,12 @@ jtkicker_scroll #(.LAYOUT(LAYOUT),.NOSCROLL(1)) u_scroll(
     .rom_data   ( scr_data  ),
     .rom_ok     ( scr_ok    ),
 
-    .prio       ( prio      ),
+    .prio       (           ),
     .pxl        ( scr_pxl   ),
     .debug_bus  ( debug_bus )
 );
 
-jtroadf_obj #(.LAYOUT(LAYOUT)) u_obj(
+jtroadf_obj u_obj(
     .rst        ( rst       ),
     .clk        ( clk       ),      // 48 MHz
     .clk24      ( clk24     ),      // 24 MHz
@@ -167,7 +161,7 @@ jtroadf_obj #(.LAYOUT(LAYOUT)) u_obj(
 
     // PROMs
     .prog_data  ( prog_data[3:0] ),
-    .prog_addr  ( prog_addr ),
+    .prog_addr  ( prog_addr[7:0] ),
     .prog_en    ( prom_we[1]),
 
     // SDRAM
@@ -184,7 +178,6 @@ jtyiear_colmix u_colmix(
     .clk        ( clk       ),
 
     .pxl_cen    ( pxl_cen   ),
-    .pal_sel    ( pal_sel   ),
 
     // video inputs
     .obj_pxl    ( obj_pxl   ),
@@ -193,8 +186,8 @@ jtyiear_colmix u_colmix(
     .LVBL       ( LVBL      ),
 
     // PROMs
-    .prog_data  (prog_data[3:0]),
-    .prog_addr  (prog_addr[7:0]),
+    .prog_data  (prog_data  ),
+    .prog_addr  (prog_addr[4:0]),
     .prog_en    (prom_we[0] ),
 
     .red        ( red       ),

@@ -1,0 +1,18 @@
+game:
+  - from: sbaskt
+    get:
+      - jtsbaskt_snd.v
+jtframe:
+  - from: cpu
+    get:
+      - jtframe_z80wait.v
+      - jtframe_z80.v
+      - t80/T80.qip
+  - from: sound
+    get:
+      - jtframe_dcrm.v
+modules:
+  jt:
+    - name: jt89
+  other:
+    - get: [ vlm5030/vlm5030.qip ]
