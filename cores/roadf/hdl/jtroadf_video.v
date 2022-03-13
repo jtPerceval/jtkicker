@@ -73,12 +73,21 @@ wire       LHBL, hinit;
 wire [8:0] vdump, vrender, hdump;
 wire       vscr_cs=0;
 wire [3:0] obj_pxl, scr_pxl;
-reg  [3:0] prom_we;
+reg  [2:0] prom_we;
+wire [9:0] prom_offset;
+
+assign prom_offset = prog_addr[9:0]-10'h20;
 
 always @* begin
     prom_we = 0;
-    prom_we[ prog_addr[9:8] ] = prom_en;
-    if( prom_we[0] && prog_addr[7:5]!=0 ) prom_we = 0;
+    if( prom_en ) begin
+        if( prog_addr[9:0] < 10'h20 )
+            prom_we[0] = 1; // Final colour PROM
+        else if( prog_addr[9:0]<10'h120 )
+            prom_we[1] = 1;
+        else if( prog_addr[9:0]<10'h220 )
+            prom_we[2] = 1;
+    end
 end
 
 jtkicker_vtimer #(.LAYOUT(LAYOUT)) u_vtimer(
@@ -123,7 +132,7 @@ jtkicker_scroll #(.LAYOUT(LAYOUT),.NOSCROLL(1)) u_scroll(
 
     // PROMs
     .prog_data  ( prog_data[3:0] ),
-    .prog_addr  ( prog_addr[7:0] ),
+    .prog_addr  ( prom_offset[7:0] ),
     .prog_en    ( prom_we[2]),
 
     // SDRAM
@@ -161,7 +170,7 @@ jtroadf_obj u_obj(
 
     // PROMs
     .prog_data  ( prog_data[3:0] ),
-    .prog_addr  ( prog_addr[7:0] ),
+    .prog_addr  ( prom_offset[7:0] ),
     .prog_en    ( prom_we[1]),
 
     // SDRAM

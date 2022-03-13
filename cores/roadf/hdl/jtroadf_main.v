@@ -78,7 +78,7 @@ assign rom_addr    = A;
 always @(*) begin
     // the ROM logic has some optional jumpers and the PCB we got
     // had G13 missing, apparently it was never there
-    rom_cs  = VMA && A[15:13]>2 && RnW && VMA; // ROM = 4000 - FFFF
+    rom_cs  = VMA && RnW && A[15:13]>=2; // ROM = 4000 - FFFF
     iow_cs     = 0;
     in5_cs     = 0;
     intst_cs   = 0;
@@ -175,7 +175,7 @@ jtframe_ff u_irq(
 
 // 13 bits is a bit more than needed because
 // half of the SCR RAM is embedded in sys6809
-jtframe_sys6809 #(.RAM_AW(13)) u_cpu(
+jtframe_sys6809 #(.RAM_AW(13),.KONAMI1(1)) u_cpu(
     .rstn       ( ~rst      ),
     .clk        ( clk       ),
     .cen        ( cpu4_cen  ),   // This is normally the input clock to the CPU

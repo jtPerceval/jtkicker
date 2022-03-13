@@ -236,6 +236,7 @@ jtsbaskt_snd u_sound(
     assign pcm_addr=0;
     assign snd=0;
     assign sample=0;
+    assign game_led=0;
 `endif
 
 jtroadf_video u_video(

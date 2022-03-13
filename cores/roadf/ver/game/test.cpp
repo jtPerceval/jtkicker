@@ -312,11 +312,11 @@ void SDRAM::dump() {
         if( dut.rst ) {
             dut.data_read = 0;
             dly[0] = -1;
-            return;
         }
 
         if( dut.prog_we ) {
-            write_bank16( banks[0], dut.prog_addr, dut.prog_data, dut.prog_mask );
+            int16_t data = (dut.prog_data&0xff) | (dut.prog_data<<8);
+            write_bank16( banks[0], dut.prog_addr, data, dut.prog_mask );
             dut.sdram_ack = 1;
             return;
         }
