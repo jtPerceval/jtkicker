@@ -61,7 +61,7 @@ reg  [ 2:0] code_msb;
 reg  [31:0] pxl_data;
 reg  [10:0] rd_addr;
 reg  [ 7:0] hpos, vf;
-reg  [ 6:0] hsum, heff;
+reg  [ 8:0] hsum, heff;
 reg         cur_hf;
 wire        vram_we_low, vram_we_high;
 reg         vflip, hflip;
@@ -76,8 +76,8 @@ assign eff_addr     = cpu_addr[10:0];
 
 always @* begin
     // These are chips D6, D7, C5 and B7 in the video board sch.
-    hsum = hpos[7:1] + (LHBL ? hdump[8:2] : 7'd0) + 7'd1;
-    heff = hsum ^ {1'b0,{6{flip}}};
+    hsum = {hpos[7:1],2'd0} + ( LHBL ? hdump : { ~6'h0, hdump[2:0]} );
+    heff = hsum ^ {1'b0,{8{flip}}};
     code_msb = { attr[6:5], attr[7] };
     vflip    = 0;
     hflip    = attr[4]^flip;
@@ -93,20 +93,20 @@ assign pal_addr =
 always @(posedge clk, posedge rst) begin
     if( rst ) begin
         hpos <= 0;
-        vf <= 0;
+        vf   <= 0;
     end else begin
-        if( (pxl_cen && hdump[2:0]==7) || !LHBL )
-            rd_addr <= { vf[7:3], heff[6:1] }; // 5+6 = 11
+        if( pxl_cen && heff[2:0]==7 )
+            rd_addr <= { vf[7:3], heff[8:3] }; // 5+6 = 11
         if( scr_we  ) hpos <= scr_din;
         vf <= {8{flip}} ^ vdump;
     end
 end
 
 always @(posedge clk) if(pxl_cen) begin
-    if( hdump[2:0]==0 ) begin
+    if( heff[2:0]==0 ) begin
         rom_addr <= { code_msb, code, vf[2:0]^{3{vflip}} }; // 2+8+3=13 bits
     end
-    if( hdump[2:0]==4 ) begin // 2 pixel delay to grab data
+    if( heff[2:0]==4 ) begin // 2 pixel delay to grab data
         pxl_data <= {
             rom_data[27], rom_data[31], rom_data[19], rom_data[23],
             rom_data[26], rom_data[30], rom_data[18], rom_data[22],
