@@ -28,14 +28,14 @@ delete = [ "Unused", "Unknown" ]
 regions = [
     { name="maincpu" },
     { name="audiocpu" },
-    { name="gfx1", width=16, no_offset=true, start=$SCR_START },
-    { name="gfx2", width=16, no_offset=true, Sort_even=true, start=$OBJ_START },
+    { name="gfx2", width=16, no_offset=true, Sort_even=true, start=$SCR_START },
+    { name="gfx1", width=16, no_offset=true, start=$OBJ_START },
     { name="vlm", reverse=true, start=$PCM_START },
     { name="proms", start=$PROM_START            },
 ]
 
 order = [
-    "maincpu", "audiocpu", "gfx1", "gfx2", "vlm", "proms"
+    "maincpu", "audiocpu", "gfx2", "gfx1", "vlm", "proms"
 ]
 
 

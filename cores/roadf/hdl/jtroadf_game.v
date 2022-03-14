@@ -48,7 +48,7 @@ module jtroadf_game(
     input   [24:0]  ioctl_addr,
     input   [ 7:0]  ioctl_dout,
     input           ioctl_wr,
-    output     [21:0] prog_addr,
+    output reg [21:0] prog_addr,
     output reg [ 7:0] prog_data,
     output   [ 1:0] prog_mask,
     output          prog_we,
@@ -145,14 +145,18 @@ jtframe_cen3p57 #(.CLK24(1)) u_cen3p57(
 );
 
 wire [ 7:0] nc, pre_data;
+wire [21:0] pre_addr;
+wire        is_scr;
 
+assign is_scr   = ioctl_addr[21:0] >= SCR_START && ioctl_addr[21:0]<OBJ_START;
 assign pxl2_cen = cen_base[0]; // ~12MHz
 assign pxl_cen  = cen_base[1]; // ~ 6MHz
 
 always @(*) begin
     prog_data = pre_data;
-    if( ioctl_addr[21:0] >= SCR_START && ioctl_addr[21:0]<PCM_START ) begin
-        prog_data = { pre_data[3:0], pre_data[7:4] };
+    prog_addr = pre_addr;
+    if( is_scr ) begin
+        prog_addr[3:0] = { pre_addr[2:0], ~pre_addr[3] };
     end
 end
 
@@ -296,7 +300,7 @@ u_dwnld(
     .ioctl_addr     ( ioctl_addr    ),
     .ioctl_dout     ( ioctl_dout    ),
     .ioctl_wr       ( ioctl_wr      ),
-    .prog_addr      ( prog_addr     ),
+    .prog_addr      ( pre_addr      ),
     .prog_data      ( {nc,pre_data} ),
     .prog_mask      ( prog_mask     ), // active low
     .prog_we        ( prog_we       ),

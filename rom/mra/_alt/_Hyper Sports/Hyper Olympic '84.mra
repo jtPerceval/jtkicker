@@ -24,7 +24,7 @@
     <name>Hyper Olympic &apos;84</name>
     <setname>hpolym84</setname>
     <rbf>jtroadf</rbf>
-    <mameversion>0237</mameversion>
+    <mameversion>0232</mameversion>
     <year>1984</year>
     <manufacturer>Konami</manufacturer>
     <players>4</players>
@@ -44,7 +44,17 @@
         <!-- audiocpu - starts at 0x10000 -->
         <part name="c10" crc="3dc1a6ff"/>
         <part name="c09" crc="9b525c3e"/>
-        <!-- gfx1 - starts at 0x14000 -->
+        <!-- gfx2 - starts at 0x14000 -->
+        <interleave output="16">
+            <part name="c26" crc="a6897eac" map="01"/>
+            <part name="c22" crc="ed9271a0" map="10"/>
+        </interleave>
+        <interleave output="16">
+            <part name="330e24.bin" crc="f9bbfe1d" map="01"/>
+            <part name="330e20.bin" crc="29969b92" map="10"/>
+        </interleave>
+        <part repeat="0x4000"> FF</part>
+        <!-- gfx1 - starts at 0x20000 -->
         <interleave output="16">
             <part name="c14" crc="c72d63be" map="01"/>
             <part name="c13" crc="76565608" map="10"/>
@@ -61,16 +71,6 @@
             <part name="c16" crc="d7ff9f2b" map="01"/>
             <part name="c15" crc="f3d454e6" map="10"/>
         </interleave>
-        <!-- gfx2 - starts at 0x24000 -->
-        <interleave output="16">
-            <part name="c26" crc="a6897eac" map="01"/>
-            <part name="c22" crc="ed9271a0" map="10"/>
-        </interleave>
-        <interleave output="16">
-            <part name="330e24.bin" crc="f9bbfe1d" map="01"/>
-            <part name="330e20.bin" crc="29969b92" map="10"/>
-        </interleave>
-        <part repeat="0x4000"> FF</part>
         <!-- vlm - starts at 0x30000 -->
         <interleave output="16">
             <part name="c08" crc="e8f8ea78" map="12"/>

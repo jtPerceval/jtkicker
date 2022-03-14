@@ -59,6 +59,7 @@ module jtkicker_scroll(
 // 1  Yie Ar Kungfu
 // 2  Super Basketball
 // 3  Mikie
+// 4  Road Fighter
 
 parameter BYPASS_PROM=0, NOSCROLL=0;
 parameter LAYOUT = !NOSCROLL ? 0 : 1;

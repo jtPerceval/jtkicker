@@ -67,7 +67,7 @@ wire        RnW, irq_n, nmi_n;
 wire        irq_trigger;
 reg         irq_clrn, ram_cs;
 reg         ior_cs, in5_cs, intst_cs, intst_l,
-            color_cs, iow_cs, intshow_cs;
+            iow_cs, intshow_cs;
 // reg         afe_cs; // watchdog
 wire        VMA;
 
@@ -83,7 +83,6 @@ always @(*) begin
     in5_cs     = 0;
     intst_cs   = 0;
     ior_cs     = 0;
-    color_cs   = 0;
     intshow_cs = 0;
     objram_cs  = 0;
     vram_cs    = 0;
