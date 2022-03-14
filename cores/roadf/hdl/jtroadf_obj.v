@@ -50,9 +50,13 @@ module jtroadf_obj(
     input               hinit,
     input               LHBL,
     input               LVBL,
-    input         [7:0] vrender,
+    input         [8:0] vdump,
     input         [8:0] hdump,
     input               flip,
+
+    // Row scroll
+    output reg    [7:0] hpos,
+    output reg          scr_we,
 
     // PROMs
     input         [3:0] prog_data,
@@ -81,12 +85,14 @@ reg  [ 6:0] scan_addr;  // although the DMA bus in the schematics has 8 bits
     // to zero at the beginning of each raster line
 reg  [ 9:0] eff_scan;
 wire [ 3:0] pal_data;
+reg         scr_rd;
 
 assign obj_dout = obj_frame ? obj1_dout : obj2_dout;
 assign obj1_we  = obj_cs &  obj_frame & ~cpu_rnw;
 assign obj2_we  = obj_cs & ~obj_frame & ~cpu_rnw;
 assign scan_dout= obj_frame ? rd2_dout : rd1_dout;
 
+// two sprite tables
 jtframe_dual_ram #(.simfile("obj.bin")) u_hi(
     // Port 0, CPU
     .clk0   ( clk24         ),
@@ -131,22 +137,22 @@ reg  [3:0] dr_v;
 reg        dr_start;
 wire [7:0] ydiff;
 reg  [7:0] dr_y, ypos;
-wire [7:0] vrf;
+wire [7:0] vdf;
 wire       adj;
 
 reg        hflip, vflip;
 wire       dr_busy;
 wire [3:0] pal;
 
-assign vrf    = vrender ^ {8{flip}};
-assign inzone = dr_y>=vrf && dr_y<(vrf+8'h10);
-assign ydiff  = vrf-dr_y-8'd1;
+assign vdf    = vdump[7:0] ^ {8{flip}};
+assign inzone = dr_y>=vdf && dr_y<(vdf+8'h10);
+assign ydiff  = vdf-dr_y-8'd1;
 assign done   = scan_addr[6:2]==24;
 assign pal    = dr_attr[3:0];
 assign adj    = 0;
 
 always @* begin
-    eff_scan = {3'd0,scan_addr};
+    eff_scan = { 2'd0, scr_rd, scan_addr};
     hflip = dr_attr[6];
     vflip = dr_attr[7];
     dr_y   = ~ypos + ( adj ? ( flip ? 8'hff : 8'h1 ) : 8'h0 );
@@ -163,13 +169,17 @@ always @(posedge clk, posedge rst) begin
     if( rst ) begin
         scan_st  <= 0;
         dr_start <= 0;
+        scr_rd   <= 0;
+        scr_we   <= 0;
     end else if( cen2 ) begin
         dr_start <= 0;
         if( cnt_en ) scan_addr <= scan_addr+1'd1;
+        scr_we   <= 0;
         case( scan_st )
             0: if( hinit_x ) begin
-                scan_addr <= 0;
-                scan_st   <= 1;
+                scr_rd    <= 1;
+                scan_addr <= { 1'b1, vdf[7:3], vdump[8] };
+                scan_st   <= 6;
                 cnt_en    <= 1;
             end
             1: if(!dr_busy) begin
@@ -196,6 +206,13 @@ always @(posedge clk, posedge rst) begin
             5: begin
                 scan_st <= 1; // give time to dr_busy to rise
                 cnt_en  <= 1;
+            end
+            6: begin // Reads the row scroll value
+                scr_we   <= 1;
+                hpos     <= scan_dout;
+                scr_rd   <= 0;
+                scan_addr<= 0;
+                scan_st  <= 1;
             end
         endcase
     end

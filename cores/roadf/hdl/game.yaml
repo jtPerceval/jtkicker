@@ -4,6 +4,7 @@ game:
       - jtroadf_game.v
       - jtroadf_main.v
       - jtroadf_video.v
+      - jtroadf_scroll.v
       - jtroadf_obj.v
   - from: yiear
     get:

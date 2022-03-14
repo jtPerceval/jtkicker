@@ -309,6 +309,8 @@ u_dwnld(
     .header         (               )
 );
 
+/* verilator tracing_off */
+
 jtframe_rom #(
     .SLOT0_AW    ( 14              ),
     .SLOT0_DW    ( 32              ),

@@ -67,7 +67,7 @@ wire        RnW, irq_n, nmi_n;
 wire        irq_trigger;
 reg         irq_clrn, ram_cs;
 reg         ior_cs, in5_cs, intst_cs, intst_l,
-            iow_cs, intshow_cs;
+            iow_cs;
 // reg         afe_cs; // watchdog
 wire        VMA;
 
@@ -83,35 +83,26 @@ always @(*) begin
     in5_cs     = 0;
     intst_cs   = 0;
     ior_cs     = 0;
-    intshow_cs = 0;
     objram_cs  = 0;
     vram_cs    = 0;
     ram_cs     = 0;
     snd_data_cs     = 0;
 
     if( VMA ) begin
-        if( A[15:13]==1 )
+        if( A[15:13]==1 ) // chip H16
             case( A[12:11] ) // chip H13
-                0: begin
-                    // Half othe SCR RAM is repurposed as
-                    // regular RAM in the original board, based
-                    // on bit 5.
-                    if( A[5] )
-                        ram_cs = 1;
-                    else
-                        vram_cs = 1; // Divided down in two signals originally: V1_cs and V2_cs
-                end
+                0,1: vram_cs = 1; // Divided down in two signals originally: V1_cs and V2_cs
                 2,3: ram_cs = 1; // 3 is the NVRAM (2kB)
             endcase
         if( A[15:13]==0 )
             case( A[12:10] ) // chip H14
                 4: objram_cs = 1;
                 5: case( A[9:7]) // chip H8
-                    0: intst_cs= 1; // intst / afe, two signals on board B, the same signal on board A
-                    1: iow_cs  = 1;
-                    2: snd_data_cs  = 1;
-                    4: in5_cs  = 1;
-                    5: ior_cs  = 1;
+                    0: intst_cs    = 1; // intst / afe, two signals on board B, the same signal on board A
+                    1: iow_cs      = 1;
+                    2: snd_data_cs = 1;
+                    4: in5_cs      = 1;
+                    5: ior_cs      = 1;
                     default:;
                 endcase
                 default:;
@@ -172,9 +163,7 @@ jtframe_ff u_irq(
     .sigedge  ( irq_trigger )     // signal whose edge will trigger the FF
 );
 
-// 13 bits is a bit more than needed because
-// half of the SCR RAM is embedded in sys6809
-jtframe_sys6809 #(.RAM_AW(13),.KONAMI1(1)) u_cpu(
+jtframe_sys6809 #(.RAM_AW(12),.KONAMI1(1)) u_cpu(
     .rstn       ( ~rst      ),
     .clk        ( clk       ),
     .cen        ( cpu4_cen  ),   // This is normally the input clock to the CPU

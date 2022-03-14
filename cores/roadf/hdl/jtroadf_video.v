@@ -71,12 +71,14 @@ localparam LAYOUT=4;
 
 wire       LHBL, hinit;
 wire [8:0] vdump, vrender, hdump;
-wire       vscr_cs=0;
+wire [7:0] hpos;
+wire       scr_we;
 wire [3:0] obj_pxl, scr_pxl;
 reg  [2:0] prom_we;
 wire [9:0] prom_offset;
 
 assign prom_offset = prog_addr[9:0]-10'h20;
+assign hinit = hdump==9'h120; // sch. F2 (video board)
 
 always @* begin
     prom_we = 0;
@@ -96,18 +98,14 @@ jtkicker_vtimer #(.LAYOUT(LAYOUT)) u_vtimer(
     .vdump  ( vdump     ),
     .vrender( vrender   ),
     .hdump  ( hdump     ),
-    .hinit  ( hinit     ),
+    .hinit  (           ),
     .LHBL   ( LHBL      ),
     .LVBL   ( LVBL      ),
     .HS     ( HS        ),
     .VS     ( VS        )
 );
 
-wire [ 7:0] vdumpx = vdump[7:0]+8'd1;
-wire [10:0] vscr_addr = { cpu_addr[11:6], cpu_addr[4:0] }; // bit 5 is always low for video output
-    // the memory at bit 5 is considered normal RAM and handled in main
-
-jtkicker_scroll #(.LAYOUT(LAYOUT),.NOSCROLL(1)) u_scroll(
+jtroadf_scroll u_scroll(
     .rst        ( rst       ),
     .clk        ( clk       ),
     .clk24      ( clk24     ),
@@ -115,18 +113,20 @@ jtkicker_scroll #(.LAYOUT(LAYOUT),.NOSCROLL(1)) u_scroll(
     .pxl_cen    ( pxl_cen   ),
 
     // CPU interface
-    .cpu_addr   ( vscr_addr ),
+    .cpu_addr   ( cpu_addr  ),
     .cpu_dout   ( cpu_dout  ),
     .cpu_rnw    ( cpu_rnw   ),
     .vram_cs    ( vram_cs   ),
-    .vscr_cs    ( vscr_cs   ),
     .vram_dout  ( vram_dout ),
-    .vscr_dout  (           ),
+
+    // Row scroll
+    .scr_we     ( scr_we    ),
+    .scr_din    ( hpos      ),
 
     // video inputs
     .LHBL       ( LHBL      ),
     .LVBL       ( LVBL      ),
-    .vdump      ( vdumpx    ),
+    .vdump      ( vdump[7:0]),
     .hdump      ( hdump     ),
     .flip       ( flip      ),
 
@@ -140,7 +140,6 @@ jtkicker_scroll #(.LAYOUT(LAYOUT),.NOSCROLL(1)) u_scroll(
     .rom_data   ( scr_data  ),
     .rom_ok     ( scr_ok    ),
 
-    .prio       (           ),
     .pxl        ( scr_pxl   ),
     .debug_bus  ( debug_bus )
 );
@@ -164,9 +163,13 @@ jtroadf_obj u_obj(
     .hinit      ( hinit     ),
     .LHBL       ( LHBL      ),
     .LVBL       ( LVBL      ),
-    .vrender    (vrender[7:0]),
+    .vdump      ( vdump     ),
     .hdump      ( hdump     ),
     .flip       ( flip      ),
+
+    // row scroll
+    .hpos       ( hpos      ),
+    .scr_we     ( scr_we    ),
 
     // PROMs
     .prog_data  ( prog_data[3:0] ),
