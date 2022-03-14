@@ -76,8 +76,8 @@ assign eff_addr     = cpu_addr[10:0];
 
 always @* begin
     hdf = flip ? (~hdump[7:0]-8'd3) : hdump[7:0];
-    heff = hdf + ~hpos + 8'd1;
-    code_msb = {1'b0,attr[5]};
+    heff = hdf + hpos + 8'd1;
+    code_msb = { attr[5], attr[7] };
     vflip    = 0;
     hflip    = attr[4];
     pal_msb  = attr[3:0];

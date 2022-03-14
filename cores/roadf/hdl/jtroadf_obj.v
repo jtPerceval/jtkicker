@@ -127,8 +127,9 @@ jtframe_dual_ram #(.simfile("obj.bin")) u_low(
 localparam [4:0] HALF = 5'd19;
 
 reg        cen2=0;
-wire       inzone, done;
-reg        hinit_x, cnt_en;
+wire       done;
+reg        inzone;
+reg        hinit_x;
 reg  [2:0] scan_st;
 
 reg  [7:0] dr_attr, dr_xpos;
@@ -145,7 +146,6 @@ wire       dr_busy;
 wire [3:0] pal;
 
 assign vdf    = vdump[7:0] ^ {8{flip}};
-assign inzone = dr_y>=vdf && dr_y<(vdf+8'h10);
 assign ydiff  = vdf-dr_y-8'd1;
 assign done   = scan_addr[6:2]==24;
 assign pal    = dr_attr[3:0];
@@ -173,39 +173,39 @@ always @(posedge clk, posedge rst) begin
         scr_we   <= 0;
     end else if( cen2 ) begin
         dr_start <= 0;
-        if( cnt_en ) scan_addr <= scan_addr+1'd1;
         scr_we   <= 0;
         case( scan_st )
             0: if( hinit_x ) begin
                 scr_rd    <= 1;
                 scan_addr <= { 1'b1, vdf[7:3], vdump[8] };
                 scan_st   <= 6;
-                cnt_en    <= 1;
             end
             1: if(!dr_busy) begin
-                dr_xpos   <= scan_dout;
                 dr_attr   <= scan_dout;
                 scan_st   <= 2;
+                scan_addr <= scan_addr+1'd1;
             end
             2: begin
-                dr_code <= { dr_attr[5], scan_dout };
+                ypos <= scan_dout;
                 scan_st <= 3;
+                scan_addr <= scan_addr+1'd1;
             end
             3: begin
-                ypos <= scan_dout;
-                scan_st <= 4;
-                cnt_en  <= 0;
+                dr_code   <= { dr_attr[5], scan_dout };
+                dr_v      <= ydiff[3:0];
+                inzone    <= dr_y>=vdf && dr_y<(vdf+8'h10);
+                scan_st   <= 4;
+                scan_addr <= scan_addr+1'd1;
             end
             4: begin
-                dr_v      <= ydiff[3:0];
-                if( inzone ) begin
-                    dr_start <= 1;
-                end
-                scan_st   <= done ? 0 : 4;
+                dr_xpos   <= scan_dout;
+                scan_st   <= 5;
+                dr_start  <= inzone;
+                scan_addr <= scan_addr+1'd1;
             end
-            5: begin
-                scan_st <= 1; // give time to dr_busy to rise
-                cnt_en  <= 1;
+            5: begin // give time to dr_busy to rise
+                dr_start<= 0;
+                scan_st <= done ? 0 : 1;
             end
             6: begin // Reads the row scroll value
                 scr_we   <= 1;
