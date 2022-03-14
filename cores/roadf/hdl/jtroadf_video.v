@@ -45,7 +45,7 @@ module jtroadf_video(
     input               prom_en,
 
     // Scroll
-    output       [12:0] scr_addr,
+    output       [13:0] scr_addr,
     input        [31:0] scr_data,
     input               scr_ok,
 
@@ -160,7 +160,7 @@ jtroadf_obj u_obj(
     .obj_frame  ( obj_frame ),
 
     // video inputs
-    .hinit      ( hinit     ),
+    .hinit      ( HS        ),
     .LHBL       ( LHBL      ),
     .LVBL       ( LVBL      ),
     .vdump      ( vdump     ),
@@ -186,7 +186,7 @@ jtroadf_obj u_obj(
     .pxl        ( obj_pxl   )
 );
 
-jtyiear_colmix u_colmix(
+jtyiear_colmix #(.BLANK_DLY(9)) u_colmix(
     .clk        ( clk       ),
 
     .pxl_cen    ( pxl_cen   ),

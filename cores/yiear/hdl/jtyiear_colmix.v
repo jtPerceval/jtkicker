@@ -40,6 +40,8 @@ module jtyiear_colmix(
     input         [3:0] gfx_en
 );
 
+parameter BLANK_DLY=8;
+
 reg  [4:0] mux;
 wire       obj_blank = obj_pxl[3:0]==0 || !gfx_en[3];
 wire [3:0] scr_gated = gfx_en[0] ? scr_pxl : 4'd0;
@@ -72,7 +74,7 @@ jtframe_prom #(
 );
 
 
-jtframe_blank #(.DLY(8),.DW(8)) u_blank(
+jtframe_blank #(.DLY(BLANK_DLY),.DW(8)) u_blank(
     .clk        ( clk       ),
     .pxl_cen    ( pxl_cen   ),
     .LHBL       ( LHBL      ),

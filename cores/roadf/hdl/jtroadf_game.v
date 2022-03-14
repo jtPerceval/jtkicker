@@ -81,7 +81,7 @@ localparam [24:0] PROM_START  =  `PROM_START;
 
 wire        main_cs, main_ok;
 
-wire [12:0] scr_addr;
+wire [13:0] scr_addr;
 wire [13:0] obj_addr;
 wire [31:0] scr_data, obj_data;
 wire        scr_ok, obj_ok, objrom_cs;
@@ -316,7 +316,7 @@ u_dwnld(
 /* verilator tracing_off */
 
 jtframe_rom #(
-    .SLOT0_AW    ( 14              ),
+    .SLOT0_AW    ( 15              ),
     .SLOT0_DW    ( 32              ),
     .SLOT0_OFFSET( SCR_START>>1    ),
 

@@ -147,7 +147,7 @@ wire [3:0] pal;
 
 assign vdf    = vdump[7:0] ^ {8{flip}};
 assign ydiff  = vdf-dr_y-8'd1;
-assign done   = scan_addr[6:2]==24;
+assign done   = scan_addr[6:2]==5'h1f;
 assign pal    = dr_attr[3:0];
 assign adj    = 0;
 
@@ -183,25 +183,25 @@ always @(posedge clk, posedge rst) begin
             1: if(!dr_busy) begin
                 dr_attr   <= scan_dout;
                 scan_st   <= 2;
-                scan_addr <= scan_addr+1'd1;
+                scan_addr[1:0] <= scan_addr[1:0]+1'd1;
             end
             2: begin
                 ypos <= scan_dout;
                 scan_st <= 3;
-                scan_addr <= scan_addr+1'd1;
+                scan_addr[1:0] <= scan_addr[1:0]+1'd1;
             end
             3: begin
                 dr_code   <= { dr_attr[5], scan_dout };
                 dr_v      <= ydiff[3:0];
                 inzone    <= dr_y>=vdf && dr_y<(vdf+8'h10);
                 scan_st   <= 4;
-                scan_addr <= scan_addr+1'd1;
+                scan_addr[1:0] <= scan_addr[1:0]+1'd1;
             end
             4: begin
                 dr_xpos   <= scan_dout;
                 scan_st   <= 5;
                 dr_start  <= inzone;
-                scan_addr <= scan_addr+1'd1;
+                scan_addr <= { scan_addr[6:2]-5'd1,2'b0};
             end
             5: begin // give time to dr_busy to rise
                 dr_start<= 0;
@@ -211,7 +211,7 @@ always @(posedge clk, posedge rst) begin
                 scr_we   <= 1;
                 hpos     <= scan_dout;
                 scr_rd   <= 0;
-                scan_addr<= 0;
+                scan_addr<= 7'd23<<2;
                 scan_st  <= 1;
             end
         endcase

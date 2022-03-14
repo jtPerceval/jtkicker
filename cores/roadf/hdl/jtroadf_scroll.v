@@ -47,7 +47,7 @@ module jtroadf_scroll(
     input               prog_en,
 
     // SDRAM
-    output reg   [12:0] rom_addr,
+    output reg   [13:0] rom_addr,
     input        [31:0] rom_data,
     input               rom_ok,
 
@@ -58,7 +58,7 @@ module jtroadf_scroll(
 wire [ 7:0] code, attr, vram_high, vram_low, pal_addr;
 reg  [ 3:0] pal_msb;
 reg  [ 3:0] cur_pal;
-reg  [ 1:0] code_msb;
+reg  [ 2:0] code_msb;
 reg  [31:0] pxl_data;
 wire [10:0] rd_addr;
 reg  [ 7:0] hdf, heff, hpos, vf;
@@ -77,7 +77,7 @@ assign eff_addr     = cpu_addr[10:0];
 always @* begin
     hdf = flip ? (~hdump[7:0]-8'd3) : hdump[7:0];
     heff = hdf + hpos + 8'd1;
-    code_msb = { attr[5], attr[7] };
+    code_msb = { attr[6:5], attr[7] };
     vflip    = 0;
     hflip    = attr[4];
     pal_msb  = attr[3:0];
