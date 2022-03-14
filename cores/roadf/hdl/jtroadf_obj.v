@@ -31,6 +31,15 @@
 // the CPU. obj_frame must mean something, but I cannot
 // make up what it is
 
+// The row scroll is stored in 2-byte words in the
+// upper part of the sprite tables
+// From the second byte, only the LSB is used
+// The two LSBs of the 1st byte are not used
+// The lower byte is latched into device B7
+// and the upper byte directly feed the 085 scroll adder (device C5)
+// Note that the signal called 256V is actually unrelated to
+// the vertical counter
+
 module jtroadf_obj(
     input               rst,
     input               clk,        // 48 MHz
@@ -177,7 +186,7 @@ always @(posedge clk, posedge rst) begin
         case( scan_st )
             0: if( hinit_x ) begin
                 scr_rd    <= 1;
-                scan_addr <= { 1'b1, vdf[7:3], vdump[8] };
+                scan_addr <= { 1'b1, vdf[7:3], 1'b0 };
                 scan_st   <= 6;
             end
             1: if(!dr_busy) begin
@@ -208,11 +217,16 @@ always @(posedge clk, posedge rst) begin
                 scan_st <= done ? 0 : 1;
             end
             6: begin // Reads the row scroll value
-                scr_we   <= 1;
-                hpos     <= scan_dout;
-                scr_rd   <= 0;
-                scan_addr<= 7'd23<<2;
-                scan_st  <= 1;
+                hpos[6:0] <= scan_dout[7:1];
+                scan_st   <= 7;
+                scan_addr[0] <= 1;
+            end
+            7: begin
+                hpos[7]   <= scan_dout[0];
+                scr_rd    <= 0;
+                scr_we    <= 1;
+                scan_addr <= 7'd31<<2;
+                scan_st   <= 1;
             end
         endcase
     end

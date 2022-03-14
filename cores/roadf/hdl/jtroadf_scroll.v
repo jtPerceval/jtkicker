@@ -36,7 +36,6 @@ module jtroadf_scroll(
 
     // video inputs
     input               LHBL,
-    input               LVBL,
     input         [7:0] vdump,
     input         [8:0] hdump,
     input               flip,
@@ -60,8 +59,9 @@ reg  [ 3:0] pal_msb;
 reg  [ 3:0] cur_pal;
 reg  [ 2:0] code_msb;
 reg  [31:0] pxl_data;
-wire [10:0] rd_addr;
-reg  [ 7:0] hdf, heff, hpos, vf;
+reg  [10:0] rd_addr;
+reg  [ 7:0] hpos, vf;
+reg  [ 6:0] hsum, heff;
 reg         cur_hf;
 wire        vram_we_low, vram_we_high;
 reg         vflip, hflip;
@@ -75,15 +75,15 @@ assign vram_dout    = cpu_addr[11] ? vram_high : vram_low;
 assign eff_addr     = cpu_addr[10:0];
 
 always @* begin
-    hdf = flip ? (~hdump[7:0]-8'd3) : hdump[7:0];
-    heff = hdf + hpos + 8'd1;
+    // These are chips D6, D7, C5 and B7 in the video board sch.
+    hsum = hpos[7:1] + (LHBL ? hdump[8:2] : 7'd0) + 7'd1;
+    heff = hsum ^ {1'b0,{6{flip}}};
     code_msb = { attr[6:5], attr[7] };
     vflip    = 0;
-    hflip    = attr[4];
+    hflip    = attr[4]^flip;
     pal_msb  = attr[3:0];
 end
 
-assign rd_addr  = { vf[7:3], 1'b0, heff[7:3] }; // 5+1+5 = 11
 
 assign pal_addr =
     //flip && hdump<9'o20 ? 8'd0 :   // removes the first columns in flip mode
@@ -95,6 +95,8 @@ always @(posedge clk, posedge rst) begin
         hpos <= 0;
         vf <= 0;
     end else begin
+        if( (pxl_cen && hdump[2:0]==7) || !LHBL )
+            rd_addr <= { vf[7:3], heff[6:1] }; // 5+6 = 11
         if( scr_we  ) hpos <= scr_din;
         vf <= {8{flip}} ^ vdump;
     end

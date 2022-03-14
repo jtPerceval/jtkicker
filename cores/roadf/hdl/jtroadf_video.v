@@ -69,7 +69,7 @@ module jtroadf_video(
 
 localparam LAYOUT=4;
 
-wire       LHBL, hinit;
+wire       LHBL;
 wire [8:0] vdump, vrender, hdump;
 wire [7:0] hpos;
 wire       scr_we;
@@ -78,7 +78,7 @@ reg  [2:0] prom_we;
 wire [9:0] prom_offset;
 
 assign prom_offset = prog_addr[9:0]-10'h20;
-assign hinit = hdump==9'h120; // sch. F2 (video board)
+// assign hinit = hdump==9'h120; // sch. F2 (video board)
 
 always @* begin
     prom_we = 0;
@@ -125,7 +125,6 @@ jtroadf_scroll u_scroll(
 
     // video inputs
     .LHBL       ( LHBL      ),
-    .LVBL       ( LVBL      ),
     .vdump      ( vdump[7:0]),
     .hdump      ( hdump     ),
     .flip       ( flip      ),
@@ -160,7 +159,7 @@ jtroadf_obj u_obj(
     .obj_frame  ( obj_frame ),
 
     // video inputs
-    .hinit      ( HS        ),
+    .hinit      ( HS        ), // to ensure that vdump is right for the row scroll
     .LHBL       ( LHBL      ),
     .LVBL       ( LVBL      ),
     .vdump      ( vdump     ),
