@@ -12,7 +12,7 @@ sourcefile="hyperspt.cpp"
 [buttons]
 core=2 # max number of buttons supported by the core
 names=[
-    { names="Button A,Button B" }
+    { names="Low gear,High gear" }
 ]
 
 [rbf]

@@ -81,5 +81,5 @@
         <dip name="Cabinet" bits="14" ids="Upright,Cocktail"/>
         <dip name="Demo Sounds" bits="15" ids="On,Off"/>
     </switches>
-    <buttons names="Button A,Button B,Start,Coin,Core credits" default="Y,X,Start,Select,-" count="2"/>
+    <buttons names="Low gear,High gear,Start,Coin,Core credits" default="Y,X,Start,Select,-" count="2"/>
 </misterromdescription>
