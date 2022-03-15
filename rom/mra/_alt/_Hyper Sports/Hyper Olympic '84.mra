@@ -57,18 +57,18 @@
         <!-- gfx1 - starts at 0x20000 -->
         <interleave output="16">
             <part name="c14" crc="c72d63be" map="01"/>
-            <part name="c13" crc="76565608" map="10"/>
+            <part name="c18" crc="ed25e669" map="10"/>
         </interleave>
         <interleave output="16">
-            <part name="c12" crc="74d2cc69" map="01"/>
-            <part name="c11" crc="66cbcb4d" map="10"/>
-        </interleave>
-        <interleave output="16">
-            <part name="c18" crc="ed25e669" map="01"/>
+            <part name="c13" crc="76565608" map="01"/>
             <part name="c17" crc="b145b39f" map="10"/>
         </interleave>
         <interleave output="16">
-            <part name="c16" crc="d7ff9f2b" map="01"/>
+            <part name="c12" crc="74d2cc69" map="01"/>
+            <part name="c16" crc="d7ff9f2b" map="10"/>
+        </interleave>
+        <interleave output="16">
+            <part name="c11" crc="66cbcb4d" map="01"/>
             <part name="c15" crc="f3d454e6" map="10"/>
         </interleave>
         <!-- vlm - starts at 0x30000 -->
