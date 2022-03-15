@@ -216,7 +216,9 @@ always @(posedge clk, posedge rst) begin
                 dr_start<= 0;
                 scan_st <= done ? 0 : 1;
             end
-            6: begin // Reads the row scroll value
+            // --------------------------
+            // Reads the row scroll value
+            6: begin
                 hpos[6:0] <= scan_dout[7:1];
                 scan_st   <= 7;
                 scan_addr[0] <= 1;
