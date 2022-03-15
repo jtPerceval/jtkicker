@@ -76,7 +76,7 @@ assign eff_addr     = cpu_addr[10:0];
 
 always @* begin
     // These are chips D6, D7, C5 and B7 in the video board sch.
-    hsum = {hpos[7:1],2'd0} + ( LHBL ? hdump : { ~6'h0, hdump[2:0]} );
+    hsum = {hpos[7:1],2'd0} + ( LHBL ? hdump : { ~6'h0, hdump[2:0]} ) + 9'd8;
     heff = hsum ^ {1'b0,{8{flip}}};
     code_msb = { attr[6:5], attr[7] };
     vflip    = 0;
