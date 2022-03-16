@@ -26,6 +26,7 @@ module jtroadf_video(
 
     // configuration
     input               flip,
+    input               is_hyper,
 
     // CPU interface
     input        [11:0] cpu_addr,
@@ -128,6 +129,7 @@ jtroadf_scroll u_scroll(
     .vdump      ( vdump[7:0]),
     .hdump      ( hdump     ),
     .flip       ( flip      ),
+    .is_hyper   ( is_hyper | debug_bus[0] ),
 
     // PROMs
     .prog_data  ( prog_data[3:0] ),

@@ -40,8 +40,3 @@ order = [
     "maincpu", "audiocpu", "gfx2", "gfx1", "vlm", "proms"
 ]
 
-blanks = [
-    { machine="hyperspt", region="gfx2", offset=0x4000 , len=0x2000 }
-]
-
-

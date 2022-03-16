@@ -110,7 +110,7 @@ wire [15:0] pcm_addr;
 wire [ 7:0] pcm_data;
 wire        pcm_ok;
 
-wire        m2s_on, m2s_data;
+wire        m2s_irq, m2s_data;
 
 assign prog_rd    = 0;
 assign dwnld_busy = downloading;
@@ -172,7 +172,7 @@ jtsbaskt_main u_main(
     .obj_frame      ( obj_frame     ),
     // Sound control
     .snd_data_cs    ( m2s_data      ),
-    .snd_on_cs      ( m2s_on        ),
+    .snd_on_cs      ( m2s_irq       ),
     // GFX configuration
     .pal_sel        ( pal_sel       ),
     .flip           ( flip          ),
@@ -209,7 +209,7 @@ jtsbaskt_snd u_sound(
     // From main CPU
     .main_dout  ( cpu_dout  ),
     .m2s_data   ( m2s_data  ),
-    .m2s_on     ( m2s_on    ),
+    .m2s_irq    ( m2s_irq   ),
     // Sound
     .pcm_addr   ( pcm_addr  ),
     .pcm_data   ( pcm_data  ),

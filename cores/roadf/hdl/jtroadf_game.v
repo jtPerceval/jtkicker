@@ -120,6 +120,7 @@ assign dip_flip = ~flip;
 wire [ 7:0] nc, pre_data;
 wire [21:0] pre_addr;
 wire        is_scr, is_obj;
+reg         is_hyper=0;
 
 assign is_scr   = ioctl_addr[21:0] >= SCR_START && ioctl_addr[21:0]<OBJ_START;
 assign is_obj   = ioctl_addr[21:0] >= OBJ_START && ioctl_addr[21:0]<PCM_START;
@@ -133,6 +134,11 @@ always @(*) begin
     if( is_obj ) begin
         prog_addr[4:0] = { pre_addr[2:0], ~pre_addr[4], ~pre_addr[3] };
     end
+end
+
+always @(posedge clk) begin
+    if( ioctl_addr[21:0]==PROM_START[21:0]+22'h1 && ioctl_wr && downloading )
+        is_hyper <= &ioctl_dout;
 end
 
 jtkicker_clocks u_clocks(
@@ -243,6 +249,7 @@ jtroadf_video u_video(
 
     // configuration
     .flip       ( flip      ),
+    .is_hyper   ( is_hyper  ),
 
     // CPU interface
     .cpu_addr   ( main_addr[11:0]  ),

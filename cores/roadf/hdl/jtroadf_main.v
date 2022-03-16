@@ -151,13 +151,13 @@ always @(posedge clk) begin
     end
 end
 
-`ifdef SIMULATION
-reg clrnl;
-always @(posedge clk) begin
-    clrnl <= irq_clrn;
-    if( !irq_clrn && clrnl && !irq_n ) $display("IRQ cleared");
-end
-`endif
+// `ifdef SIMULATION
+// reg clrnl;
+// always @(posedge clk) begin
+//     clrnl <= irq_clrn;
+//     if( !irq_clrn && clrnl && !irq_n ) $display("IRQ cleared");
+// end
+// `endif
 
 jtframe_ff u_irq(
     .rst      ( rst         ),

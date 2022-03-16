@@ -24,7 +24,7 @@
     <name>Hyper Olympic &apos;84</name>
     <setname>hpolym84</setname>
     <rbf>jtroadf</rbf>
-    <mameversion>0237</mameversion>
+    <mameversion>0232</mameversion>
     <year>1984</year>
     <manufacturer>Konami</manufacturer>
     <players>4</players>
@@ -49,12 +49,11 @@
             <part name="c26" crc="a6897eac" map="01"/>
             <part name="c22" crc="ed9271a0" map="10"/>
         </interleave>
-        <part repeat="0x2000"> FF</part>
         <interleave output="16">
             <part name="330e24.bin" crc="f9bbfe1d" map="01"/>
             <part name="330e20.bin" crc="29969b92" map="10"/>
         </interleave>
-        <part repeat="0x2000"> FF</part>
+        <part repeat="0x4000"> FF</part>
         <!-- gfx1 - starts at 0x20000 -->
         <interleave output="16">
             <part name="c14" crc="c72d63be" map="01"/>

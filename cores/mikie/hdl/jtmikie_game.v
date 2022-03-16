@@ -108,6 +108,8 @@ wire        snd_cen, psg_cen;
 wire [ 7:0] snd_latch;
 
 wire        m2s_on;
+reg  [24:0] dwn_addr;
+wire [ 7:0] nc, pre_data;
 
 assign prog_rd    = 0;
 assign dwnld_busy = downloading;
