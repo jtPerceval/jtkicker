@@ -90,7 +90,6 @@ wire        snd_ok, snd_cs;
 
 wire [ 7:0] main_data;
 wire [15:0] main_addr;
-wire [ 3:0] cen_base;
 
 wire [ 7:0] dipsw_a, dipsw_b;
 wire [ 1:0] dipsw_c;
@@ -114,32 +113,6 @@ assign prog_rd    = 0;
 assign dwnld_busy = downloading;
 assign { dipsw_c, dipsw_b, dipsw_a } = dipsw[17:0];
 assign dip_flip = ~flip;
-assign vsync60  = status[13];   // high to use a 6MHz pixel clock, instead of 6.144MHz
-
-// Using an integer divider for the 6.144MHz
-// cen_base will probably help with the video
-// compatibility in MiSTer. MiST seems to be
-// doing well with the fractional divider.
-jtframe_frac_cen #(.W(4)) u_cen (
-    .clk    ( clk       ),
-    .n      ( vsync60 ? 10'd1 : 10'd32    ),
-    .m      ( vsync60 ? 10'd4 : 10'd125   ),
-    .cen    ( cen_base  ),
-    .cenb   (           ) // 180 shifted
-);
-
-jtframe_crossclk_cen u_cpu_cen(
-    .clk_in     ( clk       ),
-    .cen_in     ( pxl2_cen  ),
-    .clk_out    ( clk24     ),
-    .cen_out    ( cpu4_cen  )   // 6MHz
-);
-
-reg  [24:0] dwn_addr;
-wire [ 7:0] nc, pre_data;
-
-assign pxl2_cen = cen_base[0]; // ~12MHz
-assign pxl_cen  = cen_base[1]; // ~ 6MHz
 
 always @(*) begin
     prog_data = pre_data;
@@ -160,6 +133,21 @@ always @(*) begin
         dwn_addr[6:3] =  { ioctl_addr[6], ioctl_addr[3:1] };
     end
 end
+
+jtkicker_clocks u_clocks(
+    .status     ( status    ),
+    // 24 MHz domain
+    .clk24      ( clk24     ),
+    .cpu4_cen   ( cpu4_cen  ),
+    .snd_cen    (           ),
+    .psg_cen    (           ),
+    .ti1_cen    ( ti1_cen   ),
+    .ti2_cen    ( ti2_cen   ),
+    // 48 MHz domain
+    .clk        ( clk       ),
+    .pxl_cen    ( pxl_cen   ),
+    .pxl2_cen   ( pxl2_cen  )
+);
 
 `ifndef NOMAIN
 jtmikie_main u_main(

@@ -87,7 +87,6 @@ wire        scr_ok, obj_ok, objrom_cs;
 
 wire [ 7:0] main_data;
 wire [15:0] main_addr;
-wire [ 3:0] cen_base;
 
 wire [ 7:0] dipsw_a, dipsw_b;
 wire [ 3:0] dipsw_c;
@@ -110,46 +109,9 @@ assign prog_rd    = 0;
 assign dwnld_busy = downloading;
 assign { dipsw_c, dipsw_b, dipsw_a } = dipsw[19:0];
 assign dip_flip = flip;
-assign vsync60  = status[13];   // high to use a 6MHz pixel clock, instead of 6.144MHz
-
-// Using an integer divider for the 6.144MHz
-// cen_base will probably help with the video
-// compatibility in MiSTer. MiST seems to be
-// doing well with the fractional divider.
-jtframe_frac_cen #(.W(4)) u_cen (
-    .clk    ( clk       ),
-    .n      ( vsync60 ? 10'd1 : 10'd32    ),
-    .m      ( vsync60 ? 10'd4 : 10'd125   ),
-    .cen    ( cen_base  ),
-    .cenb   (           ) // 180 shifted
-);
-
-jtframe_crossclk_cen u_cpu_cen(
-    .clk_in     ( clk       ),
-    .cen_in     ( pxl2_cen  ),
-    .clk_out    ( clk24     ),
-    .cen_out    ( cpu4_cen  )   // 6MHz
-);
-
-jtframe_crossclk_cen u_ti1_cen(
-    .clk_in     ( clk       ),
-    .cen_in     (cen_base[2]),
-    .clk_out    ( clk24     ),
-    .cen_out    ( ti1_cen   )   // 3MHz
-);
-
-jtframe_crossclk_cen u_ti2_cen(
-    .clk_in     ( clk       ),
-    .cen_in     (cen_base[3]),
-    .clk_out    ( clk24     ),
-    .cen_out    ( ti2_cen   )   // 1.5MHz
-);
 
 wire [21:0] pre_addr;
 wire [ 7:0] nc;
-
-assign pxl2_cen = cen_base[0]; // ~12MHz
-assign pxl_cen  = cen_base[1]; // ~ 6MHz
 
 always @(*) begin
     prog_addr = pre_addr;
@@ -163,6 +125,21 @@ always @(*) begin
         prog_addr[5:2] =  { pre_addr[5], pre_addr[2:0] }; // making [5] explicit for now
     end
 end
+
+jtkicker_clocks u_clocks(
+    .status     ( status    ),
+    // 24 MHz domain
+    .clk24      ( clk24     ),
+    .cpu4_cen   ( cpu4_cen  ),
+    .snd_cen    (           ),
+    .psg_cen    (           ),
+    .ti1_cen    ( ti1_cen   ),
+    .ti2_cen    ( ti2_cen   ),
+    // 48 MHz domain
+    .clk        ( clk       ),
+    .pxl_cen    ( pxl_cen   ),
+    .pxl2_cen   ( pxl2_cen  )
+);
 
 jtframe_dwnld #(.PROM_START(PROM_START))
 u_dwnld(
