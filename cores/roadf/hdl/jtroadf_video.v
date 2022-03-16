@@ -64,8 +64,7 @@ module jtroadf_video(
     output        [3:0] red,
     output        [3:0] green,
     output        [3:0] blue,
-    input         [3:0] gfx_en,
-    input         [7:0] debug_bus
+    input         [3:0] gfx_en
 );
 
 localparam LAYOUT=4;
@@ -129,7 +128,7 @@ jtroadf_scroll u_scroll(
     .vdump      ( vdump[7:0]),
     .hdump      ( hdump     ),
     .flip       ( flip      ),
-    .is_hyper   ( is_hyper | debug_bus[0] ),
+    .is_hyper   ( is_hyper  ),
 
     // PROMs
     .prog_data  ( prog_data[3:0] ),
@@ -141,8 +140,7 @@ jtroadf_scroll u_scroll(
     .rom_data   ( scr_data  ),
     .rom_ok     ( scr_ok    ),
 
-    .pxl        ( scr_pxl   ),
-    .debug_bus  ( debug_bus )
+    .pxl        ( scr_pxl   )
 );
 
 jtroadf_obj u_obj(

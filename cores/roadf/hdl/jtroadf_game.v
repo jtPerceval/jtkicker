@@ -286,8 +286,7 @@ jtroadf_video u_video(
     .red        ( red       ),
     .green      ( green     ),
     .blue       ( blue      ),
-    .gfx_en     ( gfx_en    ),
-    .debug_bus  ( debug_bus )
+    .gfx_en     ( gfx_en    )
 );
 
 jtframe_dwnld #(.PROM_START(PROM_START),.SWAB(1))

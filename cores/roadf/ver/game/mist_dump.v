@@ -13,33 +13,23 @@ module mist_dump(
         $display("iverilog: DUMP enabled");
         $dumpfile("test.lxt");
     end
-    `ifdef LOADROM
-    //always @(negedge led) if( $time > 20000 ) begin // led = downloading signal
-    initial begin
-        $display("iverilog: DUMP starts");
-        $dumpvars(1,mist_test.UUT.u_game);
+    `ifdef DUMP_START
+    always @(negedge VGA_VS) if( frame_cnt==`DUMP_START ) begin
+    `else
+        initial begin
+    `endif
+        $display("DUMP starts");
+        `ifdef DEEPDUMP
+            $dumpvars(0,mist_test);
+        `else
+            $dumpvars(1,mist_test.UUT.u_game);
+            //$dumpvars(1,mist_test.UUT.u_game.u_sound);
+            $dumpvars(1,mist_test.UUT.u_game.u_video);
+            $dumpvars(1,mist_test.UUT.u_game.u_video.u_scroll);
+            $dumpvars(1,mist_test.frame_cnt);
+        `endif
         $dumpon;
     end
-    `else
-        `ifdef DUMP_START
-        always @(negedge VGA_VS) if( frame_cnt==`DUMP_START ) begin
-        `else
-            initial begin
-        `endif
-            $display("DUMP starts");
-            `ifdef DEEPDUMP
-                $dumpvars(0,mist_test);
-            `else
-                $dumpvars(1,mist_test.UUT.u_game.u_main);
-                $dumpvars(1,mist_test.UUT.u_game.u_sdram);
-                $dumpvars(1,mist_test.UUT.u_game.u_sdram.u_dwnld);
-                //$dumpvars(1,mist_test.UUT.u_game.u_sound);
-                //$dumpvars(1,mist_test.UUT.u_game.u_video);
-                $dumpvars(1,mist_test.frame_cnt);
-            `endif
-            $dumpon;
-        end
-    `endif
 `else // NCVERILOG
     `ifdef DUMP_START
     always @(negedge VGA_VS) if( frame_cnt==`DUMP_START ) begin

@@ -51,8 +51,7 @@ module jtroadf_scroll(
     input        [31:0] rom_data,
     input               rom_ok,
 
-    output        [3:0] pxl,
-    input         [7:0] debug_bus
+    output        [3:0] pxl
 );
 
 wire [ 7:0] code, attr, vram_high, vram_low, pal_addr;
