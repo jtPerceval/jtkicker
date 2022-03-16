@@ -16,6 +16,8 @@
     Version: 1.0
     Date: 21-12-2021 */
 
+/* verilator tracing_off */
+
 module jtkicker_vtimer(
     input               clk,        
     input               pxl_cen,

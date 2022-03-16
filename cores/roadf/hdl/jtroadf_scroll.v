@@ -79,7 +79,7 @@ always @* begin
     // These are chips D6, D7, C5 and B7 in the video board sch.
     hsum = {hpos[7:1],2'd0} + ( LHBL ? hdump : { ~6'h0, hdump[2:0]} ) + 9'd8;
     heff = hsum ^ {1'b0,{8{flip}}};
-    code_msb = is_hyper ? {1'b0,attr[6],attr[7]} : { attr[6:5], attr[7] };
+    code_msb = { attr[6], attr[5]&~is_hyper, attr[7] }; // jumper JP1 video board
     vflip    = 0; // is_hyper & attr[5]; // MAME uses this, but I don't see it in the schematics
     hflip    = attr[4]^flip;
     pal_msb  = attr[3:0];

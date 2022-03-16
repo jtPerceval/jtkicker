@@ -7,7 +7,7 @@ eval `jtcfgstr -target=mist -output=bash -core $SYSNAME`
 # PROM_ONLY="-d JTFRAME_DWNLD_PROM_ONLY"
 OTHER=
 SCENE=
-SIMULATOR=-verilator
+# SIMULATOR=-verilator
 
 for i in $*; do
     case $i in
