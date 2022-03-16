@@ -97,7 +97,7 @@ wire [ 2:0] dipsw_c;
 wire        LVBL;
 
 wire        obj_frame;
-wire        cpu_cen, cpu4_cen, ti1_cen, ti2_cen;
+wire        cpu_cen, cpu4_cen;
 wire        cpu_rnw, cpu_irqn, cpu_nmin;
 wire        vram_cs, objram_cs,
             prom_we, flip;
@@ -283,10 +283,13 @@ jtroadf_video u_video(
     .VS         ( VS        ),
     .LHBL_dly   ( LHBL_dly  ),
     .LVBL_dly   ( LVBL_dly  ),
+
     .red        ( red       ),
     .green      ( green     ),
     .blue       ( blue      ),
-    .gfx_en     ( gfx_en    )
+
+    .gfx_en     ( gfx_en    ),
+    .debug_bus  ( debug_bus )
 );
 
 jtframe_dwnld #(.PROM_START(PROM_START),.SWAB(1))

@@ -78,8 +78,7 @@ module jtroadf_obj(
     output              rom_cs,
     input               rom_ok,
 
-    output        [3:0] pxl,
-    input         [7:0] debug_bus
+    output        [3:0] pxl
 );
 
 parameter [7:0] HOFFSET = 8'd6;
@@ -271,7 +270,6 @@ jtkicker_objdraw #(
     .rom_data   ( rom_data  ),
     .rom_ok     ( rom_ok    ),
 
-    .debug_bus  ( debug_bus ),
     .pxl        ( pxl       )
 );
 

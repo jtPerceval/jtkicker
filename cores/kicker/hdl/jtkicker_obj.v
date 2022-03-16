@@ -242,7 +242,6 @@ jtkicker_objdraw #(
     .rom_data   ( rom_data  ),
     .rom_ok     ( rom_ok    ),
 
-    .debug_bus  ( debug_bus ),
     .pxl        ( pxl       )
 );
 
