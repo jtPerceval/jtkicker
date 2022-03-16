@@ -24,7 +24,7 @@
     <name>Hyper Sports</name>
     <setname>hyperspt</setname>
     <rbf>jtroadf</rbf>
-    <mameversion>0232</mameversion>
+    <mameversion>0237</mameversion>
     <year>1984</year>
     <manufacturer>Konami (Centuri license)</manufacturer>
     <players>4</players>
@@ -49,11 +49,12 @@
             <part name="c26" crc="a6897eac" map="01"/>
             <part name="c22" crc="ed9271a0" map="10"/>
         </interleave>
+        <part repeat="0x2000"> FF</part>
         <interleave output="16">
             <part name="c24" crc="5fb230c0" map="01"/>
             <part name="c20" crc="183f4324" map="10"/>
         </interleave>
-        <part repeat="0x4000"> FF</part>
+        <part repeat="0x2000"> FF</part>
         <!-- gfx1 - starts at 0x20000 -->
         <interleave output="16">
             <part name="c14" crc="c72d63be" map="01"/>
@@ -98,5 +99,5 @@
         <dip name="World Records" bits="11" ids="Erase on Reset,Don&apos;t Erase"/>
         <dip name="Difficulty" bits="12,15" ids="Difficult 4,Difficult 3,Difficult 2,Difficult 1,Normal 8,Normal 7,Normal 6,Normal 5,Normal 4,Normal 3,Normal 2,Normal 1,Easy 4,Easy 3,Easy 2,Easy 1"/>
     </switches>
-    <buttons names="Low gear,High gear,Start,Coin,Core credits" default="Y,X,Start,Select,-" count="2"/>
+    <buttons names="Button A, Button B,Start,Coin,Core credits" default="Y,X,Start,Select,-" count="2"/>
 </misterromdescription>
