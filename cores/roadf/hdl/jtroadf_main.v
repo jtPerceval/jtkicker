@@ -68,15 +68,9 @@ wire        irq_trigger;
 reg         irq_clrn, ram_cs;
 reg         ior_cs, in5_cs, intst_cs, intst_l,
             iow_cs;
-// reg         afe_cs; // watchdog
 wire        VMA;
-reg halt=0;
 
-//always @(posedge clk) if( A==16'h5c75  ) halt<=1; // never happens in FPGA!
-//always @(posedge clk) if( A==16'h5c6f  ) halt<=1;
-//always @(posedge clk) if( A==16'h5c69  ) halt<=1; // yes
-
-assign irq_trigger = ~LVBL & dip_pause & ~halt;
+assign irq_trigger = ~LVBL & dip_pause;
 assign cpu_rnw     = RnW;
 assign rom_addr    = A;
 

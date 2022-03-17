@@ -116,6 +116,11 @@ wire        main_pause;
 
 assign prog_rd    = 0;
 assign dwnld_busy = downloading;
+// dipsw_c: these are the tied high bits
+// Hyper Sports
+//      if bit 0 low, the game seems to expect a different ROM mapping
+// Road Fighter
+//      bit 0 is the flip
 assign { dipsw_c, dipsw_b, dipsw_a } = dipsw[18:0];
 assign dip_flip = ~flip;
 assign main_pause = dip_pause & ~ioctl_ram;
