@@ -67,7 +67,10 @@ module jtroadf_video(
     output        [3:0] blue,
 
     input         [3:0] gfx_en,
-    input         [7:0] debug_bus
+    input         [7:0] debug_bus,
+    input           ioctl_ram,
+    output  [ 7:0]  ioctl_din,
+    input   [15:0]  ioctl_addr
 );
 
 localparam LAYOUT=4;
@@ -79,9 +82,11 @@ wire       scr_we;
 wire [3:0] obj_pxl, scr_pxl;
 reg  [2:0] prom_we;
 wire [9:0] prom_offset;
+wire [7:0] ioctl_obj, ioctl_scr;
 
 assign prom_offset = prog_addr[9:0]-10'h20;
 // assign hinit = hdump==9'h120; // sch. F2 (video board)
+assign ioctl_din = ioctl_addr[12] ? ioctl_obj : ioctl_scr;
 
 always @* begin
     prom_we = 0;
@@ -144,7 +149,10 @@ jtroadf_scroll u_scroll(
     .rom_ok     ( scr_ok    ),
 
     .pxl        ( scr_pxl   ),
-    .debug_bus  ( debug_bus )
+    .debug_bus  ( debug_bus ),
+    .ioctl_ram  ( ioctl_ram ),
+    .ioctl_din  ( ioctl_scr ),
+    .ioctl_addr ( ioctl_addr)
 );
 
 jtroadf_obj u_obj(
@@ -185,7 +193,10 @@ jtroadf_obj u_obj(
     .rom_data   ( obj_data  ),
     .rom_ok     ( obj_ok    ),
 
-    .pxl        ( obj_pxl   )
+    .pxl        ( obj_pxl   ),
+    .ioctl_ram  ( ioctl_ram ),
+    .ioctl_din  ( ioctl_obj ),
+    .ioctl_addr ( ioctl_addr)
 );
 
 jtyiear_colmix #(.BLANK_DLY(9)) u_colmix(

@@ -52,7 +52,10 @@ module jtroadf_scroll(
     input               rom_ok,
 
     output        [3:0] pxl,
-    input         [7:0] debug_bus
+    input         [7:0] debug_bus,
+    input               ioctl_ram,
+    output       [ 7:0] ioctl_din,
+    input        [15:0] ioctl_addr
 );
 
 wire [ 7:0] code, attr, vram_high, vram_low, pal_addr;
@@ -74,6 +77,7 @@ assign vram_we_low  = vram_we & ~cpu_addr[11];
 assign vram_we_high = vram_we &  cpu_addr[11];
 assign vram_dout    = cpu_addr[11] ? vram_high : vram_low;
 assign eff_addr     = cpu_addr[10:0];
+assign ioctl_din    = ioctl_addr[11] ? attr : code;
 
 always @* begin
     // These are chips D6, D7, C5 and B7 in the video board sch.
@@ -130,6 +134,8 @@ always @(posedge clk) if(pxl_cen) begin
     end
 end
 
+wire [10:0] dmp_addr = ioctl_ram ? ioctl_addr[10:0] : rd_addr;
+
 jtframe_dual_ram #(.simfile("vram_lo.bin"),.aw(11)) u_low(
     // Port 0, CPU
     .clk0   ( clk24         ),
@@ -140,7 +146,7 @@ jtframe_dual_ram #(.simfile("vram_lo.bin"),.aw(11)) u_low(
     // Port 1
     .clk1   ( clk           ),
     .data1  (               ),
-    .addr1  ( rd_addr       ),
+    .addr1  ( dmp_addr      ),
     .we1    ( 1'b0          ),
     .q1     ( code          )
 );
@@ -155,7 +161,7 @@ jtframe_dual_ram #(.simfile("vram_hi.bin"),.aw(11)) u_high(
     // Port 1
     .clk1   ( clk           ),
     .data1  (               ),
-    .addr1  ( rd_addr       ),
+    .addr1  ( dmp_addr      ),
     .we1    ( 1'b0          ),
     .q1     ( attr          )
 );

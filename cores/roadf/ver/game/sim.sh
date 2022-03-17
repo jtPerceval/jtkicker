@@ -36,7 +36,7 @@ for i in $*; do
 done
 
 if [ -n "$SCENE" ]; then
- cp $SCENE/vram_{lo,hi}.bin .
+ cp $SCENE/*.bin .
  # go run obj2sim.go $SCENE/obj.bin || exit $?
 fi
 

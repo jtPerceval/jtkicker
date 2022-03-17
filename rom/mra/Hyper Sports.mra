@@ -49,11 +49,11 @@
             <part name="c26" crc="a6897eac" map="01"/>
             <part name="c22" crc="ed9271a0" map="10"/>
         </interleave>
-        <part repeat="0x4000"> FF</part>
         <interleave output="16">
             <part name="c24" crc="5fb230c0" map="01"/>
             <part name="c20" crc="183f4324" map="10"/>
         </interleave>
+        <part repeat="0x4000"> FF</part>
         <!-- gfx1 - starts at 0x20000 -->
         <interleave output="16">
             <part name="c14" crc="c72d63be" map="01"/>
@@ -84,6 +84,7 @@
     <rom index="17" zip="jtbeta.zip" md5="None">
         <part name="beta.bin"/>
     </rom>
+    <nvram index="2" size="6144"/>
     <rom index="1">
         <part>00</part>
     </rom>

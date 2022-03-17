@@ -69,7 +69,9 @@ module jtroadf_game(
     input           enable_fm,
     // Debug
     input   [ 3:0]  gfx_en,
-    input   [ 7:0]  debug_bus
+    input   [ 7:0]  debug_bus,
+    input           ioctl_ram,
+    output  [ 7:0]  ioctl_din
 );
 
 // SDRAM offsets
@@ -191,7 +193,7 @@ jtroadf_main u_main(
     // interrupt triggers
     .LVBL           ( LVBL          ),
     // DIP switches
-    .dip_pause      ( dip_pause     ),
+    .dip_pause      ( dip_pause & ~ioctl_ram    ),
     .dipsw_a        ( dipsw_a       ),
     .dipsw_b        ( dipsw_b       ),
     .dipsw_c        ( dipsw_c       )
@@ -296,7 +298,10 @@ jtroadf_video u_video(
     .blue       ( blue      ),
 
     .gfx_en     ( gfx_en    ),
-    .debug_bus  ( debug_bus )
+    .debug_bus  ( debug_bus ),
+    .ioctl_ram  ( ioctl_ram ),
+    .ioctl_din  ( ioctl_din ),
+    .ioctl_addr ( ioctl_addr[15:0])
 );
 
 jtframe_dwnld #(.PROM_START(PROM_START),.SWAB(1))

@@ -78,7 +78,10 @@ module jtroadf_obj(
     output              rom_cs,
     input               rom_ok,
 
-    output        [3:0] pxl
+    output        [3:0] pxl,
+    input               ioctl_ram,
+    output       [ 7:0] ioctl_din,
+    input        [15:0] ioctl_addr
 );
 
 parameter [7:0] HOFFSET = 8'd6;
@@ -99,9 +102,10 @@ assign obj_dout = obj_frame ? obj1_dout : obj2_dout;
 assign obj1_we  = obj_cs &  obj_frame & ~cpu_rnw;
 assign obj2_we  = obj_cs & ~obj_frame & ~cpu_rnw;
 assign scan_dout= obj_frame ? rd2_dout : rd1_dout;
+assign ioctl_din= ioctl_addr[10] ? rd2_dout : rd1_dout;
 
 // two sprite tables
-jtframe_dual_ram #(.simfile("obj.bin")) u_hi(
+jtframe_dual_ram #(.simfile("obj_lo.bin")) u_hi(
     // Port 0, CPU
     .clk0   ( clk24         ),
     .data0  ( cpu_dout      ),
@@ -116,7 +120,7 @@ jtframe_dual_ram #(.simfile("obj.bin")) u_hi(
     .q1     ( rd1_dout      )
 );
 
-jtframe_dual_ram #(.simfile("obj.bin")) u_low(
+jtframe_dual_ram #(.simfile("obj_hi.bin")) u_low(
     // Port 0, CPU
     .clk0   ( clk24         ),
     .data0  ( cpu_dout      ),
@@ -160,7 +164,7 @@ assign pal    = dr_attr[3:0];
 assign adj    = 0;
 
 always @* begin
-    eff_scan = { 2'd0, scr_rd, scan_addr};
+    eff_scan = ioctl_ram ? ioctl_addr[9:0] : { 2'd0, scr_rd, scan_addr};
     hflip = dr_attr[6];
     vflip = dr_attr[7];
     dr_y   = ~ypos + ( adj ? ( flip ? 8'hff : 8'h1 ) : 8'h0 );

@@ -65,6 +65,7 @@
     <rom index="17" zip="jtbeta.zip" md5="None">
         <part name="beta.bin"/>
     </rom>
+    <nvram index="2" size="6144"/>
     <!-- Vertical game -->
     <rom index="1">
         <part>01</part>
