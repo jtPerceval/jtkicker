@@ -112,12 +112,13 @@ wire [ 7:0] pcm_data;
 wire        pcm_ok;
 
 wire        m2s_irq, m2s_data;
+wire        main_pause;
 
 assign prog_rd    = 0;
 assign dwnld_busy = downloading;
 assign { dipsw_c, dipsw_b, dipsw_a } = dipsw[18:0];
 assign dip_flip = ~flip;
-
+assign main_pause = dip_pause & ~ioctl_ram;
 
 wire [ 7:0] nc, pre_data;
 wire [21:0] pre_addr;
@@ -193,7 +194,7 @@ jtroadf_main u_main(
     // interrupt triggers
     .LVBL           ( LVBL          ),
     // DIP switches
-    .dip_pause      ( dip_pause & ~ioctl_ram    ),
+    .dip_pause      ( main_pause    ),
     .dipsw_a        ( dipsw_a       ),
     .dipsw_b        ( dipsw_b       ),
     .dipsw_c        ( dipsw_c       )
