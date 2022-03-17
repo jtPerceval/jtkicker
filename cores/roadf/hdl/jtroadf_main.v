@@ -70,8 +70,13 @@ reg         ior_cs, in5_cs, intst_cs, intst_l,
             iow_cs;
 // reg         afe_cs; // watchdog
 wire        VMA;
+reg halt=0;
 
-assign irq_trigger = ~LVBL & dip_pause;
+//always @(posedge clk) if( A==16'h5c75  ) halt<=1; // never happens in FPGA!
+//always @(posedge clk) if( A==16'h5c6f  ) halt<=1;
+//always @(posedge clk) if( A==16'h5c69  ) halt<=1; // yes
+
+assign irq_trigger = ~LVBL & dip_pause & ~halt;
 assign cpu_rnw     = RnW;
 assign rom_addr    = A;
 
