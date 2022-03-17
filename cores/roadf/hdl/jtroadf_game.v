@@ -197,13 +197,20 @@ jtroadf_main u_main(
     .dipsw_c        ( dipsw_c       )
 );
 `else
-    assign main_cs = 0;
+    assign main_cs   = 0;
+    assign main_addr = 0;
+    assign cpu_rnw   = 1;
+    assign vram_cs   = 0;
+    assign cpu_dout  = 0;
+    assign m2s_irq   = 0;
+    assign m2s_data  = 0;
     assign objram_cs = 0;
-    assign snd     = 0;
-    assign sample  = 0;
-    assign game_led= 0;
-    assign flip    = 0;
-    assign pcm_addr= 0;
+    assign snd       = 0;
+    assign sample    = 0;
+    assign game_led  = 0;
+    assign flip      = 0;
+    assign pcm_addr  = 0;
+    assign obj_frame = 0;
 `endif
 
 `ifndef NOSOUND

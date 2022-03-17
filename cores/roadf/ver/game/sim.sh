@@ -24,6 +24,10 @@ for i in $*; do
             shift
             SCENE=$1
             OTHER="$OTHER -d NOMAIN -d NOSND -video 2"
+            if [ ! -d $SCENE ]; then
+                echo Cannot find scene $SCENE
+                exit 1
+            fi
             ;;
         *)
             OTHER="$OTHER $1";;
@@ -31,12 +35,10 @@ for i in $*; do
     shift
 done
 
-# if [ -n "$SCENE" ]; then
-#     cp $SCENE/vram_{lo,hi}.bin .
-#     go run obj2sim.go $SCENE/obj.bin || exit $?
-#     # pal_sel.hex must be one line, no \n character.
-#     OTHER="$OTHER -d PALSEL="`cat $SCENE/pal_sel.hex`
-# fi
+if [ -n "$SCENE" ]; then
+ cp $SCENE/vram_{lo,hi}.bin .
+ # go run obj2sim.go $SCENE/obj.bin || exit $?
+fi
 
 export M6809=1
 

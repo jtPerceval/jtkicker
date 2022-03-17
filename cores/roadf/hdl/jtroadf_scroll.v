@@ -81,6 +81,8 @@ always @* begin
     heff = hsum ^ {1'b0,{8{flip}}};
     code_msb = is_hyper ?
         { attr[6], 1'b0, attr[7] } : // jumper JP1 video board
+        //{ attr[ debug_bus[2:0] ], 1'b0, attr[7] } : // jumper JP1 video board
+        //{ debug_bus[1:0], attr[7] } : // jumper JP1 video board
         // debug_bus[2:0] : // jumper JP1 video board
         { attr[6:5],     attr[7] };
     vflip    = 0; // is_hyper & attr[5]; // MAME uses this, but I don't see it in the schematics
