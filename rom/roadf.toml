@@ -5,7 +5,7 @@ mraauthor=["jotego"]
 [features]
 # debug=true
 beta=true
-nvram=6144
+nvram=$JTFRAME_IOCTL_RD
 
 [parse]
 sourcefile="hyperspt.cpp"

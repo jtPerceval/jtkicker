@@ -202,7 +202,14 @@ jtroadf_main u_main(
     .dip_pause      ( main_pause    ),
     .dipsw_a        ( dipsw_a       ),
     .dipsw_b        ( dipsw_b       ),
-    .dipsw_c        ( dipsw_c       )
+    .dipsw_c        ( dipsw_c       ),
+    // NVRAM
+    .clk48          ( clk           ),
+    .ioctl_ram      ( ioctl_ram     ),
+    .ioctl_dout     ( ioctl_dout    ),
+    .ioctl_din      ( ioctl_din     ),
+    .ioctl_wr       ( ioctl_wr      ),
+    .ioctl_addr     ( ioctl_addr[15:0])
 );
 `else
     assign main_cs   = 0;
@@ -305,8 +312,8 @@ jtroadf_video u_video(
 
     .gfx_en     ( gfx_en    ),
     .debug_bus  ( debug_bus ),
-    .ioctl_ram  ( ioctl_ram ),
-    .ioctl_din  ( ioctl_din ),
+    .ioctl_ram  ( 1'b0      ),
+    .ioctl_din  (           ),      // only for debugging
     .ioctl_addr ( ioctl_addr[15:0])
 );
 

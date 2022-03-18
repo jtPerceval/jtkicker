@@ -81,7 +81,7 @@ assign ioctl_din    = ioctl_addr[11] ? attr : code;
 
 always @* begin
     // These are chips D6, D7, C5 and B7 in the video board sch.
-    hsum = {hpos[7:1],2'd0} + ( LHBL ? hdump : { ~6'h0, hdump[2:0]} ) + 9'd8;
+    hsum = {hpos[7:1],2'd0} + ( LHBL ? hdump : { ~6'h0, hdump[2:0]} ) + 9'd8 - {8'd0,flip};
     heff = hsum ^ {1'b0,{8{flip}}};
     code_msb = is_hyper ?
         { attr[6], 1'b0, attr[7] } : // jumper JP1 video board
@@ -101,8 +101,6 @@ always @(posedge clk, posedge rst) begin
     end else begin
         if( pxl_cen && heff[2:0]==7 ) begin
             rd_addr <= { vf[7:3], heff[8:3] }; // 5+6 = 11
-            pal_msb <= attr[3:0];
-            hflip   <= attr[4]^flip;
         end
         if( scr_we  ) hpos <= scr_din;
         vf <= {8{flip}} ^ vdump;
@@ -112,6 +110,8 @@ end
 always @(posedge clk) if(pxl_cen) begin
     if( heff[2:0]==0 ) begin
         rom_addr <= { code_msb, code, vf[2:0]^{3{vflip}} }; // 2+8+3=13 bits
+        pal_msb  <= attr[3:0];
+        hflip    <= attr[4]^flip;
     end
     if( heff[2:0]==4 ) begin // 2 pixel delay to grab data
         pxl_data <= {

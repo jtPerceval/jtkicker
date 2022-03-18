@@ -19,6 +19,7 @@
 module jtroadf_main(
     input               rst,
     input               clk,        // 24 MHz
+    input               clk48,      // 24 MHz
     input               cpu4_cen,   // 6 MHz
     output              cpu_cen,    // Q clock
     // ROM
@@ -57,7 +58,14 @@ module jtroadf_main(
     input               dip_pause,
     input      [7:0]    dipsw_a,
     input      [7:0]    dipsw_b,
-    input      [2:0]    dipsw_c // three jumpers at the board
+    input      [2:0]    dipsw_c, // three jumpers at the board
+
+    // NVRAM
+    input      [15:0]   ioctl_addr,
+    input               ioctl_ram,
+    input               ioctl_wr,
+    input      [ 7:0]   ioctl_dout,
+    output     [ 7:0]   ioctl_din
 );
 
 reg  [ 7:0] cabinet, cpu_din;
@@ -69,10 +77,14 @@ reg         irq_clrn, ram_cs;
 reg         ior_cs, in5_cs, intst_cs, intst_l,
             iow_cs;
 wire        VMA;
+reg         nvram_we;
 
 assign irq_trigger = ~LVBL & dip_pause;
 assign cpu_rnw     = RnW;
 assign rom_addr    = A;
+
+always @(posedge clk)
+    nvram_we <= ioctl_ram && ioctl_wr && ioctl_addr[15:11]==0;
 
 always @(*) begin
     // the ROM logic has some optional jumpers and the PCB we got
@@ -170,7 +182,7 @@ jtframe_ff u_irq(
     .sigedge  ( irq_trigger )     // signal whose edge will trigger the FF
 );
 
-jtframe_sys6809 #(.RAM_AW(12),.KONAMI1(1)) u_cpu(
+jtframe_sys6809_dma #(.RAM_AW(12),.KONAMI1(1)) u_cpu(
     .rstn       ( ~rst      ),
     .clk        ( clk       ),
     .cen        ( cpu4_cen  ),   // This is normally the input clock to the CPU
@@ -193,7 +205,13 @@ jtframe_sys6809 #(.RAM_AW(12),.KONAMI1(1)) u_cpu(
     // Bus multiplexer is external
     .ram_dout   ( ram_dout  ),
     .cpu_dout   ( cpu_dout  ),
-    .cpu_din    ( cpu_din   )
+    .cpu_din    ( cpu_din   ),
+    // NVRAM
+    .dma_clk    ( clk48         ),
+    .dma_addr   ( {1'b1, ioctl_addr[10:0]} ),
+    .dma_din    ( ioctl_dout    ),
+    .dma_dout   ( ioctl_din     ),
+    .dma_we     ( nvram_we      )
 );
 
 endmodule
