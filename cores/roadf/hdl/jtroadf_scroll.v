@@ -87,13 +87,10 @@ always @* begin
         { attr[6], 1'b0, attr[7] } : // jumper JP1 video board
         { attr[6:5],     attr[7] };
     vflip    = 0; // is_hyper & attr[5]; // MAME uses this, but I don't see it in the schematics
-    hflip    = attr[4];
-    pal_msb  = attr[3:0];
 end
 
 
 assign pal_addr =
-    //flip && hdump<9'o20 ? 8'd0 :   // removes the first columns in flip mode
     { cur_pal, cur_hf ? pxl_data[3:0] : pxl_data[31:28] };
 
 // scroll register in custom chip 085
@@ -102,8 +99,11 @@ always @(posedge clk, posedge rst) begin
         hpos <= 0;
         vf   <= 0;
     end else begin
-        if( pxl_cen && heff[2:0]==7 )
+        if( pxl_cen && heff[2:0]==7 ) begin
             rd_addr <= { vf[7:3], heff[8:3] }; // 5+6 = 11
+            pal_msb <= attr[3:0];
+            hflip   <= attr[4]^flip;
+        end
         if( scr_we  ) hpos <= scr_din;
         vf <= {8{flip}} ^ vdump;
     end
@@ -124,7 +124,7 @@ always @(posedge clk) if(pxl_cen) begin
             rom_data[ 9], rom_data[13], rom_data[ 1], rom_data[ 5],
             rom_data[ 8], rom_data[12], rom_data[ 0], rom_data[ 4]
         };
-        cur_hf   <= hflip^flip;
+        cur_hf   <= hflip;
         cur_pal  <= pal_msb;
     end else begin
         pxl_data <= cur_hf ? pxl_data>>4 : pxl_data<<4;
