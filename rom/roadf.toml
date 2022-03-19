@@ -11,10 +11,10 @@ nvram=$JTFRAME_IOCTL_RD
 sourcefile="hyperspt.cpp"
 
 [buttons]
-core=2 # max number of buttons supported by the core
+core=3 # max number of buttons supported by the core
 names=[
     { machine="roadf", names="Low gear,High gear" },
-    { names="Button A, Button B" }
+    { machine="hyperspt", names="Left, Centre, Right" }
 ]
 
 [rbf]
@@ -36,7 +36,7 @@ regions = [
     { name="gfx2", width=16, no_offset=true, Sort_even=true, start=$SCR_START },
     { machine="roadf", name="gfx1", width=16, no_offset=true, start=$OBJ_START },
     { machine="hyperspt", name="gfx1", width=16, no_offset=true, start=$OBJ_START, Name_sort=["c14","c18","c13","c17","c12","c16","c11","c15"] },
-    { name="vlm", reverse=true, start=$PCM_START },
+    { name="vlm", start=$PCM_START },
     { name="proms", start=$PROM_START            },
 ]
 

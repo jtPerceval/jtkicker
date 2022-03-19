@@ -72,9 +72,7 @@
             <part name="c15" crc="f3d454e6" map="10"/>
         </interleave>
         <!-- vlm - starts at 0x30000 -->
-        <interleave output="16">
-            <part name="c08" crc="e8f8ea78" map="12"/>
-        </interleave>
+        <part name="c08" crc="e8f8ea78"/>
         <!-- proms - starts at 0x32000 -->
         <part name="c03_c27.bin" crc="bc8a5956"/>
         <part name="j12_c28.bin" crc="2c891d59"/>
@@ -99,5 +97,5 @@
         <dip name="World Records" bits="11" ids="Erase on Reset,Don&apos;t Erase"/>
         <dip name="Difficulty" bits="12,15" ids="Difficult 4,Difficult 3,Difficult 2,Difficult 1,Normal 8,Normal 7,Normal 6,Normal 5,Normal 4,Normal 3,Normal 2,Normal 1,Easy 4,Easy 3,Easy 2,Easy 1"/>
     </switches>
-    <buttons names="Button A, Button B,Start,Coin,Core credits" default="Y,X,Start,Select,-" count="2"/>
+    <buttons names="Left, Centre, Right,Start,Coin,Core credits" default="Y,X,B,Start,Select,-" count="3"/>
 </misterromdescription>
