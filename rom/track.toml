@@ -1,0 +1,40 @@
+[global]
+# info = [ {tag="mameversion", value="0229"} ]
+mraauthor=["jotego"]
+
+[features]
+# debug=true
+beta=true
+nvram=$JTFRAME_IOCTL_RD
+
+[parse]
+sourcefile="trackfld.cpp"
+skip = { setnames=["mastkin","wizzquiz","wizzquiza","reaktor","trackfldu"], bootlegs=false }
+
+[buttons]
+core=3 # max number of buttons supported by the core
+names=[
+    { names="Left, Centre, Right" }
+]
+
+[rbf]
+name="jttrack"
+
+[dipsw]
+delete = [ "Unused", "Unknown" ]
+
+[ROM]
+# values starting with $ refer to macro definitions in the .def file
+# or arguments passed to mame2mra
+regions = [
+    { name="maincpu" },
+    { name="audiocpu" },
+    { name="gfx2", no_offset=true, start=$SCR_START },
+    { name="gfx1", width=16, no_offset=true, start=$OBJ_START },
+    { name="vlm", start=$PCM_START },
+    { name="proms", start=$PROM_START },
+]
+
+order = [
+    "maincpu", "audiocpu", "gfx2", "gfx1", "vlm", "proms"
+]

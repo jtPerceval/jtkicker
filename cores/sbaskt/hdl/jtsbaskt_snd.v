@@ -31,7 +31,7 @@ module jtsbaskt_snd(
     input               m2s_data,
     input               m2s_irq,
     // Sound
-    output     [15:0]   pcm_addr,
+    output     [15:0]   pcm_addr, // only 8kB ROMs actually used
     input      [ 7:0]   pcm_data,
     input               pcm_ok,
 
@@ -39,6 +39,10 @@ module jtsbaskt_snd(
     output               sample,
     output               peak
 );
+
+// Road Fighter: sch. has bit A10 as a jumper to either ground or VDD
+// Track'n Field has A10 connected to the CPU, so RAM_AW must be set to 11 for it
+parameter RAM_AW=10;
 
 localparam CNTW=11;
 
@@ -217,7 +221,7 @@ jtframe_ff u_irq(
 
 /* verilator tracing_off */
 
-jtframe_sysz80 #(.RAM_AW(10)) u_cpu( // sch. has bit A10 as a jumper, but seems to be grounded
+jtframe_sysz80 #(.RAM_AW(RAM_AW)) u_cpu(
     .rst_n      ( ~rst        ),
     .clk        ( clk         ),
     .cen        ( snd_cen     ),
