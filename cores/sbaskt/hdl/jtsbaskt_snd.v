@@ -22,7 +22,7 @@ module jtsbaskt_snd(
     input               snd_cen,    // 3.5MHz
     input               psg_cen,    // 1.7MHz
     // ROM
-    output      [12:0]  rom_addr,
+    output      [13:0]  rom_addr,
     output reg          rom_cs,
     input       [ 7:0]  rom_data,
     input               rom_ok,
@@ -65,7 +65,7 @@ assign vlm_mux = ~vlm_sel ? vlm_data :
 assign pcm_addr[15:13]=0;
 assign irq_ack = ~iorq_n & ~m1_n;
 assign vlm_ceng = snd_cen & ( vlm_me_b | pcm_ok );
-assign rom_addr = A[12:0];
+assign rom_addr = A[13:0];
 assign sample   = psg_cen;
 
 always @(posedge clk, posedge rst) begin
@@ -135,7 +135,7 @@ jt89 u_psg(
     .ready  ( rdy1          )
 );
 
-`ifndef VERILATOR
+`ifndef NOVLM
 wire [ 2:0] pcm_nc;
 
 vlm5030_gl u_vlm(
@@ -183,7 +183,7 @@ jtframe_dcrm #(.SW(8)) u_dcrm(
 
 wire [7:0] gain_psg  = !snd_en[2] ? 8'h18 : 8'h0;
 wire [7:0] gain_vlm  = !snd_en[1] ? 8'h18 : 8'h0;
-wire [7:0] gain_rdac = !snd_en[0] ? 8'h10 : 8'h0;
+wire [7:0] gain_rdac = !snd_en[0] ? 8'h08 : 8'h0;
 
 jtframe_mixer #(.W0(11),.W1(10),.W2(8)) u_mixer(
     .rst    ( rst       ),
@@ -217,7 +217,7 @@ jtframe_ff u_irq(
 
 /* verilator tracing_off */
 
-jtframe_sysz80 #(.RAM_AW(11)) u_cpu( // sch. has bit A10 as a jumper
+jtframe_sysz80 #(.RAM_AW(10)) u_cpu( // sch. has bit A10 as a jumper, but seems to be grounded
     .rst_n      ( ~rst        ),
     .clk        ( clk         ),
     .cen        ( snd_cen     ),

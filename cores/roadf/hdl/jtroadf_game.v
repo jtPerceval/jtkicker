@@ -31,10 +31,12 @@ module jtroadf_game(
     output          HS,
     output          VS,
     // cabinet I/O
-    input   [ 1:0]  start_button,
-    input   [ 1:0]  coin_input,
+    input   [ 3:0]  start_button,
+    input   [ 3:0]  coin_input,
     input   [ 6:0]  joystick1,
     input   [ 6:0]  joystick2,
+    input   [ 6:0]  joystick3,
+    input   [ 6:0]  joystick4,
     // SDRAM interface
     input           downloading,
     output          dwnld_busy,
@@ -87,7 +89,7 @@ wire [13:0] scr_addr;
 wire [13:0] obj_addr;
 wire [31:0] scr_data, obj_data;
 wire        scr_ok, obj_ok, objrom_cs;
-wire [12:0] snd_addr;
+wire [13:0] snd_addr;
 wire [ 7:0] snd_data;
 wire        snd_ok, snd_cs;
 
@@ -180,7 +182,10 @@ jtroadf_main u_main(
     .coin_input     ( coin_input    ),
     .joystick1      ( joystick1     ),
     .joystick2      ( joystick2     ),
+    .joystick3      ( joystick3     ),
+    .joystick4      ( joystick4     ),
     .service        ( service       ),
+    .is_hyper       ( is_hyper      ),
     // GFX
     .cpu_dout       ( cpu_dout      ),
     .cpu_rnw        ( cpu_rnw       ),
@@ -348,7 +353,7 @@ jtframe_rom #(
     .SLOT2_DW    (  8              ),
     .SLOT2_OFFSET( PCM_START>>1    ),
 
-    .SLOT6_AW    ( 13              ),
+    .SLOT6_AW    ( 14              ),
     .SLOT6_DW    (  8              ),
     .SLOT6_OFFSET( SND_START>>1    ), // Sound CPU
 

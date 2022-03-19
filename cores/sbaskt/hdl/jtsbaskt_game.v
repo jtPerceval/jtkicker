@@ -85,7 +85,7 @@ wire [12:0] scr_addr;
 wire [13:0] obj_addr;
 wire [31:0] scr_data, obj_data;
 wire        scr_ok, obj_ok, objrom_cs;
-wire [12:0] snd_addr;
+wire [13:0] snd_addr;
 wire [ 7:0] snd_data;
 wire        snd_ok, snd_cs;
 
@@ -348,7 +348,7 @@ jtframe_rom #(
     .slot3_addr  (               ),
     .slot4_addr  (               ),
     .slot5_addr  (               ),
-    .slot6_addr  ( snd_addr      ),
+    .slot6_addr  ( snd_addr[12:0]),
     .slot7_addr  ( main_addr     ),
     .slot8_addr  (               ),
 

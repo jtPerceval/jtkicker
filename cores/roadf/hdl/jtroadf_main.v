@@ -22,6 +22,7 @@ module jtroadf_main(
     input               clk48,      // 24 MHz
     input               cpu4_cen,   // 6 MHz
     output              cpu_cen,    // Q clock
+
     // ROM
     output      [15:0]  rom_addr,
     output reg          rom_cs,
@@ -29,11 +30,14 @@ module jtroadf_main(
     input               rom_ok,
 
     // cabinet I/O
-    input       [ 1:0]  start_button,
-    input       [ 1:0]  coin_input,
+    input       [ 3:0]  start_button,
+    input       [ 3:0]  coin_input,
     input       [ 6:0]  joystick1,
     input       [ 6:0]  joystick2,
+    input       [ 6:0]  joystick3,
+    input       [ 6:0]  joystick4,
     input               service,
+    input               is_hyper,
 
     // GFX
     output              cpu_rnw,
@@ -124,8 +128,12 @@ end
 always @(posedge clk) begin
     case( A[1:0] )
         0: cabinet <= { dipsw_c, start_button, service, coin_input };
-        1: cabinet <= { 1'b1, joystick1[6:4], joystick1[2], joystick1[3], joystick1[0], joystick1[1]};
-        2: cabinet <= { 1'b1, joystick2[6:4], joystick2[2], joystick2[3], joystick2[0], joystick2[1]};
+        1: cabinet <=
+            is_hyper ? {1'b1, joystick2[6:4], start_button[2], joystick1[6:4] } :
+            { 1'b1, joystick1[6:4], joystick1[2], joystick1[3], joystick1[0], joystick1[1]};
+        2: cabinet <=
+            is_hyper ? {1'b1, joystick4[6:4], start_button[3], joystick3[6:4] } :
+            { 1'b1, joystick2[6:4], joystick2[2], joystick2[3], joystick2[0], joystick2[1]};
         3: cabinet <= dipsw_a;
     endcase
     cpu_din <= rom_cs  ? rom_data  :
