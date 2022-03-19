@@ -217,7 +217,7 @@ jtframe_ff u_irq(
 
 /* verilator tracing_off */
 
-jtframe_sysz80 #(.RAM_AW(10)) u_cpu(
+jtframe_sysz80 #(.RAM_AW(11)) u_cpu( // sch. has bit A10 as a jumper
     .rst_n      ( ~rst        ),
     .clk        ( clk         ),
     .cen        ( snd_cen     ),
