@@ -48,8 +48,7 @@ module jttrack_obj(
     input               flip,
 
     // Row scroll
-    output reg    [7:0] hpos,
-    output reg          scr_we,
+    output reg    [8:0] hpos,
 
     // PROMs
     input         [3:0] prog_data,
@@ -69,23 +68,19 @@ parameter [7:0] HOFFSET = 8'd6;
 localparam [5:0] MAXOBJ = 6'd23;
 
 wire [ 7:0] obj1_dout, obj2_dout,
-            rd1_dout, rd2_dout, scan_dout;
+            rd1_dout, rd2_dout;
 wire        obj1_we, obj2_we;
-reg  [ 6:0] scan_addr;  // although the DMA bus in the schematics has 8 bits
-    // it shouldn't be able to pass sprite count 23, as the line buffers
-    // are written at the pixel clock and the table scan count is reset
-    // to zero at the beginning of each raster line
+reg  [ 5:0] scan_addr;
 reg  [ 9:0] eff_scan;
 wire [ 3:0] pal_data;
-reg         scr_rd;
 
-assign obj_dout = cpu_addr[10] ? obj1_dout : obj2_dout;
-assign obj1_we  = obj_cs &  obj_frame & ~cpu_rnw;
-assign obj2_we  = obj_cs & ~obj_frame & ~cpu_rnw;
-assign scan_dout= obj_frame ? rd2_dout : rd1_dout;
+assign obj_dout = cpu_addr[10] ? obj2_dout : obj1_dout;
+assign obj1_we  = obj_cs & ~cpu_addr[10] & ~cpu_rnw;
+assign obj2_we  = obj_cs &  cpu_addr[10] & ~cpu_rnw;
 
-// two sprite tables
-jtframe_ram #(.simfile("obj_lo.bin")) u_hi(
+// four 4-bit RAM chips connected as one 16-bit RAM
+// in the original
+jtframe_ram #(.simfile("obj_lo.bin")) u_lo(
     // Port 0, CPU
     .clk0   ( clk24         ),
     .data0  ( cpu_dout      ),
@@ -100,7 +95,7 @@ jtframe_ram #(.simfile("obj_lo.bin")) u_hi(
     .q1     ( rd1_dout      )
 );
 
-jtframe_dual_ram #(.simfile("obj_hi.bin")) u_low(
+jtframe_dual_ram #(.simfile("obj_hi.bin")) u_hi(
     // Port 0, CPU
     .clk0   ( clk24         ),
     .data0  ( cpu_dout      ),
@@ -114,9 +109,6 @@ jtframe_dual_ram #(.simfile("obj_hi.bin")) u_low(
     .we1    ( 1'b0          ),
     .q1     ( rd2_dout      )
 );
-
-// Max sprites drawn before the raster line count moves
-localparam [4:0] HALF = 5'd19;
 
 reg        cen2=0;
 wire       done;
@@ -139,12 +131,12 @@ wire [3:0] pal;
 
 assign vdf    = vdump[7:0] ^ {8{flip}};
 assign ydiff  = vdf-dr_y-8'd1;
-assign done   = scan_addr[6:2]==5'h1f;
+assign done   = scan_addr[5:1]==5'h1f;
 assign pal    = dr_attr[3:0];
 assign adj    = 0;
 
 always @* begin
-    eff_scan = ioctl_ram ? ioctl_addr[9:0] : { 2'd0, scr_rd, scan_addr};
+    eff_scan = { 3'd0, scan_addr};
     hflip = dr_attr[6];
     vflip = dr_attr[7];
     dr_y   = ~ypos + ( adj ? ( flip ? 8'hff : 8'h1 ) : 8'h0 );
@@ -161,39 +153,34 @@ always @(posedge clk, posedge rst) begin
     if( rst ) begin
         scan_st  <= 0;
         dr_start <= 0;
-        scr_rd   <= 0;
         scr_we   <= 0;
     end else if( cen2 ) begin
         dr_start <= 0;
-        scr_we   <= 0;
         case( scan_st )
             0: if( hinit_x ) begin
-                scr_rd    <= 1;
-                scan_addr <= { 1'b1, vdf[7:3], 1'b0 };
+                scan_addr <= { 2'b10, vdf[7:3] };
                 scan_st   <= 6;
             end
             1: if(!dr_busy) begin
-                dr_attr   <= scan_dout;
+                dr_attr   <= rd1_dout;
+                dr_code   <= rd2_dout;
                 scan_st   <= 2;
-                scan_addr[1:0] <= scan_addr[1:0]+1'd1;
+                scan_addr[0] <= 1;
             end
             2: begin
-                ypos <= scan_dout;
+                ypos    <= rd1_dout;
+                dr_xpos <= rd2_dout;
                 scan_st <= 3;
-                scan_addr[1:0] <= scan_addr[1:0]+1'd1;
             end
             3: begin
-                dr_code   <= { dr_attr[5], scan_dout };
-                dr_v      <= ydiff[3:0];
-                inzone    <= dr_y>=vdf && dr_y<(vdf+8'h10);
-                scan_st   <= 4;
-                scan_addr[1:0] <= scan_addr[1:0]+1'd1;
+                dr_v    <= ydiff[3:0];
+                inzone  <= dr_y>=vdf && dr_y<(vdf+8'h10);
+                scan_st <= 4;
             end
             4: begin
-                dr_xpos   <= scan_dout;
                 scan_st   <= 5;
                 dr_start  <= inzone;
-                scan_addr <= { scan_addr[6:2]-5'd1,2'b0};
+                scan_addr <= { scan_addr[5:1]-5'd1,1'b0};
             end
             5: begin // give time to dr_busy to rise
                 dr_start<= 0;
@@ -202,15 +189,8 @@ always @(posedge clk, posedge rst) begin
             // --------------------------
             // Reads the row scroll value
             6: begin
-                hpos[6:0] <= scan_dout[7:1];
-                scan_st   <= 7;
-                scan_addr[0] <= 1;
-            end
-            7: begin
-                hpos[7]   <= scan_dout[0];
-                scr_rd    <= 0;
-                scr_we    <= 1;
-                scan_addr <= 7'd31<<2;
+                hpos <= { rd2_dout[7], rd1_dout };
+                scan_addr <= 6'd31<<1;
                 scan_st   <= 1;
             end
         endcase

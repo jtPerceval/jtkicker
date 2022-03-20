@@ -69,19 +69,14 @@ module jttrack_video(
     input         [7:0] debug_bus
 );
 
-localparam LAYOUT=4;
-
 wire       LHBL;
 wire [8:0] vdump, vrender, hdump;
-wire [7:0] hpos;
-wire       scr_we;
+wire [8:0] hpos;
 wire [3:0] obj_pxl, scr_pxl;
 reg  [2:0] prom_we;
 wire [9:0] prom_offset;
-wire [7:0] ioctl_obj, ioctl_scr;
 
 assign prom_offset = prog_addr[9:0]-10'h20;
-assign ioctl_din = ioctl_addr[12] ? ioctl_obj : ioctl_scr;
 
 always @* begin
     prom_we = 0;
@@ -95,7 +90,7 @@ always @* begin
     end
 end
 
-jtkicker_vtimer #(.LAYOUT(LAYOUT)) u_vtimer(
+jtkicker_vtimer u_vtimer(
     .clk    ( clk       ),
     .pxl_cen( pxl_cen   ),
     .vdump  ( vdump     ),
@@ -123,8 +118,7 @@ jttrack_scroll u_scroll(
     .vram_dout  ( vram_dout ),
 
     // Row scroll
-    .scr_we     ( scr_we    ),
-    .scr_din    ( hpos      ),
+    .hpos       ( hpos      ),
 
     // video inputs
     .LHBL       ( LHBL      ),
@@ -172,7 +166,6 @@ jttrack_obj u_obj(
 
     // row scroll
     .hpos       ( hpos      ),
-    .scr_we     ( scr_we    ),
 
     // PROMs
     .prog_data  ( prog_data[3:0] ),

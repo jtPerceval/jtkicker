@@ -30,8 +30,7 @@ module jttrack_scroll(
     output        [7:0] vram_dout,
 
     // Row scroll
-    input         [7:0] scr_din,
-    input               scr_we,
+    input         [8:0] hpos,
 
     // video inputs
     input               LHBL,
@@ -59,7 +58,7 @@ reg  [ 3:0] cur_pal;
 reg  [ 1:0] code_msb;
 reg  [31:0] pxl_data;
 reg  [10:0] rd_addr;
-reg  [ 7:0] hpos, vf;
+reg  [ 7:0] vf;
 reg  [ 8:0] hsum, heff;
 reg         cur_hf;
 wire        vram_we_low, vram_we_high;
@@ -75,8 +74,7 @@ assign eff_addr     = cpu_addr[10:0];
 assign ioctl_din    = ioctl_addr[11] ? attr : code;
 
 always @* begin
-    // These are chips D6, D7, C5 and B7 in the video board sch.
-    hsum = {hpos[7:1],2'd0} + ( LHBL ? hdump : { ~6'h0, hdump[2:0]} ) + 9'd8 - {8'd0,flip};
+    hsum = hpos + ( LHBL ? hdump : { ~6'h0, hdump[2:0]} ) - {8'd0,flip};
     heff = hsum ^ {1'b0,{8{flip}}};
     code_msb = attr[7:6];
     vflip    = attr[4];

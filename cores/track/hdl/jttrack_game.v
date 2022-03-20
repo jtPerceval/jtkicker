@@ -124,7 +124,6 @@ assign main_pause = dip_pause & ~ioctl_ram;
 wire [ 7:0] nc, pre_data;
 wire [21:0] pre_addr;
 wire        is_scr, is_obj;
-reg         is_hyper=0;
 
 assign is_scr   = ioctl_addr[21:0] >= SCR_START && ioctl_addr[21:0]<OBJ_START;
 assign is_obj   = ioctl_addr[21:0] >= OBJ_START && ioctl_addr[21:0]<PCM_START;
@@ -135,11 +134,6 @@ always @(*) begin
     if( is_obj ) begin
         prog_addr[4:0] = { pre_addr[2:0], ~pre_addr[4], ~pre_addr[3] };
     end
-end
-
-always @(posedge clk) begin
-    if( ioctl_addr[21:0]==PROM_START[21:0]+22'h1 && ioctl_wr && downloading )
-        is_hyper <= &ioctl_dout;
 end
 
 jtkicker_clocks u_clocks(
@@ -176,7 +170,6 @@ jttrack_main u_main(
     .joystick3      ( joystick3     ),
     .joystick4      ( joystick4     ),
     .service        ( service       ),
-    .is_hyper       ( is_hyper      ),
     // GFX
     .cpu_dout       ( cpu_dout      ),
     .cpu_rnw        ( cpu_rnw       ),
@@ -186,7 +179,6 @@ jttrack_main u_main(
 
     .objram_cs      ( objram_cs     ),
     .obj_dout       ( obj_dout      ),
-    .obj_frame      ( obj_frame     ),
     // Sound control
     .snd_data_cs    ( m2s_data      ),
     .snd_irq        ( m2s_irq       ),
@@ -266,7 +258,6 @@ jttrack_video u_video(
 
     // configuration
     .flip       ( flip      ),
-    .is_hyper   ( is_hyper  ),
 
     // CPU interface
     .cpu_addr   ( main_addr[11:0]  ),
@@ -278,7 +269,6 @@ jttrack_video u_video(
     // Objects
     .objram_cs  ( objram_cs ),
     .obj_dout   ( obj_dout  ),
-    .obj_frame  ( obj_frame ),
 
     // PROMs
     .prog_data  ( prog_data ),
@@ -306,10 +296,7 @@ jttrack_video u_video(
     .blue       ( blue      ),
 
     .gfx_en     ( gfx_en    ),
-    .debug_bus  ( debug_bus ),
-    .ioctl_ram  ( 1'b0      ),
-    .ioctl_din  (           ),      // only for debugging
-    .ioctl_addr ( ioctl_addr[15:0])
+    .debug_bus  ( debug_bus )
 );
 
 jtframe_dwnld #(.PROM_START(PROM_START),.SWAB(1))

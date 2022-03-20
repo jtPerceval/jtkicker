@@ -37,7 +37,6 @@ module jttrack_main(
     input       [ 6:0]  joystick3,
     input       [ 6:0]  joystick4,
     input               service,
-    input               is_hyper,
 
     // GFX
     output              cpu_rnw,
@@ -74,10 +73,10 @@ module jttrack_main(
 reg  [ 7:0] cabinet, cpu_din;
 wire [ 7:0] ram_dout;
 wire [15:0] A;
-wire        RnW, irq_n, nmi_n;
+wire        RnW, irq_n;
 wire        irq_trigger;
 reg         irq_clrn, ram_cs;
-reg         ior_cs, in5_cs, intst_cs, intst_l,
+reg         ior_cs, in5_cs,
             iow_cs;
 wire        VMA;
 reg         nvram_we;
@@ -95,45 +94,30 @@ always @(*) begin
     rom_cs  = VMA && RnW && A[15:13]>=3; // ROM = 6000 - FFFF
     iow_cs     = 0;
     in5_cs     = 0;
-    intst_cs   = 0;
     ior_cs     = 0;
     objram_cs  = 0;
     vram_cs    = 0;
     ram_cs     = 0;
     snd_data_cs     = 0;
 
-    if( VMA ) begin
-        if( A[15:14]==0 )
-            case( A[13:11] ) // chip 6D
-                2: if( !A[10] ) begin
-                    ior_cs =  A[9];
-                    iow_cs = !A[9];
-                end
-                3: obj_cs = 1; // A10 selects between OBJ1 (low) and OBJ2 (high)
-                5: ram_cs = 1; // NVRAM (2kB)
-                6,7: vram_cs = 1; // Divided down in two signals originally: V1_cs and V2_cs
-            endcase
-
-
-        // OLD
-        if( A[15:13]==1 ) // chip H16
-            case( A[12:11] ) // chip H13
-                0,1: vram_cs = 1; // Divided down in two signals originally: V1_cs and V2_cs
-                2,3: ram_cs = 1; // 3 is the NVRAM (2kB)
-            endcase
-        if( A[15:13]==0 )
-            case( A[12:10] ) // chip H14
-                4: objram_cs = 1;
-                5: case( A[9:7]) // chip H8
-                    0: intst_cs    = 1; // intst / afe, two signals on board B, the same signal on board A
-                    1: iow_cs      = 1;
-                    2: snd_data_cs = 1;
-                    4: in5_cs      = 1;
-                    5: ior_cs      = 1;
+    if( VMA && A[15:14]==0 ) begin
+        case( A[13:11] ) // chip 6D
+            2: if( !A[10] ) begin
+                case( A[9:7] ) // chip 2B - A[9] low -> IO writes
+                    // 0: AFE
+                    1: iow_cs = !RnW;
+                    2: snd_data_cs = !RnW;
+                    4: in5_cs = 1;
+                    5: ior_cs = 1;
+                    // 6: in6_cs - unused
                     default:;
                 endcase
-                default:;
-            endcase
+            end
+            3: objram_cs = 1; // A10 selects between OBJ1 (low) and OBJ2 (high)
+            5: ram_cs = 1; // NVRAM (2kB)
+            6,7: vram_cs = 1; // Divided down in two signals originally: V1_cs and V2_cs
+            default:;
+        endcase
     end
 end
 
@@ -143,19 +127,15 @@ endfunction
 
 always @(posedge clk) begin
     case( A[1:0] )
-        0: cabinet <= { dipsw_c, start_button[1:0], service, coin_input[1:0] };
-        1: cabinet <=
-            is_hyper ? {1'b1, rev3(joystick2[6:4]), start_button[2], rev3(joystick1[6:4]) } :
-            { 1'b1, joystick1[6:4], joystick1[2], joystick1[3], joystick1[0], joystick1[1]};
-        2: cabinet <=
-            is_hyper ? {1'b1, rev3(joystick4[6:4]), start_button[3], rev3(joystick3[6:4]) } :
-            { 1'b1, joystick2[6:4], joystick2[2], joystick2[3], joystick2[0], joystick2[1]};
+        0: cabinet <= { 3'b111, start_button[1:0], service, coin_input[1:0] };
+        1: cabinet <= {1'b1, rev3(joystick2[6:4]), start_button[2], rev3(joystick1[6:4]) };
+        2: cabinet <= {1'b1, rev3(joystick4[6:4]), start_button[3], rev3(joystick3[6:4]) };
         3: cabinet <= dipsw_a;
     endcase
     cpu_din <= rom_cs  ? rom_data  :
                vram_cs ? vram_dout :
                ram_cs  ? ram_dout  :
-               objram_cs  ? obj_dout :
+               objram_cs ? obj_dout :
                ior_cs  ? cabinet  :
                in5_cs  ? dipsw_b  : 8'hff;
 end
@@ -165,11 +145,7 @@ always @(posedge clk) begin
         irq_clrn <= 0;
         flip     <= 0;
         snd_irq  <= 0;
-        obj_frame<= 0;
-        intst_l  <= 0;
     end else if(cpu_cen) begin
-        intst_l <= intst_cs;
-        if( intst_cs && !intst_l ) obj_frame <= ~obj_frame;
         if( iow_cs && !RnW ) begin
             case(A[2:0]) // 74LS259 @ F2
                 0: flip      <= cpu_dout[0];
@@ -185,14 +161,6 @@ always @(posedge clk) begin
         end
     end
 end
-
-// `ifdef SIMULATION
-// reg clrnl;
-// always @(posedge clk) begin
-//     clrnl <= irq_clrn;
-//     if( !irq_clrn && clrnl && !irq_n ) $display("IRQ cleared");
-// end
-// `endif
 
 jtframe_ff u_irq(
     .rst      ( rst         ),
