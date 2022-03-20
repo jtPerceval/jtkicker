@@ -72,6 +72,7 @@ module jtroadf_game(
     // Debug
     input   [ 3:0]  gfx_en,
     input   [ 7:0]  debug_bus,
+    output  [ 7:0]  debug_view,
     input           ioctl_ram,
     output  [ 7:0]  ioctl_din
 );
@@ -255,7 +256,8 @@ jtsbaskt_snd u_sound(
 
     .snd        ( snd       ),
     .sample     ( sample    ),
-    .peak       ( game_led  )
+    .peak       ( game_led  ),
+    .debug_view ( debug_view)
 );
 `else
     assign snd_cs=0;

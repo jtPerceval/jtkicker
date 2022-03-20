@@ -37,7 +37,8 @@ module jtsbaskt_snd(
 
     output signed [15:0] snd,
     output               sample,
-    output               peak
+    output               peak,
+    output        [ 7:0] debug_view
 );
 
 // Road Fighter: sch. has bit A10 as a jumper to either ground or VDD
@@ -57,6 +58,8 @@ wire        vlm_bsy;
 reg         psgdata_cs, vlm_data_cs, vlm_ctrl_cs;
 reg         latch_cs, cnt_cs, rdac_cs, psg_cs;
 wire [CNTW-1:0] cnt;
+
+assign debug_view = { 5'h1f, cap_en };
 
 always @(posedge clk, posedge rst) begin
     if( rst ) begin

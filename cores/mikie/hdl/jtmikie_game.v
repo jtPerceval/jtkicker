@@ -69,7 +69,8 @@ module jtmikie_game(
     input           enable_fm,
     // Debug
     input   [ 3:0]  gfx_en,
-    input   [ 7:0]  debug_bus
+    input   [ 7:0]  debug_bus,
+    output  [ 7:0]  debug_view,
 );
 
 // SDRAM offsets
@@ -115,6 +116,7 @@ assign prog_rd    = 0;
 assign dwnld_busy = downloading;
 assign { dipsw_c, dipsw_b, dipsw_a } = dipsw[17:0];
 assign dip_flip = ~flip;
+assign debug_view = 0;
 
 always @(*) begin
     prog_data = pre_data;

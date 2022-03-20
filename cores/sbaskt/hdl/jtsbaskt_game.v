@@ -69,7 +69,8 @@ module jtsbaskt_game(
     input           enable_fm,
     // Debug
     input   [ 3:0]  gfx_en,
-    input   [ 7:0]  debug_bus
+    input   [ 7:0]  debug_bus,
+    output  [ 7:0]  debug_view
 );
 
 // SDRAM offsets
@@ -217,7 +218,8 @@ jtsbaskt_snd u_sound(
 
     .snd        ( snd       ),
     .sample     ( sample    ),
-    .peak       ( game_led  )
+    .peak       ( game_led  ),
+    .debug_view ( debug_view)
 );
 `else
     assign snd_cs=0;
