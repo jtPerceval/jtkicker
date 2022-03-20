@@ -56,10 +56,10 @@
         <!-- gfx1 - starts at 0x20000 -->
         <interleave output="16">
             <part name="c11_d06.bin" crc="82e2185a" map="01"/>
-            <part name="c12_d07.bin" crc="800ff1f1" map="10"/>
+            <part name="c13_d08.bin" crc="d9faf183" map="10"/>
         </interleave>
         <interleave output="16">
-            <part name="c13_d08.bin" crc="d9faf183" map="01"/>
+            <part name="c12_d07.bin" crc="800ff1f1" map="01"/>
             <part name="c14_d09.bin" crc="5886c802" map="10"/>
         </interleave>
         <part repeat="0x8000"> FF</part>

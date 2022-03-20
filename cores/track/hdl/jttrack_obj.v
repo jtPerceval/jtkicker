@@ -64,7 +64,7 @@ module jttrack_obj(
     output        [3:0] pxl
 );
 
-parameter [7:0] HOFFSET = 8'd6;
+parameter [7:0] HOFFSET = 8'd5;
 localparam [5:0] MAXOBJ = 6'd23;
 
 wire [ 7:0] obj1_dout, obj2_dout,
@@ -188,7 +188,7 @@ always @(posedge clk, posedge rst) begin
             // --------------------------
             // Reads the row scroll value
             6: begin
-                hpos      <= { rd2_dout[7], rd1_dout };
+                hpos      <= { rd2_dout[0], rd1_dout };
                 scan_addr <= 7'd31<<1;
                 scan_st   <= 1;
             end
