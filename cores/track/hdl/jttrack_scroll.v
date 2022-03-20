@@ -74,7 +74,7 @@ assign vram_dout    = cpu_addr[11] ? vram_high : vram_low;
 assign eff_addr     = cpu_addr[10:0];
 
 always @* begin
-    hsum = hpos + ( LHBL ? hdump : { ~6'h0, hdump[2:0]} ) - {8'd0,flip};
+    hsum = hpos + ( LHBL ? hdump : { ~6'h0, hdump[2:0]} ) - {8'd0,flip} + 9'd8;
     heff = hsum ^ {1'b0,{8{flip}}};
     code_msb = attr[7:6];
     vflip    = attr[4];
