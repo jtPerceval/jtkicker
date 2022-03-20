@@ -46,48 +46,26 @@ parameter RAM_AW=10;
 
 localparam CNTW=11;
 
-reg  [ 7:0] latch, psg_data, vlm_data, din, rdac;
-wire [ 7:0] ram_dout, vlm_mux, dout;
-wire        irq_ack, int_n;
-wire        vlm_ceng, vlm_me_b;
-wire [10:0] psg_snd;
+reg  [ 7:0] din;
+wire [ 7:0] ram_dout, latch;
 reg         ram_cs;
-wire        mreq_n, iorq_n, m1_n;
+wire        mreq_n;
 wire [15:0] A;
-reg  [ 2:0] snd_en;
-wire        rdy1;
+reg  [ 2:0] cap_en;
 reg         vlm_rst, vlm_st, vlm_sel;
 wire        vlm_bsy;
 reg         psgdata_cs, vlm_data_cs, vlm_ctrl_cs;
 reg         latch_cs, cnt_cs, rdac_cs, psg_cs;
-reg [CNTW-1:0] cnt;
-wire signed
-         [9:0] vlm_snd;
-
-assign vlm_mux = ~vlm_sel ? vlm_data :
-               ~vlm_me_b ? pcm_data : 8'hff;
-assign pcm_addr[15:13]=0;
-assign irq_ack = ~iorq_n & ~m1_n;
-assign vlm_ceng = snd_cen & ( vlm_me_b | pcm_ok );
-assign rom_addr = A[13:0];
-assign sample   = psg_cen;
+wire [CNTW-1:0] cnt;
 
 always @(posedge clk, posedge rst) begin
     if( rst ) begin
-        latch    <= 0;
-        psg_data <= 0;
-        cnt      <= 0;
-        snd_en   <= 0;
+        cap_en   <= 0;
         vlm_rst  <= 1;
         vlm_st   <= 0;
         vlm_sel  <= 0;
     end else begin
-        if( psg_cen     ) cnt<=cnt+1'd1;
-        if( m2s_data    ) latch <= main_dout;
-        if( psgdata_cs  ) psg_data <= dout;
-        if( vlm_data_cs ) vlm_data <= dout;
-        if( vlm_ctrl_cs ) { snd_en, vlm_rst, vlm_st, vlm_sel } <= A[8:3];
-        if( rdac_cs     ) rdac <= dout;
+        if( vlm_ctrl_cs ) { cap_en, vlm_rst, vlm_st, vlm_sel } <= A[8:3];
     end
 end
 
@@ -128,123 +106,47 @@ always @(posedge clk) begin
             8'hff;
 end
 
-jt89 u_psg(
-    .rst    ( rst           ),
-    .clk    ( clk           ),
-    .clk_en ( psg_cen       ),
-    .wr_n   ( rdy1          ),
-    .cs_n   ( ~psg_cs       ),
-    .din    ( psg_data      ),
-    .sound  ( psg_snd       ),
-    .ready  ( rdy1          )
+jtsbaskt_snd_dev #( .RAM_AW(RAM_AW),.CNTW(CNTW)) u_dev(
+    .rst        ( rst       ),
+    .clk        ( clk       ),
+    .snd_cen    ( snd_cen   ),    // 3.5MHz
+    .psg_cen    ( psg_cen   ),    // 1.7MHz
+    // Sound CPU
+    .A          ( A         ),
+    .din        ( din       ),
+    .ram_dout   ( ram_dout  ),
+    .mreq_n     ( mreq_n    ),
+    // Misc
+    .ram_cs     ( ram_cs    ),
+    .psg_cs     ( psg_cs    ),
+    .psgdata_cs ( psgdata_cs),
+    .rdac_cs    ( rdac_cs   ),
+    .vlm_data_cs(vlm_data_cs),
+    .vlm_bsy    ( vlm_bsy   ),
+    .cap_en     ({1'b0,cap_en}), // Enable capacitors
+    .cnt        ( cnt       ),
+    .vlm_st     ( vlm_st    ),
+    .vlm_rst    ( vlm_rst   ),
+    .vlm_sel    ( vlm_sel   ),
+    // ROM
+    .rom_addr   ( rom_addr  ),
+    .rom_cs     ( rom_cs    ),
+    .rom_data   ( rom_data  ),
+    .rom_ok     ( rom_ok    ),
+    // From main CPU
+    .main_dout  ( main_dout ),
+    .m2s_data   ( m2s_data  ),
+    .m2s_irq    ( m2s_irq   ),
+    .latch      ( latch     ),
+    // Sound
+    .pcm_addr   ( pcm_addr  ), // only 8kB ROMs actually used
+    .pcm_data   ( pcm_data  ),
+    .pcm_ok     ( pcm_ok    ),
+
+    .snd        ( snd       ),
+    .sample     ( sample    ),
+    .peak       ( peak      )
 );
 
-`ifndef NOVLM
-wire [ 2:0] pcm_nc;
-
-vlm5030_gl u_vlm(
-    .i_rst   ( vlm_rst      ),
-    .i_clk   ( clk          ),
-    .i_oscen ( vlm_ceng     ),
-    .i_start ( vlm_st       ),
-    .i_vcu   ( 1'b0         ),
-    .i_tst1  ( 1'b0         ),
-    .o_tst2  (              ),
-    .o_tst4  (              ),
-    .i_d     ( vlm_mux      ),
-    .o_a     ( { pcm_nc, pcm_addr[12:0] } ),
-    .o_me_l  ( vlm_me_b     ),
-    .o_mte   (              ),
-    .o_bsy   ( vlm_bsy      ),
-
-    .o_dao   (              ),
-    .o_audio ( vlm_snd      )
-);
-`else
-    reg busy_dummy=0;
-    reg cnt_csl;
-
-    assign vlm_bsy = busy_dummy;
-    assign pcm_addr = 0;
-    assign vlm_snd  = 0;
-    assign vlm_me_b = 0;
-
-    always @(posedge clk) begin
-        cnt_csl <= cnt_cs;
-        if( cnt_cs && !cnt_csl ) busy_dummy <= ~busy_dummy;
-    end
-`endif
-
-wire signed [7:0] rdac_s;
-
-jtframe_dcrm #(.SW(8)) u_dcrm(
-    .rst    ( rst       ),
-    .clk    ( clk       ),
-    .sample ( cnt[6]    ),  // 14 kHz
-    .din    ( rdac      ),
-    .dout   ( rdac_s    )
-);
-
-wire [7:0] gain_psg  = !snd_en[2] ? 8'h18 : 8'h0;
-wire [7:0] gain_vlm  = !snd_en[1] ? 8'h18 : 8'h0;
-wire [7:0] gain_rdac = !snd_en[0] ? 8'h08 : 8'h0;
-
-jtframe_mixer #(.W0(11),.W1(10),.W2(8)) u_mixer(
-    .rst    ( rst       ),
-    .clk    ( clk       ),
-    .cen    ( psg_cen   ),
-    // input signals
-    .ch0    ( psg_snd   ),
-    .ch1    ( vlm_snd   ),
-    .ch2    ( rdac_s    ),
-    .ch3    ( 16'd0     ),
-    // gain for each channel in 4.4 fixed point format
-    .gain0  ( gain_psg  ),
-    .gain1  ( gain_vlm  ),
-    .gain2  ( gain_rdac ),
-    .gain3  ( 8'h00     ),
-    .mixed  ( snd       ),
-    .peak   ( peak      )
-);
-
-jtframe_ff u_irq(
-    .rst      ( rst         ),
-    .clk      ( clk         ),
-    .cen      ( 1'b1        ),
-    .din      ( 1'b1        ),
-    .q        (             ),
-    .qn       ( int_n       ),
-    .set      (             ),
-    .clr      ( irq_ack     ),
-    .sigedge  ( m2s_irq     )
-);
-
-/* verilator tracing_off */
-
-jtframe_sysz80 #(.RAM_AW(RAM_AW)) u_cpu(
-    .rst_n      ( ~rst        ),
-    .clk        ( clk         ),
-    .cen        ( snd_cen     ),
-    .cpu_cen    (             ),
-    .int_n      ( int_n       ),
-    .nmi_n      ( 1'b1        ),
-    .busrq_n    ( 1'b1        ),
-    .m1_n       ( m1_n        ),
-    .mreq_n     ( mreq_n      ),
-    .iorq_n     ( iorq_n      ),
-    .rd_n       (             ),
-    .wr_n       (             ),
-    .rfsh_n     (             ),
-    .halt_n     (             ),
-    .busak_n    (             ),
-    .A          ( A           ),
-    .cpu_din    ( din         ),
-    .cpu_dout   ( dout        ),
-    .ram_dout   ( ram_dout    ),
-    // manage access to ROM data from SDRAM
-    .ram_cs     ( ram_cs      ),
-    .rom_cs     ( rom_cs      ),
-    .rom_ok     ( rom_ok      )
-);
 
 endmodule

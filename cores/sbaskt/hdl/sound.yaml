@@ -2,6 +2,7 @@ game:
   - from: sbaskt
     get:
       - jtsbaskt_snd.v
+      - jtsbaskt_snd_dev.v
 jtframe:
   - from: cpu
     get:
