@@ -85,7 +85,7 @@ localparam [24:0] PROM_START  =  `PROM_START;
 
 wire        main_cs, main_ok;
 
-wire [13:0] scr_addr;
+wire [12:0] scr_addr;
 wire [13:0] obj_addr;
 wire [31:0] scr_data, obj_data;
 wire        scr_ok, obj_ok, objrom_cs;
@@ -99,7 +99,6 @@ wire [15:0] main_addr;
 wire [ 7:0] dipsw_a, dipsw_b;
 wire        LVBL;
 
-wire        obj_frame;
 wire        cpu_cen, cpu4_cen;
 wire        cpu_rnw, cpu_irqn, cpu_nmin;
 wire        vram_cs, objram_cs,
@@ -212,7 +211,6 @@ jttrack_main u_main(
     assign game_led  = 0;
     assign flip      = 0;
     assign pcm_addr  = 0;
-    assign obj_frame = 0;
 `endif
 
 `ifndef NOSOUND
@@ -318,7 +316,7 @@ u_dwnld(
 /* verilator tracing_off */
 
 jtframe_rom #(
-    .SLOT0_AW    ( 15              ),
+    .SLOT0_AW    ( 14              ),
     .SLOT0_DW    ( 32              ),
     .SLOT0_OFFSET( SCR_START>>1    ),
 

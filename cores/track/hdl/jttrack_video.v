@@ -37,7 +37,6 @@ module jttrack_video(
 
     input               objram_cs,
     output        [7:0] obj_dout,
-    input               obj_frame,
 
     // PROMs
     input         [7:0] prog_data,
@@ -45,7 +44,7 @@ module jttrack_video(
     input               prom_en,
 
     // Scroll
-    output       [13:0] scr_addr,
+    output       [12:0] scr_addr,
     input        [31:0] scr_data,
     input               scr_ok,
 
@@ -125,7 +124,6 @@ jttrack_scroll u_scroll(
     .vdump      ( vdump[7:0]),
     .hdump      ( hdump     ),
     .flip       ( flip      ),
-    .is_hyper   ( is_hyper  ),
 
     // PROMs
     .prog_data  ( prog_data[3:0] ),
@@ -149,12 +147,11 @@ jttrack_obj u_obj(
     .pxl_cen    ( pxl_cen   ),
 
     // CPU interface
-    .cpu_addr   ( cpu_addr[9:0] ),
+    .cpu_addr   ( cpu_addr[10:0] ),
     .cpu_dout   ( cpu_dout  ),
     .obj_cs     ( objram_cs ),
     .cpu_rnw    ( cpu_rnw   ),
     .obj_dout   ( obj_dout  ),
-    .obj_frame  ( obj_frame ),
 
     // video inputs
     .hinit      ( HS        ), // to ensure that vdump is right for the row scroll

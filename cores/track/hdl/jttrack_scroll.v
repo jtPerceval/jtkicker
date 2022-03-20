@@ -18,6 +18,7 @@
 
 module jttrack_scroll(
     input               rst,
+    input               clk,        // 48 MHz
     input               clk24,      // 24 MHz
 
     input               pxl_cen,
@@ -71,7 +72,6 @@ assign vram_we_low  = vram_we & ~cpu_addr[11];
 assign vram_we_high = vram_we &  cpu_addr[11];
 assign vram_dout    = cpu_addr[11] ? vram_high : vram_low;
 assign eff_addr     = cpu_addr[10:0];
-assign ioctl_din    = ioctl_addr[11] ? attr : code;
 
 always @* begin
     hsum = hpos + ( LHBL ? hdump : { ~6'h0, hdump[2:0]} ) - {8'd0,flip};
@@ -87,13 +87,12 @@ assign pal_addr =
 // scroll register in custom chip 085
 always @(posedge clk, posedge rst) begin
     if( rst ) begin
-        hpos <= 0;
         vf   <= 0;
+        rd_addr <= 0;
     end else begin
         if( pxl_cen && heff[2:0]==7 ) begin
             rd_addr <= { vf[7:3], heff[8:3] }; // 5+6 = 11
         end
-        if( scr_we  ) hpos <= scr_din;
         vf <= {8{flip}} ^ vdump;
     end
 end

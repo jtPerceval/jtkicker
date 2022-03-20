@@ -70,7 +70,7 @@ localparam [5:0] MAXOBJ = 6'd23;
 wire [ 7:0] obj1_dout, obj2_dout,
             rd1_dout, rd2_dout;
 wire        obj1_we, obj2_we;
-reg  [ 5:0] scan_addr;
+reg  [ 6:0] scan_addr;
 reg  [ 9:0] eff_scan;
 wire [ 3:0] pal_data;
 
@@ -80,7 +80,7 @@ assign obj2_we  = obj_cs &  cpu_addr[10] & ~cpu_rnw;
 
 // four 4-bit RAM chips connected as one 16-bit RAM
 // in the original
-jtframe_ram #(.simfile("obj_lo.bin")) u_lo(
+jtframe_dual_ram #(.simfile("obj_lo.bin")) u_lo(
     // Port 0, CPU
     .clk0   ( clk24         ),
     .data0  ( cpu_dout      ),
@@ -117,7 +117,7 @@ reg        hinit_x;
 reg  [2:0] scan_st;
 
 reg  [7:0] dr_attr, dr_xpos;
-reg  [8:0] dr_code;
+reg  [7:0] dr_code;
 reg  [3:0] dr_v;
 reg        dr_start;
 wire [7:0] ydiff;
@@ -153,7 +153,6 @@ always @(posedge clk, posedge rst) begin
     if( rst ) begin
         scan_st  <= 0;
         dr_start <= 0;
-        scr_we   <= 0;
     end else if( cen2 ) begin
         dr_start <= 0;
         case( scan_st )
@@ -180,7 +179,7 @@ always @(posedge clk, posedge rst) begin
             4: begin
                 scan_st   <= 5;
                 dr_start  <= inzone;
-                scan_addr <= { scan_addr[5:1]-5'd1,1'b0};
+                scan_addr <= { scan_addr[6:1]-6'd1,1'b0};
             end
             5: begin // give time to dr_busy to rise
                 dr_start<= 0;
@@ -190,7 +189,7 @@ always @(posedge clk, posedge rst) begin
             // Reads the row scroll value
             6: begin
                 hpos <= { rd2_dout[7], rd1_dout };
-                scan_addr <= 6'd31<<1;
+                scan_addr <= 7'd31<<1;
                 scan_st   <= 1;
             end
         endcase
@@ -216,7 +215,7 @@ jtkicker_objdraw #(
     .busy       ( dr_busy   ),
 
     // Object table data
-    .code       ( dr_code   ),
+    .code       ( { 1'b0, dr_code } ),
     .xpos       ( dr_xpos   ),
     .pal        ( pal       ),
     .hflip      ( hflip     ),

@@ -43,7 +43,6 @@ module jttrack_main(
     output      [ 7:0]  cpu_dout,
     output reg          vram_cs,
     output reg          objram_cs,
-    output reg          obj_frame,
 
     // Sound
     output reg          snd_data_cs,
