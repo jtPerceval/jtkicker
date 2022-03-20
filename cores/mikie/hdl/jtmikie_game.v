@@ -70,7 +70,7 @@ module jtmikie_game(
     // Debug
     input   [ 3:0]  gfx_en,
     input   [ 7:0]  debug_bus,
-    output  [ 7:0]  debug_view,
+    output  [ 7:0]  debug_view
 );
 
 // SDRAM offsets
