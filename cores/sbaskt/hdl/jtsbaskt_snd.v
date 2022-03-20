@@ -128,6 +128,7 @@ jtsbaskt_snd_dev #( .RAM_AW(RAM_AW),.CNTW(CNTW)) u_dev(
     .vlm_st     ( vlm_st    ),
     .vlm_rst    ( vlm_rst   ),
     .vlm_sel    ( vlm_sel   ),
+    .cnt_cs     ( cnt_cs    ),
     // ROM
     .rom_addr   ( rom_addr  ),
     .rom_cs     ( rom_cs    ),

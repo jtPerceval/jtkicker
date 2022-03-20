@@ -6,6 +6,7 @@ game:
       - jttrack_video.v
       - jttrack_scroll.v
       - jttrack_obj.v
+      - jttrack_snd.v
   - from: yiear
     get:
       - jtyiear_colmix.v

@@ -32,6 +32,7 @@ module jtsbaskt_snd_dev #(
     output              mreq_n,
     // Misc
     input               ram_cs,
+    input               cnt_cs,
     input               psg_cs,
     input               psgdata_cs,
     input               vlm_data_cs,
@@ -73,7 +74,6 @@ wire        vlm_ceng, vlm_me_b;
 wire [10:0] psg_snd;
 wire        iorq_n, m1_n;
 wire        rdy1;
-reg         cnt_cs;
 wire signed
          [9:0] vlm_snd;
 

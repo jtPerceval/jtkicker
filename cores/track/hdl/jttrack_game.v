@@ -217,7 +217,7 @@ jttrack_main u_main(
 `endif
 
 `ifndef NOSOUND
-jtsbaskt_snd #(.RAM_AW(11)) u_sound(
+jttrack_snd u_sound(
     .rst        ( rst       ),
     .clk        ( clk24     ),
     .snd_cen    ( snd_cen   ),    // 3.5MHz
