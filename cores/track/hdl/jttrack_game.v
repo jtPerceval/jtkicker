@@ -130,6 +130,9 @@ assign is_obj   = ioctl_addr[21:0] >= OBJ_START && ioctl_addr[21:0]<PCM_START;
 always @(*) begin
     prog_data = pre_data;
     prog_addr = pre_addr;
+    if( is_scr ) begin
+        prog_addr[0] = ~pre_addr[0];
+    end
     if( is_obj ) begin
         prog_addr[4:0] = { pre_addr[2:0], ~pre_addr[4], ~pre_addr[3] };
     end

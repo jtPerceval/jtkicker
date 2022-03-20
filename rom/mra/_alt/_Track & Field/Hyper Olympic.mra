@@ -24,7 +24,7 @@
     <name>Hyper Olympic</name>
     <setname>hyprolym</setname>
     <rbf>jttrack</rbf>
-    <mameversion>0237</mameversion>
+    <mameversion>0241</mameversion>
     <year>1983</year>
     <manufacturer>Konami</manufacturer>
     <players>4</players>
@@ -43,9 +43,15 @@
         <!-- audiocpu - starts at 0x10000 -->
         <part name="c2_d13.bin" crc="95bf79b6"/>
         <!-- gfx2 - starts at 0x12000 -->
-        <part name="361-d12.h16" crc="768bb63d"/>
-        <part name="361-d11.h15" crc="3af0e2a8"/>
-        <part name="h14_e10.bin" crc="c2166a5c"/>
+        <interleave output="16">
+            <part name="361-d12.h16" crc="768bb63d" map="12"/>
+        </interleave>
+        <interleave output="16">
+            <part name="361-d11.h15" crc="3af0e2a8" map="12"/>
+        </interleave>
+        <interleave output="16">
+            <part name="h14_e10.bin" crc="c2166a5c" map="12"/>
+        </interleave>
         <part repeat="0x8000"> FF</part>
         <!-- gfx1 - starts at 0x20000 -->
         <interleave output="16">

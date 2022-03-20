@@ -24,7 +24,7 @@
     <name>Track &amp; Field (Centuri)</name>
     <setname>trackfldc</setname>
     <rbf>jttrack</rbf>
-    <mameversion>0237</mameversion>
+    <mameversion>0241</mameversion>
     <year>1983</year>
     <manufacturer>Konami (Centuri license)</manufacturer>
     <players>4</players>
@@ -43,9 +43,15 @@
         <!-- audiocpu - starts at 0x10000 -->
         <part name="c2_d13.bin" crc="95bf79b6"/>
         <!-- gfx2 - starts at 0x12000 -->
-        <part name="h16_e12.bin" crc="50075768"/>
-        <part name="h15_e11.bin" crc="dda9e29f"/>
-        <part name="h14_e10.bin" crc="c2166a5c"/>
+        <interleave output="16">
+            <part name="h16_e12.bin" crc="50075768" map="12"/>
+        </interleave>
+        <interleave output="16">
+            <part name="h15_e11.bin" crc="dda9e29f" map="12"/>
+        </interleave>
+        <interleave output="16">
+            <part name="h14_e10.bin" crc="c2166a5c" map="12"/>
+        </interleave>
         <part repeat="0x8000"> FF</part>
         <!-- gfx1 - starts at 0x20000 -->
         <interleave output="16">

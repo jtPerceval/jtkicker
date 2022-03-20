@@ -161,14 +161,14 @@ always @(posedge clk, posedge rst) begin
                 scan_st   <= 6;
             end
             1: if(!dr_busy) begin
-                dr_attr   <= rd1_dout;
-                dr_code   <= rd2_dout;
-                scan_st   <= 2;
+                dr_attr      <= rd1_dout;
+                dr_xpos      <= rd2_dout;
+                scan_st      <= 2;
                 scan_addr[0] <= 1;
             end
             2: begin
                 ypos    <= rd1_dout;
-                dr_xpos <= rd2_dout;
+                dr_code <= rd2_dout;
                 scan_st <= 3;
             end
             3: begin
@@ -182,13 +182,13 @@ always @(posedge clk, posedge rst) begin
                 scan_addr <= { scan_addr[6:1]-6'd1,1'b0};
             end
             5: begin // give time to dr_busy to rise
-                dr_start<= 0;
-                scan_st <= done ? 0 : 1;
+                dr_start <= 0;
+                scan_st  <= done ? 0 : 1;
             end
             // --------------------------
             // Reads the row scroll value
             6: begin
-                hpos <= { rd2_dout[7], rd1_dout };
+                hpos      <= { rd2_dout[7], rd1_dout };
                 scan_addr <= 7'd31<<1;
                 scan_st   <= 1;
             end

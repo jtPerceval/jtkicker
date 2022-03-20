@@ -29,7 +29,7 @@ delete = [ "Unused", "Unknown" ]
 regions = [
     { name="maincpu" },
     { name="audiocpu" },
-    { name="gfx2", no_offset=true, start=$SCR_START },
+    { name="gfx2", no_offset=true, reverse=true, start=$SCR_START },
     { name="gfx1", width=16, no_offset=true, start=$OBJ_START },
     { name="vlm", start=$PCM_START },
     { name="proms", start=$PROM_START },
