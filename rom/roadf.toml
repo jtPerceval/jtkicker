@@ -14,7 +14,7 @@ sourcefile="hyperspt.cpp"
 core=3 # max number of buttons supported by the core
 names=[
     { machine="roadf", names="Low gear,High gear" },
-    { machine="hyperspt", names="Left, Centre, Right" }
+    { machine="hyperspt", names="Left button, Centre button, Right button" }
 ]
 
 [rbf]
