@@ -44,6 +44,42 @@ public:
     void dump();
 };
 
+class SimInputs {
+    ifstream fin;
+    UUT& dut;
+public:
+    SimInputs( UUT& _dut) : dut(_dut) {
+        dut.dip_pause=1;
+        dut.joystick1 = 0xff;
+        dut.joystick2 = 0xff;
+        dut.start_button = 0xf;
+        dut.coin_input   = 0xf;
+        dut.service      = 1;
+        dut.dip_test     = 1;
+#ifdef SIM_INPUTS
+        fin.open("sim_inputs.hex");
+        if( fin.bad() ) {
+            cout << "Error: could not open sim_inputs.hex\n";
+        } else {
+            cout << "reading sdram_inputs.hex\n";
+        }
+        next();
+#endif
+    }
+    void next() {
+        if( fin.good() ) {
+            string s;
+            unsigned v;
+            getline( fin, s );
+            sscanf( s.c_str(),"%u", &v );
+            v = ~v;
+            dut.start_button = 0xc | (v&3);
+            dut.coin_input   = 0xc | ((v>>2)&3);
+            dut.joystick1    = 0x3c0 | ((v>>4)&0x3f);
+        }
+    }
+};
+
 class Download {
     UUT& dut;
     int addr, din, ticks,len;
@@ -138,6 +174,7 @@ class JTSim {
     bool download;
     VerilatedVcdC* tracer;
     SDRAM sdram;
+    SimInputs sim_inputs;
     Download dwn;
     int frame_cnt, last_VS;
     // Video dump
@@ -417,7 +454,7 @@ void JTSim::reset( int v ) {
 #endif
 }
 
-JTSim::JTSim( UUT& g, int argc, char *argv[]) : game(g), sdram(g), dwn(g) {
+JTSim::JTSim( UUT& g, int argc, char *argv[]) : game(g), sdram(g), dwn(g), sim_inputs(g) {
     simtime=0;
     frame_cnt=0;
     last_VS = 0;
@@ -447,16 +484,9 @@ JTSim::JTSim( UUT& g, int argc, char *argv[]) : game(g), sdram(g), dwn(g) {
 #else
     game.gfx_en=0xf;    // enable all layers
 #endif
-    game.dip_pause=1;
 #ifdef JTFRAME_MRA_DIP
     game.dipsw=JTFRAME_SIM_DIPS;
 #endif
-    game.joystick1 = 0xff;
-    game.joystick2 = 0xff;
-    game.start_button = 0xf;
-    game.coin_input   = 0xf;
-    game.service      = 1;
-    game.dip_test     = 1;
     reset(0);
     clock(48);
     reset(1);
@@ -519,7 +549,7 @@ void JTSim::clock(int n) {
 #ifdef DUMP
         if( tracer && dump_ok ) tracer->dump(simtime);
 #endif
-        // frame counter
+        // frame counter & inputs
         if( game.VS && !last_VS ) {
             frame_cnt++;
             if( frame_cnt == DUMP_START && !dump_ok ) {
@@ -529,6 +559,7 @@ void JTSim::clock(int n) {
             cout << ".";
             if( !(frame_cnt & 0x3f) ) cout << '\n';
             cout.flush();
+            sim_inputs.next();
         }
         last_VS = game.VS;
 

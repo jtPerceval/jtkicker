@@ -36,8 +36,12 @@ for i in $*; do
 done
 
 if [ -n "$SCENE" ]; then
- cp $SCENE/*.bin .
- # go run obj2sim.go $SCENE/obj.bin || exit $?
+    cp -v $SCENE/vram_*.bin .
+    if [ -e $SCENE/obj.bin ]; then
+        cp $SCENE/obj.bin obj_lo.bin
+        cp $SCENE/obj.bin obj_hi.bin
+    fi
+    # go run obj2sim.go $SCENE/obj.bin || exit $?
 fi
 
 export M6809=1

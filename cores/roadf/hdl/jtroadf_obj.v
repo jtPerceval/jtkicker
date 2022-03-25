@@ -40,6 +40,13 @@
 // Note that the signal called 256V is actually unrelated to
 // the vertical counter
 
+// The object table overlaps with the row scroll at least
+// in 8 bytes. If the object count is started at 31, avoiding
+// that overlap the target in the archery trial of Hyper Sports
+// is not drawn completely. (See scene #4 in ver/game)
+// I have to measure the board to check the object count with
+// more precision. Particularly, when it stops.
+
 module jtroadf_obj(
     input               rst,
     input               clk,        // 48 MHz
@@ -85,12 +92,12 @@ module jtroadf_obj(
 );
 
 parameter [7:0] HOFFSET = 8'd6;
-localparam [5:0] MAXOBJ = 6'd23;
+//localparam [5:0] MAXOBJ = 6'd23;
 
 wire [ 7:0] obj1_dout, obj2_dout,
             rd1_dout, rd2_dout, scan_dout;
 wire        obj1_we, obj2_we;
-reg  [ 6:0] scan_addr;  // although the DMA bus in the schematics has 8 bits
+reg  [ 7:0] scan_addr;  // although the DMA bus in the schematics has 8 bits
     // it shouldn't be able to pass sprite count 23, as the line buffers
     // are written at the pixel clock and the table scan count is reset
     // to zero at the beginning of each raster line
@@ -159,12 +166,12 @@ wire [3:0] pal;
 
 assign vdf    = vdump[7:0] ^ {8{flip}};
 assign ydiff  = vdf-dr_y-8'd1;
-assign done   = scan_addr[6:2]==5'h1f;
+assign done   = scan_addr[7:2]==6'h3f;
 assign pal    = dr_attr[3:0];
 assign adj    = 0;
 
 always @* begin
-    eff_scan = ioctl_ram ? ioctl_addr[9:0] : { 2'd0, scr_rd, scan_addr};
+    eff_scan = ioctl_ram ? ioctl_addr[9:0] : { 2'd0, scan_addr};
     hflip = dr_attr[6];
     vflip = dr_attr[7];
     dr_y   = ~ypos + ( adj ? ( flip ? 8'hff : 8'h1 ) : 8'h0 );
@@ -189,7 +196,7 @@ always @(posedge clk, posedge rst) begin
         case( scan_st )
             0: if( hinit_x ) begin
                 scr_rd    <= 1;
-                scan_addr <= { 1'b1, vdf[7:3], 1'b0 };
+                scan_addr <= { 2'b11, vdf[7:3], 1'b0 };
                 scan_st   <= 6;
             end
             1: if(!dr_busy) begin
@@ -213,7 +220,7 @@ always @(posedge clk, posedge rst) begin
                 dr_xpos   <= scan_dout;
                 scan_st   <= 5;
                 dr_start  <= inzone;
-                scan_addr <= { scan_addr[6:2]-5'd1,2'b0};
+                scan_addr <= { scan_addr[7:2]-6'd1,2'b0};
             end
             5: begin // give time to dr_busy to rise
                 dr_start<= 0;
@@ -230,7 +237,7 @@ always @(posedge clk, posedge rst) begin
                 hpos[7]   <= scan_dout[0];
                 scr_rd    <= 0;
                 scr_we    <= 1;
-                scan_addr <= 7'd31<<2;
+                scan_addr <= 8'd33<<2;
                 scan_st   <= 1;
             end
         endcase
