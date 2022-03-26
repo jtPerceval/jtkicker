@@ -38,3 +38,11 @@ cores/roadf/ver/game/filtered.f
 cores/roadf/ver/game/game.f
 cores/roadf/ver/game/mist.f
 cores/roadf/ver/game/waiver
+*.f
+*.fbak
+*.hbak
+*.defbak
+cores/track/ver/game/waiver
+rom/trackfld
+cores/track/ver/game/defmacros.h
+cores/track/ver/game/test.cpp
