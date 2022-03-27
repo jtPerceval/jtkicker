@@ -44,8 +44,8 @@ module jtpinpon_video(
     input               prom_en,
 
     // Scroll
-    output       [12:0] scr_addr,
-    input        [31:0] scr_data,
+    output       [11:0] scr_addr,
+    input        [15:0] scr_data,
     input               scr_ok,
 
     // Objects
@@ -102,7 +102,7 @@ jtkicker_vtimer u_vtimer(
     .VS     ( VS        )
 );
 
-jttrack_scroll u_scroll(
+jtpinpon_char u_char(
     .rst        ( rst       ),
     .clk        ( clk       ),
     .clk24      ( clk24     ),
@@ -116,14 +116,10 @@ jttrack_scroll u_scroll(
     .vram_cs    ( vram_cs   ),
     .vram_dout  ( vram_dout ),
 
-    // Row scroll
-    .hpos       ( hpos      ),
-
     // video inputs
     .LHBL       ( LHBL      ),
     .vdump      ( vdump[7:0]),
     .hdump      ( hdump     ),
-    .flip       ( flip      ),
 
     // PROMs
     .prog_data  ( prog_data[3:0] ),

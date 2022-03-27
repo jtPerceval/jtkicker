@@ -1,0 +1,9 @@
+game:
+  - from: pinpon
+    get:
+      - jtpinpon_game.v
+      - jtpinpon_main.v
+      - jtpinpon_video.v
+      - jtpinpon_char.v
+      - jtpinpon_obj.v
+      - jtpinpon_objdraw.v

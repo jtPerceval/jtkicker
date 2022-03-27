@@ -261,10 +261,10 @@ jtpinpon_video u_video(
 
 jtframe_rom #(
     .SLOT0_AW    ( 14              ),
-    .SLOT0_DW    ( 32              ),
+    .SLOT0_DW    ( 16              ), // contrary to other cores in this repo.
     .SLOT0_OFFSET( SCR_START>>1    ),
 
-    .SLOT1_AW    ( 15              ),
+    .SLOT1_AW    ( 13              ),
     .SLOT1_DW    ( 32              ),
     .SLOT1_OFFSET( OBJ_START>>1    ),
 
@@ -295,7 +295,7 @@ jtframe_rom #(
     .slot7_ok    ( main_ok       ),
     .slot8_ok    (               ),
 
-    .slot0_addr  ({scr_addr,1'b0}),
+    .slot0_addr  ( scr_addr      ),
     .slot1_addr  ({obj_addr,1'b0}),
     .slot2_addr  (               ),
     .slot3_addr  (               ),
