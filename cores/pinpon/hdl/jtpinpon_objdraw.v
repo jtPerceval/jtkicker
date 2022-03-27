@@ -55,7 +55,8 @@ module jtpinpon_objdraw #(
     output reg          rom_cs,
     input               rom_ok,
 
-    output        [3:0] pxl
+    output        [3:0] pxl,
+    input         [7:0] debug_bus
 );
 
 wire [ 3:0] buf_in;
@@ -69,7 +70,8 @@ reg  [ 3:0] cnt;
 reg  [ 4:0] cur_pal;
 reg         cur_hflip;
 
-assign pal_addr = { 1'b0, cur_pal, pxl_data[16], pxl_data[0] };
+assign pal_addr = { 1'b0, cur_pal,
+    debug_bus[0] ? {pxl_data[16], pxl_data[0]} : {pxl_data[0], pxl_data[16]} };
 
 always @(posedge clk, posedge rst) begin
     if( rst ) begin
@@ -93,8 +95,8 @@ always @(posedge clk, posedge rst) begin
         if( busy && (!rom_cs || rom_ok) ) begin
             if( cnt==15 && rom_cs ) begin
                 pxl_data <= {
-                    rom_data[31:28], rom_data[23:20], rom_data[15:11], rom_data[7:4], // plane B
-                    rom_data[27:24], rom_data[19:16], rom_data[10: 8], rom_data[3:0]  // plane A
+                    rom_data[31:28], rom_data[23:20], rom_data[15:12], rom_data[7:4], // plane B
+                    rom_data[27:24], rom_data[19:16], rom_data[11: 8], rom_data[3:0]  // plane A
                 };
                 buf_we <= 1;
                 rom_cs <= 0;
@@ -106,7 +108,6 @@ always @(posedge clk, posedge rst) begin
             if( cnt==0 ) begin
                 buf_we <= 0;
                 busy   <= 0;
-                rom_cs <= 0;
             end
         end
     end

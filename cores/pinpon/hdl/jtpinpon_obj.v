@@ -53,62 +53,42 @@ module jtpinpon_obj(
 );
 
 parameter [7:0] HOFFSET = 8'd6;
-localparam      MAXOBJ  = 6'd23;
+//localparam      MAXOBJ  = 6'd23;
+wire [5:0]      MAXOBJ  = debug_bus[7:2];
 
-wire [ 7:0] obj1_dout, obj2_dout,
-            low_dout, hi_dout;
-wire        obj1_we, obj2_we;
-reg  [ 6:0] scan_addr;  // most games only scan 32 objects, but Mikie scans a bit further
-                        // the schematics are a bit blurry, so it isn't clear how it goes
-                        // about it. It may well be that it is scanning 32 objects too but
-                        // the table has blanks and it spans over more than 32 entries
-reg  [ 9:0] eff_scan;
+wire [ 7:0] scan_dout;
+wire        obj_we;
+reg  [ 6:0] scan_addr;
+reg  [10:0] eff_scan;
 wire [ 3:0] pal_data;
 wire        sel;
 
-assign sel      = cpu_addr[10];
-assign obj_dout = sel ? obj1_dout : obj2_dout;
-assign obj1_we  = oram_cs &  sel & ~cpu_rnw;
-assign obj2_we  = oram_cs & !sel & ~cpu_rnw;
+assign obj_we  = oram_cs & ~cpu_rnw;
 
-jtframe_dual_ram #(.simfile("obj2.bin")) u_hi(
+jtframe_dual_ram #(.aw(11),.simfile("obj.bin")) u_hi(
     // Port 0, CPU
     .clk0   ( clk24         ),
     .data0  ( cpu_dout      ),
-    .addr0  ( cpu_addr[9:0] ),
-    .we0    ( obj1_we       ),
-    .q0     ( obj1_dout     ),
+    .addr0  ( cpu_addr      ),
+    .we0    ( obj_we        ),
+    .q0     ( obj_dout      ),
     // Port 1
     .clk1   ( clk           ),
     .data1  (               ),
     .addr1  ( eff_scan      ),
     .we1    ( 1'b0          ),
-    .q1     ( hi_dout       )
-);
-
-jtframe_dual_ram #(.simfile("obj1.bin")) u_low(
-    // Port 0, CPU
-    .clk0   ( clk24         ),
-    .data0  ( cpu_dout      ),
-    .addr0  ( cpu_addr[9:0] ),
-    .we0    ( obj2_we       ),
-    .q0     ( obj2_dout     ),
-    // Port 1
-    .clk1   ( clk           ),
-    .data1  (               ),
-    .addr1  ( eff_scan      ),
-    .we1    ( 1'b0          ),
-    .q1     ( low_dout      )
+    .q1     ( scan_dout     )
 );
 
 // Max sprites drawn before the raster line count moves
 localparam [4:0] HALF     = 5'd19;
-localparam       REV_SCAN = 1;
+localparam       REV_SCAN = 0;
 
 reg        cen2=0;
-wire       inzone, done;
+reg        inzone;
+wire       done;
 reg        hinit_x;
-reg  [1:0] scan_st;
+reg  [2:0] scan_st;
 
 reg  [7:0] dr_attr, dr_xpos;
 reg  [7:0] dr_code;
@@ -123,17 +103,17 @@ wire       dr_busy;
 wire [4:0] pal;
 
 assign adj    = REV_SCAN ? scan_addr[5:1]<HALF : scan_addr[5:1]>HALF;
-assign inzone = dr_y>=vrender && dr_y<(vrender+8'h10);
 assign ydiff  = vrender-dr_y-8'd1;
 assign done   = REV_SCAN ? scan_addr[6:1]==0 : scan_addr[6:1]==MAXOBJ;
 
 assign pal    = dr_attr[4:0];
 
 always @* begin
-    eff_scan = {3'd0,scan_addr};
+    eff_scan = {4'd0,scan_addr};
     hflip = dr_attr[6];
     vflip = dr_attr[7];
-    dr_y   = ~low_dout + ( adj ? 8'h1 : 8'h0 );
+    dr_y   = ~scan_dout + ( adj ? 8'h1 : 8'h0 );
+    inzone = dr_y>=vrender && dr_y<(vrender+8'h10);
 end
 
 always @(posedge clk) begin
@@ -149,28 +129,32 @@ always @(posedge clk, posedge rst) begin
         dr_start <= 0;
     end else if( cen2 ) begin
         dr_start <= 0;
+        if( scan_st != 0 ) begin
+            scan_addr[1:0] <= scan_addr[1:0] + 2'd1;
+            if(!dr_busy) scan_st <= scan_st+3'd1;
+        end
         case( scan_st )
             0: if( hinit_x ) begin
                 scan_addr <= REV_SCAN  ? {MAXOBJ, 1'd0} : 7'd0;
                 scan_st   <= 1;
             end
             1: if(!dr_busy) begin
-                dr_xpos   <= hi_dout;
-                dr_attr   <= low_dout;
-                scan_addr[0] <= ~scan_addr[0];
-                scan_st   <= 2;
+                dr_code   <= scan_dout;
             end
             2: begin
-                dr_code   <= hi_dout;
-                dr_v      <= ydiff[3:0];
-                scan_addr[0] <= 0;
-                scan_addr[6:1] <= REV_SCAN ? scan_addr[6:1]-6'd1 : scan_addr[6:1]+6'd1;
-                if( inzone ) begin
-                    dr_start <= 1;
-                end
-                scan_st   <= done ? 0 : 3;
+                dr_xpos <= scan_dout;
             end
-            3: scan_st <= 1; // give time to dr_busy to rise
+            3: begin
+                dr_attr <= scan_dout;
+            end
+            4: begin
+                dr_v   <= ydiff[3:0];
+                scan_addr[1:0] <= 0;
+                scan_addr[6:2] <= REV_SCAN ? scan_addr[6:2]-5'd1 : scan_addr[6:2]+5'd1;
+                dr_start <= inzone;
+                scan_st  <= done ? 0 : 5;
+            end
+            5: scan_st <= 1; // give time to dr_busy to rise
         endcase
     end
 end
@@ -211,7 +195,8 @@ jtpinpon_objdraw #(
     .rom_data   ( rom_data  ),
     .rom_ok     ( rom_ok    ),
 
-    .pxl        ( pxl       )
+    .pxl        ( pxl       ),
+    .debug_bus  ( debug_bus )
 );
 
 endmodule
