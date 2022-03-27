@@ -50,10 +50,10 @@ module jtpinpon_char(
 );
 
 localparam BSEL = 10;
-localparam PW=5;
 
 wire [ 7:0] code, attr, vram_high, vram_low, pal_addr;
-reg  [PW-1:0] pre_pal, cur_pal;
+reg  [ 8:0] heff;
+reg  [ 4:0] pre_pal, cur_pal;
 reg         code_msb;
 reg  [15:0] pxl_data;
 wire [ 9:0] rd_addr;
@@ -69,27 +69,29 @@ assign vram_we_high = vram_we &  cpu_addr[BSEL];
 assign vram_dout    = cpu_addr[BSEL] ? vram_high : vram_low;
 
 always @* begin
+    heff = hdump+9'd4;
+    if( !LHBL ) heff[8:4]=0;
     eff_addr = cpu_addr[9:0];
     vflip    = attr[7];
     code_msb = attr[5];
 end
 
-assign rd_addr  = { vdump[7:3], hdump[7:3] }; // 5+5 = 10
-assign pal_addr =
-    { 1'b0, cur_pal, cur_hf ? { pxl_data[8], pxl_data[0] } : { pxl_data[15], pxl_data[7]} };
+assign rd_addr  = { vdump[7:3], heff[7:3] }; // 5+5 = 10
+assign pal_addr = { 1'b0, cur_pal,
+    cur_hf ? { pxl_data[15], pxl_data[7]} : { pxl_data[8], pxl_data[0] }};
 
 always @(posedge clk) if(pxl_cen) begin
-    if( hdump[2:0]==0 ) begin
+    if( heff[2:0]==0 ) begin
+        // request new data
         rom_addr <= { code_msb, code, vdump[2:0]^{3{vflip}} }; // 1+8+3=12 bits
-        hflip    <= ~attr[6];
+        hflip    <= attr[6];
         pre_pal  <= attr[4:0];
-    end
-    if( hdump[2:0]==4 ) begin // 2 pixel delay to grab data
-        pxl_data <= { rom_data[15:11], rom_data[7:4], rom_data[10:8], rom_data[3:0] };
+        // collects previously requested data
+        pxl_data <= { rom_data[11:8], rom_data[3:0], rom_data[15:12], rom_data[7:4] };
         cur_hf   <= hflip;
         cur_pal  <= pre_pal;
     end else begin
-        pxl_data <= cur_hf ? pxl_data>>1 : pxl_data<<1;
+        pxl_data <= cur_hf ? pxl_data<<1 : pxl_data>>1;
     end
 end
 
