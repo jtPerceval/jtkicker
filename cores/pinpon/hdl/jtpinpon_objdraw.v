@@ -16,7 +16,7 @@
     Version: 1.0
     Date: 15-11-2021 */
 
-module jtkicker_objdraw #(
+module jtpinpon_objdraw #(
     parameter       BYPASS_PROM= 0,
                     PACKED     = 0,
     parameter [7:0] HOFFSET    = 8'd6

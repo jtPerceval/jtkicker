@@ -28,14 +28,14 @@ module jtpinpon_video(
     input               flip,
 
     // CPU interface
-    input        [11:0] cpu_addr,
+    input        [10:0] cpu_addr,
     input         [7:0] cpu_dout,
     input               cpu_rnw,
 
     input               vram_cs,
     output        [7:0] vram_dout,
 
-    input               objram_cs,
+    input               oram_cs,
     output        [7:0] obj_dout,
 
     // PROMs
@@ -49,7 +49,7 @@ module jtpinpon_video(
     input               scr_ok,
 
     // Objects
-    output       [13:0] obj_addr,
+    output       [11:0] obj_addr,
     input        [31:0] obj_data,
     output              obj_cs,
     input               obj_ok,
@@ -59,6 +59,7 @@ module jtpinpon_video(
     output              LVBL,
     output              LHBL_dly,
     output              LVBL_dly,
+    output              V16,
 
     output        [3:0] red,
     output        [3:0] green,
@@ -70,12 +71,12 @@ module jtpinpon_video(
 
 wire       LHBL;
 wire [8:0] vdump, vrender, hdump;
-wire [8:0] hpos;
 wire [3:0] obj_pxl, scr_pxl;
 reg  [2:0] prom_we;
 wire [9:0] prom_offset;
 
 assign prom_offset = prog_addr[9:0]-10'h20;
+assign V16 = vdump[4];
 
 always @* begin
     prom_we = 0;
@@ -83,9 +84,9 @@ always @* begin
         if( prog_addr[9:0] < 10'h20 )
             prom_we[0] = 1; // Final colour PROM
         else if( prog_addr[9:0]<10'h120 )
-            prom_we[1] = 1; // OBJ
-        else if( prog_addr[9:0]<10'h220 )
             prom_we[2] = 1; // SCR
+        else if( prog_addr[9:0]<10'h220 )
+            prom_we[1] = 1; // OBJ
     end
 end
 
@@ -135,7 +136,7 @@ jtpinpon_char u_char(
     .debug_bus  ( debug_bus )
 );
 
-jttrack_obj u_obj(
+jtpinpon_obj u_obj(
     .rst        ( rst       ),
     .clk        ( clk       ),      // 48 MHz
     .clk24      ( clk24     ),      // 24 MHz
@@ -143,9 +144,9 @@ jttrack_obj u_obj(
     .pxl_cen    ( pxl_cen   ),
 
     // CPU interface
-    .cpu_addr   ( cpu_addr[10:0] ),
+    .cpu_addr   ( cpu_addr  ),
     .cpu_dout   ( cpu_dout  ),
-    .obj_cs     ( objram_cs ),
+    .oram_cs    ( oram_cs   ),
     .cpu_rnw    ( cpu_rnw   ),
     .obj_dout   ( obj_dout  ),
 
@@ -153,12 +154,8 @@ jttrack_obj u_obj(
     .hinit      ( HS        ), // to ensure that vdump is right for the row scroll
     .LHBL       ( LHBL      ),
     .LVBL       ( LVBL      ),
-    .vdump      ( vdump     ),
+    .vrender    (vrender[7:0]),
     .hdump      ( hdump     ),
-    .flip       ( flip      ),
-
-    // row scroll
-    .hpos       ( hpos      ),
 
     // PROMs
     .prog_data  ( prog_data[3:0] ),
@@ -171,7 +168,8 @@ jttrack_obj u_obj(
     .rom_data   ( obj_data  ),
     .rom_ok     ( obj_ok    ),
 
-    .pxl        ( obj_pxl   )
+    .pxl        ( obj_pxl   ),
+    .debug_bus  ( debug_bus )
 );
 
 jtyiear_colmix #(.BLANK_DLY(9)) u_colmix(

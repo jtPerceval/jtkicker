@@ -75,14 +75,15 @@ module jtpinpon_game(
 
 // SDRAM offsets
 localparam [21:0] SCR_START   =  `SCR_START,
-                  OBJ_START   =  `OBJ_START,
+                  OBJ_START   =  `OBJ_START;
 localparam [24:0] PROM_START  =  `PROM_START;
 
 wire        main_cs, main_ok;
 
-wire [12:0] scr_addr;
-wire [13:0] obj_addr;
-wire [31:0] scr_data, obj_data;
+wire [11:0] scr_addr;
+wire [11:0] obj_addr;
+wire [15:0] scr_data;
+wire [31:0] obj_data;
 wire        scr_ok, obj_ok, objrom_cs;
 
 wire [ 7:0] main_data;
@@ -115,7 +116,7 @@ always @(*) begin
         prog_addr[0]   = ~pre_addr[3];
         prog_addr[3:1] =  pre_addr[2:0];
     end
-    if( ioctl_addr[21:0] >= OBJ_START && ioctl_addr[21:0]<PCM_START ) begin
+    if( ioctl_addr[21:0] >= OBJ_START && ioctl_addr[21:0]<PROM_START[21:0] ) begin
         prog_addr[0]   = ~pre_addr[3];
         prog_addr[1]   = ~pre_addr[4];
         prog_addr[5:2] =  { pre_addr[5], pre_addr[2:0] }; // making [5] explicit for now
@@ -154,7 +155,9 @@ u_dwnld(
 );
 
 `ifndef NOMAIN
-jtpinpon u_main(
+assign snd[4:0]=0;
+
+jtpinpon_main u_main(
     .rst            ( rst24         ),
     .clk            ( clk24         ),        // 24 MHz
     .cpu_cen        ( cpu_cen       ),
@@ -191,7 +194,7 @@ jtpinpon u_main(
     .dipsw_c        ( dipsw_c       ),
     .dip_test       ( dip_test      ),
     // Sound
-    .snd            ( snd           ),
+    .snd            ( snd[15:5]     ),
     .sample         ( sample        )
 );
 `else
@@ -200,10 +203,6 @@ jtpinpon u_main(
     assign snd     = 0;
     assign sample  = 0;
     assign flip    = 0;
-`endif
-
-`ifndef PCM
-    assign pcm_addr = 0;
 `endif
 
 jtpinpon_video u_video(
@@ -223,9 +222,7 @@ jtpinpon_video u_video(
     .cpu_rnw    ( cpu_rnw   ),
     // Scroll
     .vram_cs    ( vram_cs   ),
-    .vscr_cs    ( vscr_cs   ),
     .vram_dout  ( vram_dout ),
-    .vscr_dout  ( vscr_dout ),
     // Objects
     .oram_cs    ( oram_cs   ),
     .obj_dout   ( obj_dout  ),
@@ -260,15 +257,15 @@ jtpinpon_video u_video(
 
 
 jtframe_rom #(
-    .SLOT0_AW    ( 14              ),
+    .SLOT0_AW    ( 12              ),
     .SLOT0_DW    ( 16              ), // contrary to other cores in this repo.
     .SLOT0_OFFSET( SCR_START>>1    ),
 
-    .SLOT1_AW    ( 13              ),
+    .SLOT1_AW    ( 12              ),
     .SLOT1_DW    ( 32              ),
     .SLOT1_OFFSET( OBJ_START>>1    ),
 
-    .SLOT7_AW    ( 14              ),
+    .SLOT7_AW    ( 15              ),
     .SLOT7_DW    (  8              ),
     .SLOT7_OFFSET(  0              )  // Main
 ) u_rom (
@@ -296,13 +293,13 @@ jtframe_rom #(
     .slot8_ok    (               ),
 
     .slot0_addr  ( scr_addr      ),
-    .slot1_addr  ({obj_addr,1'b0}),
+    .slot1_addr  ( obj_addr      ),
     .slot2_addr  (               ),
     .slot3_addr  (               ),
     .slot4_addr  (               ),
     .slot5_addr  (               ),
     .slot6_addr  (               ),
-    .slot7_addr  ( main_addr     ),
+    .slot7_addr  (main_addr[14:0]),
     .slot8_addr  (               ),
 
     .slot0_dout  ( scr_data      ),

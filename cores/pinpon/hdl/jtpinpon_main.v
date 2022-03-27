@@ -56,14 +56,13 @@ module jtpinpon_main(
     input               dip_test,
 
     // Sound
-    output signed [15:0] snd,
-    output               sample,
-    output               peak
+    output signed [10:0] snd,
+    output               sample
 );
 
 reg  [ 7:0] cabinet, cpu_din;
 wire [15:0] A;
-wire        rd_n, wr_n, int_n, nmi_n;
+wire        rd_n, wr_n, int_n, nmi_n, m1_n, iorq_n;
 wire        irq_trigger, nmi_trigger;
 reg         nmi_clrn, irq_clrn;
 reg         ior_cs, dip2_cs, dip3_cs,
@@ -185,6 +184,7 @@ jt89 u_ti1(
 
 /* verilator tracing_off */
 
+// TODO: check bus contention in the PCB
 jtframe_z80_romwait  u_cpu(
     .rst_n      ( ~rst        ),
     .clk        ( clk         ),
@@ -202,8 +202,8 @@ jtframe_z80_romwait  u_cpu(
     .halt_n     (             ),
     .busak_n    (             ),
     .A          ( A           ),
-    .cpu_din    ( cpu_din     ),
-    .cpu_dout   ( cpu_dout    ),
+    .din        ( cpu_din     ),
+    .dout       ( cpu_dout    ),
     // manage access to ROM data from SDRAM
     .rom_cs     ( rom_cs      ),
     .rom_ok     ( rom_ok      )

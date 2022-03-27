@@ -76,13 +76,13 @@ always @* begin
     pre_pal  = 0;
 end
 
-assign rd_addr  = { vscr[7:3], hdump[7:3] }; // 5+5 = 10
+assign rd_addr  = { vdump[7:3], hdump[7:3] }; // 5+5 = 10
 assign pal_addr =
     { 1'b0, cur_pal, cur_hf ? { pxl_data[8], pxl_data[0] } : { pxl_data[15], pxl_data[7]} };
 
 always @(posedge clk) if(pxl_cen) begin
     if( hdump[2:0]==0 ) begin
-        rom_addr <= { code_msb, code, vscr[2:0]^{3{vflip}} }; // 1+8+3=12 bits
+        rom_addr <= { code_msb, code, vdump[2:0]^{3{vflip}} }; // 1+8+3=12 bits
     end
     if( hdump[2:0]==4 ) begin // 2 pixel delay to grab data
         pxl_data <= { rom_data[15:11], rom_data[7:4], rom_data[10:8], rom_data[3:0] };

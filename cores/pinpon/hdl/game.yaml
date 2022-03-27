@@ -7,3 +7,37 @@ game:
       - jtpinpon_char.v
       - jtpinpon_obj.v
       - jtpinpon_objdraw.v
+  - from: kicker
+    get:
+      - jtkicker_vtimer.v
+      - jtkicker_clocks.v
+  - from: yiear
+    get:
+      - jtyiear_colmix.v
+jtframe:
+  - get:
+      - jtframe_ff.v
+  - from: cpu
+    get:
+      - jtframe_z80wait.v
+      - jtframe_z80.v
+      - t80/T80.qip
+  - from: ram
+    get:
+      - jtframe_ram.v
+      - jtframe_obj_buffer.v
+  - from: video
+    get:
+      - jtframe_vtimer.v
+      - jtframe_blank.v
+  - from: sdram
+    get:
+      - jtframe_dwnld.v
+  - from: clocking
+    get:
+      - jtframe_cen48.v
+      - jtframe_frac_cen.v
+      - jtframe_crossclk_cen.v
+modules:
+  jt:
+    - name: jt89

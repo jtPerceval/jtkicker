@@ -44,7 +44,7 @@ module jtpinpon_obj(
 
     // SDRAM
     output       [11:0] rom_addr,
-    input        [15:0] rom_data,
+    input        [31:0] rom_data,
     output              rom_cs,
     input               rom_ok,
 
@@ -53,6 +53,7 @@ module jtpinpon_obj(
 );
 
 parameter [7:0] HOFFSET = 8'd6;
+localparam      MAXOBJ  = 6'd23;
 
 wire [ 7:0] obj1_dout, obj2_dout,
             low_dout, hi_dout;
@@ -63,10 +64,12 @@ reg  [ 6:0] scan_addr;  // most games only scan 32 objects, but Mikie scans a bi
                         // the table has blanks and it spans over more than 32 entries
 reg  [ 9:0] eff_scan;
 wire [ 3:0] pal_data;
+wire        sel;
 
-assign obj_dout = cpu_addr[10] ? obj1_dout : obj2_dout;
-assign obj1_we  = oram_cs & ~cpu_rnw;
-assign obj2_we  = obj2_cs & ~cpu_rnw;
+assign sel      = cpu_addr[10];
+assign obj_dout = sel ? obj1_dout : obj2_dout;
+assign obj1_we  = oram_cs &  sel & ~cpu_rnw;
+assign obj2_we  = oram_cs & !sel & ~cpu_rnw;
 
 jtframe_dual_ram #(.simfile("obj2.bin")) u_hi(
     // Port 0, CPU
@@ -108,12 +111,11 @@ reg        hinit_x;
 reg  [1:0] scan_st;
 
 reg  [7:0] dr_attr, dr_xpos;
-reg  [8:0] dr_code;
+reg  [7:0] dr_code;
 reg  [3:0] dr_v;
 reg        dr_start;
 wire [7:0] ydiff;
 reg  [7:0] dr_y;
-wire [7:0] vrf;
 wire       adj;
 
 reg        hflip, vflip;
@@ -121,9 +123,8 @@ wire       dr_busy;
 wire [4:0] pal;
 
 assign adj    = REV_SCAN ? scan_addr[5:1]<HALF : scan_addr[5:1]>HALF;
-assign vrf    = vrender ^ {8{flip}};
-assign inzone = dr_y>=vrf && dr_y<(vrf+8'h10);
-assign ydiff  = vrf-dr_y-8'd1;
+assign inzone = dr_y>=vrender && dr_y<(vrender+8'h10);
+assign ydiff  = vrender-dr_y-8'd1;
 assign done   = REV_SCAN ? scan_addr[6:1]==0 : scan_addr[6:1]==MAXOBJ;
 
 assign pal    = dr_attr[4:0];
@@ -132,7 +133,7 @@ always @* begin
     eff_scan = {3'd0,scan_addr};
     hflip = dr_attr[6];
     vflip = dr_attr[7];
-    dr_y   = ~low_dout + ( adj ? ( flip ? 8'hff : 8'h1 ) : 8'h0 );
+    dr_y   = ~low_dout + ( adj ? 8'h1 : 8'h0 );
 end
 
 always @(posedge clk) begin
@@ -175,8 +176,7 @@ always @(posedge clk, posedge rst) begin
 end
 
 jtpinpon_objdraw #(
-    .BYPASS_PROM    ( BYPASS_PROM   ),
-    .HOFFSET        ( HOFFSET       )
+    .HOFFSET    ( HOFFSET   )
 ) u_draw (
     .rst        ( rst       ),
     .clk        ( clk       ),        // 48 MHz
