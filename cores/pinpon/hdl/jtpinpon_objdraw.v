@@ -101,14 +101,12 @@ always @(posedge clk, posedge rst) begin
             end else begin
                 pxl_data <= pxl_data>>1;
                 buf_a    <= cur_hflip ? buf_a-8'd1 : buf_a+8'd1;
-                cnt      <= cnt - 3'd1;
+                cnt      <= cnt - 4'd1;
             end
             if( cnt==0 ) begin
-                if( rom_addr[0] ) begin
-                    buf_we <= 0;
-                    busy   <= 0;
-                    rom_cs <= 0;
-                end
+                buf_we <= 0;
+                busy   <= 0;
+                rom_cs <= 0;
             end
         end
     end

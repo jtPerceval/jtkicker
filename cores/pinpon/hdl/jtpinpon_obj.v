@@ -66,7 +66,7 @@ reg  [ 9:0] eff_scan;
 wire [ 3:0] pal_data;
 wire        sel;
 
-assign sel      = cpu_addr[10];
+assign sel      = ~cpu_addr[10];
 assign obj_dout = sel ? obj1_dout : obj2_dout;
 assign obj1_we  = oram_cs &  sel & ~cpu_rnw;
 assign obj2_we  = oram_cs & !sel & ~cpu_rnw;

@@ -71,9 +71,7 @@ assign vram_dout    = cpu_addr[BSEL] ? vram_high : vram_low;
 always @* begin
     eff_addr = cpu_addr[9:0];
     vflip    = attr[7];
-    hflip    = ~attr[6];
     code_msb = attr[5];
-    pre_pal  = 0;
 end
 
 assign rd_addr  = { vdump[7:3], hdump[7:3] }; // 5+5 = 10
@@ -83,6 +81,8 @@ assign pal_addr =
 always @(posedge clk) if(pxl_cen) begin
     if( hdump[2:0]==0 ) begin
         rom_addr <= { code_msb, code, vdump[2:0]^{3{vflip}} }; // 1+8+3=12 bits
+        hflip    <= ~attr[6];
+        pre_pal  <= attr[4:0];
     end
     if( hdump[2:0]==4 ) begin // 2 pixel delay to grab data
         pxl_data <= { rom_data[15:11], rom_data[7:4], rom_data[10:8], rom_data[3:0] };

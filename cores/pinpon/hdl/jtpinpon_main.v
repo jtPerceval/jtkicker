@@ -129,8 +129,8 @@ always @(posedge clk) begin
         irq_clrn <= 0;
     end else if(cpu_cen) begin
         if( iow_cs && !wr_n ) begin
-            nmi_clrn <= cpu_dout[5];
-            irq_clrn <= cpu_dout[4];
+            nmi_clrn <= cpu_dout[3];
+            irq_clrn <= cpu_dout[2];
         end
     end
 end

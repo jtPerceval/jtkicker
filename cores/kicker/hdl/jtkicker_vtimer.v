@@ -36,6 +36,17 @@ parameter LAYOUT = 0;
 localparam [8:0] VB_START = LAYOUT==3 ? 9'd238 : 9'd239,
                  VB_END   = LAYOUT==3 ? 9'd014 : 9'd015;
 
+`ifdef VERILATOR
+    /* verilator tracing_on */
+    integer frame_cnt=0;
+    reg VSl;
+    always @(posedge clk) begin
+        VSl <= VS;
+        if( VS && !VSl ) frame_cnt<=frame_cnt+1;
+    end
+    /* verilator tracing_off */
+`endif
+
 // The original counter keeps hdump[7] high
 // while hdump[8] is hight (i.e. during HBLANK)
 // The rest of the count should match quite well

@@ -20,6 +20,7 @@ names=[
 name="jtpinpon"
 
 [dipsw]
+bitcnt = 20
 delete = [ "Unused", "Unknown" ]
 
 [ROM]
