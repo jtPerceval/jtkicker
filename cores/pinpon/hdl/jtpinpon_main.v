@@ -87,7 +87,7 @@ always @(*) begin
     tidata1_cs = 0;
     oram_cs    = 0;
     vram_cs    = 0;
-    if( mreq_n && rfsh_n ) begin
+    if( !mreq_n && rfsh_n ) begin
         if( !A[15] )
             rom_cs = 1;
         else begin

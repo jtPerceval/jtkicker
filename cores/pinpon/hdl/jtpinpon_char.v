@@ -71,7 +71,7 @@ assign vram_dout    = cpu_addr[BSEL] ? vram_high : vram_low;
 always @* begin
     eff_addr = cpu_addr[9:0];
     vflip    = attr[7];
-    hflip    = attr[6];
+    hflip    = ~attr[6];
     code_msb = attr[5];
     pre_pal  = 0;
 end

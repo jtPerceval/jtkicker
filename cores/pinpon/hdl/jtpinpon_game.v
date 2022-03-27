@@ -48,7 +48,7 @@ module jtpinpon_game(
     input   [24:0]  ioctl_addr,
     input   [ 7:0]  ioctl_dout,
     input           ioctl_wr,
-    output reg [21:0] prog_addr,
+    output  [21:0]  prog_addr,
     output  [ 7:0]  prog_data,
     output  [ 1:0]  prog_mask,
     output          prog_we,
@@ -107,19 +107,21 @@ assign dip_flip = flip;
 assign debug_view = 0;
 assign game_led= 0;
 
-wire [21:0] pre_addr;
+reg  [24:0] post_addr;
 wire [ 7:0] nc;
+wire        is_char = ioctl_addr[21:0] >= SCR_START && ioctl_addr[21:0]<OBJ_START;
+wire        is_obj  = ioctl_addr[21:0] >= OBJ_START && ioctl_addr[21:0]<PROM_START[21:0];
 
 always @(*) begin
-    prog_addr = pre_addr;
-    if( ioctl_addr[21:0] >= SCR_START && ioctl_addr[21:0]<OBJ_START ) begin
-        prog_addr[0]   = ~pre_addr[3];
-        prog_addr[3:1] =  pre_addr[2:0];
+    post_addr = ioctl_addr;
+    if( is_char ) begin
+        post_addr[0]   =  ioctl_addr[3];
+        post_addr[3:1] =  ioctl_addr[2:0]^3'd1;
     end
-    if( ioctl_addr[21:0] >= OBJ_START && ioctl_addr[21:0]<PROM_START[21:0] ) begin
-        prog_addr[0]   = ~pre_addr[3];
-        prog_addr[1]   = ~pre_addr[4];
-        prog_addr[5:2] =  { pre_addr[5], pre_addr[2:0] }; // making [5] explicit for now
+    if( is_obj ) begin
+        post_addr[0]   = ~ioctl_addr[3];
+        post_addr[1]   = ~ioctl_addr[4];
+        post_addr[5:2] =  { ioctl_addr[5], ioctl_addr[2:0] }; // making [5] explicit for now
     end
 end
 
@@ -142,10 +144,10 @@ jtframe_dwnld #(.PROM_START(PROM_START),.SWAB(1))
 u_dwnld(
     .clk            ( clk           ),
     .downloading    ( downloading   ),
-    .ioctl_addr     ( ioctl_addr    ),
+    .ioctl_addr     ( post_addr     ),
     .ioctl_dout     ( ioctl_dout    ),
     .ioctl_wr       ( ioctl_wr      ),
-    .prog_addr      ( pre_addr      ),
+    .prog_addr      ( prog_addr     ),
     .prog_data      ( {nc,prog_data}),
     .prog_mask      ( prog_mask     ), // active low
     .prog_we        ( prog_we       ),
