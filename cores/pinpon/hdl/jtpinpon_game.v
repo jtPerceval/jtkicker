@@ -200,11 +200,15 @@ jtpinpon_main u_main(
     .sample         ( sample        )
 );
 `else
-    assign main_cs = 0;
-    assign oram_cs = 0;
-    assign snd     = 0;
-    assign sample  = 0;
-    assign flip    = 0;
+    assign main_cs   = 0;
+    assign main_addr = 0;
+    assign cpu_rnw   = 1;
+    assign cpu_dout  = 0;
+    assign vram_cs   = 0;
+    assign oram_cs   = 0;
+    assign snd       = 0;
+    assign sample    = 0;
+    assign flip      = 0;
 `endif
 
 jtpinpon_video u_video(

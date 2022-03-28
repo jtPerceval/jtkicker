@@ -28,12 +28,9 @@ for i in $*; do
 done
 
 if [ -n "$SCENE" ]; then
-    cp -v $SCENE/vram_*.bin .
-    if [ -e $SCENE/obj.bin ]; then
-        cp $SCENE/obj.bin obj_lo.bin
-        cp $SCENE/obj.bin obj_hi.bin
-    fi
-    # go run obj2sim.go $SCENE/obj.bin || exit $?
+    dd if=$SCENE/vram.bin of=vram_lo.bin count=2
+    dd if=$SCENE/vram.bin of=vram_hi.bin skip=2 count=2
+    cp $SCENE/oram.bin .
 fi
 
 jtsim -mist -sysname $SYSNAME $SIMULATOR -load \

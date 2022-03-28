@@ -52,9 +52,9 @@ module jtpinpon_obj(
     input         [7:0] debug_bus
 );
 
-parameter [7:0] HOFFSET = 8'd6;
-//localparam      MAXOBJ  = 6'd23;
-wire [5:0]      MAXOBJ  = debug_bus[7:2];
+parameter  [7:0] HOFFSET = 8'd6;
+localparam [4:0] MAXOBJ  = 5'd24;
+//wire [5:0]      MAXOBJ  = debug_bus[7:2];
 
 wire [ 7:0] scan_dout;
 wire        obj_we;
@@ -65,7 +65,7 @@ wire        sel;
 
 assign obj_we  = oram_cs & ~cpu_rnw;
 
-jtframe_dual_ram #(.aw(11),.simfile("obj.bin")) u_hi(
+jtframe_dual_ram #(.aw(11),.simfile("oram.bin")) u_hi(
     // Port 0, CPU
     .clk0   ( clk24         ),
     .data0  ( cpu_dout      ),
@@ -104,7 +104,7 @@ wire [4:0] pal;
 
 assign adj    = REV_SCAN ? scan_addr[5:1]<HALF : scan_addr[5:1]>HALF;
 assign ydiff  = vrender-dr_y-8'd1;
-assign done   = REV_SCAN ? scan_addr[6:1]==0 : scan_addr[6:1]==MAXOBJ;
+assign done   = REV_SCAN ? scan_addr[6:2]==0 : scan_addr[6:2]==MAXOBJ;
 
 assign pal    = dr_attr[4:0];
 
@@ -113,7 +113,6 @@ always @* begin
     hflip = dr_attr[6];
     vflip = dr_attr[7];
     dr_y   = ~scan_dout + ( adj ? 8'h1 : 8'h0 );
-    inzone = dr_y>=vrender && dr_y<(vrender+8'h10);
 end
 
 always @(posedge clk) begin
@@ -129,29 +128,32 @@ always @(posedge clk, posedge rst) begin
         dr_start <= 0;
     end else if( cen2 ) begin
         dr_start <= 0;
-        if( scan_st != 0 ) begin
-            scan_addr[1:0] <= scan_addr[1:0] + 2'd1;
-            if(!dr_busy) scan_st <= scan_st+3'd1;
-        end
         case( scan_st )
             0: if( hinit_x ) begin
-                scan_addr <= REV_SCAN  ? {MAXOBJ, 1'd0} : 7'd0;
+                scan_addr <= REV_SCAN  ? {MAXOBJ, 2'd0} : 7'd0;
                 scan_st   <= 1;
             end
-            1: if(!dr_busy) begin
-                dr_code   <= scan_dout;
+            1: begin
+                dr_v   <= ydiff[3:0];
+                inzone <= dr_y>=vrender && dr_y<(vrender+8'h10);
+                scan_st <= scan_st+3'd1;
+                scan_addr[1:0] <= scan_addr[1:0] + 2'd1;
             end
             2: begin
-                dr_xpos <= scan_dout;
+                dr_code   <= scan_dout;
+                scan_st <= scan_st+3'd1;
+                scan_addr[1:0] <= scan_addr[1:0] + 2'd1;
             end
             3: begin
-                dr_attr <= scan_dout;
+                dr_xpos <= scan_dout;
+                scan_addr[1:0] <= scan_addr[1:0] + 2'd1;
+                scan_st <= scan_st+3'd1;
             end
-            4: begin
-                dr_v   <= ydiff[3:0];
+            4: if(!dr_busy) begin
+                dr_start <= inzone;
+                dr_attr <= scan_dout;
                 scan_addr[1:0] <= 0;
                 scan_addr[6:2] <= REV_SCAN ? scan_addr[6:2]-5'd1 : scan_addr[6:2]+5'd1;
-                dr_start <= inzone;
                 scan_st  <= done ? 0 : 5;
             end
             5: scan_st <= 1; // give time to dr_busy to rise
