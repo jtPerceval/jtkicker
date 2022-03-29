@@ -48,7 +48,7 @@ localparam [8:0] VB_START = LAYOUT==3 ? 9'd238 : 9'd239,
 `endif
 
 // The original counter keeps hdump[7] high
-// while hdump[8] is hight (i.e. during HBLANK)
+// while hdump[8] is high (i.e. during HBLANK)
 // The rest of the count should match quite well
 // the original, particularly VBLANK, H period
 // and V period
@@ -57,12 +57,11 @@ jtframe_vtimer #(
     .VB_END     (  VB_END   ),
     .VCNT_END   (  9'd263   ),
     .VS_START   (  9'd260   ),
-    .VS_END     (  9'd262   ),
     .HB_END     (  9'd383   ),
     .HB_START   (  9'd255   ),
     .HCNT_END   (  9'd383   ),
-    .HS_START   (  9'd300   ),
-    .HS_END     (  9'd318   )
+    .HS_START   (  9'h130   ),
+    .HS_END     (  9'h150   )
 ) u_vtimer(
     .clk        ( clk       ),
     .pxl_cen    ( pxl_cen   ),
