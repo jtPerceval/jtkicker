@@ -17,6 +17,7 @@ game:
 jtframe:
   - get:
       - jtframe_ff.v
+      - jtframe_sort.v
   - from: cpu
     get:
       - jtframe_z80wait.v

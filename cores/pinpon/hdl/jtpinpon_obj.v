@@ -55,6 +55,9 @@ module jtpinpon_obj(
 parameter  [7:0] HOFFSET = 8'd6;
 localparam [4:0] MAXOBJ  = 5'd24;
 //wire [5:0]      MAXOBJ  = debug_bus[7:2];
+// Max sprites drawn before the raster line count moves
+localparam [4:0] HALF     = 5'd19;
+localparam       REV_SCAN = 1;
 
 wire [ 7:0] scan_dout;
 wire        obj_we;
@@ -79,10 +82,6 @@ jtframe_dual_ram #(.aw(11),.simfile("oram.bin")) u_hi(
     .we1    ( 1'b0          ),
     .q1     ( scan_dout     )
 );
-
-// Max sprites drawn before the raster line count moves
-localparam [4:0] HALF     = 5'd19;
-localparam       REV_SCAN = 0;
 
 reg        cen2=0;
 reg        inzone;

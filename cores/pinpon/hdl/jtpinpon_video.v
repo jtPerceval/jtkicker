@@ -136,6 +136,12 @@ jtpinpon_char u_char(
     .debug_bus  ( debug_bus )
 );
 
+wire [3:0] raw;
+// The bit order of the colour PROM output
+// is inverted in the PCB. This may have been
+// an error in the design.
+assign obj_pxl = {raw[0],raw[1],raw[2],raw[3]};
+
 jtpinpon_obj u_obj(
     .rst        ( rst       ),
     .clk        ( clk       ),      // 48 MHz
@@ -168,7 +174,7 @@ jtpinpon_obj u_obj(
     .rom_data   ( obj_data  ),
     .rom_ok     ( obj_ok    ),
 
-    .pxl        ( obj_pxl   ),
+    .pxl        ( raw       ),
     .debug_bus  ( debug_bus )
 );
 

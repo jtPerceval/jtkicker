@@ -70,8 +70,18 @@ reg  [ 3:0] cnt;
 reg  [ 4:0] cur_pal;
 reg         cur_hflip;
 
-assign pal_addr = { 1'b0, cur_pal,
-    debug_bus[0] ? {pxl_data[16], pxl_data[0]} : {pxl_data[0], pxl_data[16]} };
+wire [3:0] sorted;
+
+jtframe_sort u_sort(
+    .debug_bus( debug_bus   ),
+    .busin    ( cur_pal[3:0] ),
+    .busout   ( sorted      )
+);
+
+assign pal_addr = { 1'b0,
+    cur_pal,
+    //debug_bus[4:0],
+    {pxl_data[0], pxl_data[16]} };
 
 always @(posedge clk, posedge rst) begin
     if( rst ) begin
