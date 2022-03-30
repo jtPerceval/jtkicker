@@ -55,7 +55,6 @@ parameter  [7:0] HOFFSET = 8'd6;
 localparam [4:0] MAXOBJ  = 5'd24; // 24*16=384 objects x pixels per object = pixels per line
 // Max sprites drawn before the raster line count moves
 localparam [4:0] HALF     = 5'd19;
-localparam       REV_SCAN = 1;
 
 wire [ 7:0] scan_dout;
 wire        obj_we;
@@ -102,11 +101,13 @@ wire [4:0] pal;
 
 //assign adj    = REV_SCAN ? scan_addr[5:1]<HALF : scan_addr[5:1]>HALF;
 assign ydiff  = vrender-dr_y-8'd1;
-assign done   = REV_SCAN ? scan_addr[6:2]==0 : scan_addr[6:2]==MAXOBJ;
+assign done   = scan_addr[6:2]==0;
 
 assign pal    = dr_attr[4:0];
 
 always @* begin
+    // The original count is done with H256&H128,~H256,H64,H32,H16
+    // So it
     eff_scan = {4'd0,scan_addr};
     hflip = dr_attr[6];
     vflip = dr_attr[7];
@@ -128,7 +129,7 @@ always @(posedge clk, posedge rst) begin
         dr_start <= 0;
         case( scan_st )
             0: if( hinit_x ) begin
-                scan_addr <= REV_SCAN  ? {MAXOBJ, 2'd0} : 7'd0;
+                scan_addr <= {MAXOBJ, 2'd0};
                 scan_st   <= 1;
             end
             1: begin
@@ -149,7 +150,7 @@ always @(posedge clk, posedge rst) begin
                 // latched for 16 pixels, that makes the hardware read
                 // the previous object data instead of the current!
                 // They got around it with a software change
-                scan_addr[6:2] <= REV_SCAN ? scan_addr[6:2]-5'd1 : scan_addr[6:2]+5'd1;
+                scan_addr[6:2] <= scan_addr[6:2]-5'd1;
                 scan_st <= scan_st+3'd1;
             end
             4: if(!dr_busy) begin

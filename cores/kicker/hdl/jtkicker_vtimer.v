@@ -44,6 +44,8 @@ localparam [8:0] VB_START = LAYOUT==3 ? 9'd238 : 9'd239,
         VSl <= VS;
         if( VS && !VSl ) frame_cnt<=frame_cnt+1;
     end
+    wire [8:0] H = hdump^9'h100; // original count
+    wire [4:0] pinpon_obj = { &H[8:7],~H[8],H[6:4]};
     /* verilator tracing_off */
 `endif
 
@@ -60,8 +62,8 @@ jtframe_vtimer #(
     .HB_END     (  9'd383   ),
     .HB_START   (  9'd255   ),
     .HCNT_END   (  9'd383   ),
-    .HS_START   (  9'h130   ),
-    .HS_END     (  9'h150   )
+    .HS_START   (  9'h12F   ),
+    .HS_END     (  9'h14F   )
 ) u_vtimer(
     .clk        ( clk       ),
     .pxl_cen    ( pxl_cen   ),
