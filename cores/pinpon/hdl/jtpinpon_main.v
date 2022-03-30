@@ -111,7 +111,7 @@ end
 always @(posedge clk) begin
     case( A[8:7] )
         0: cabinet <= { coin_input[0], coin_input[1], service,
-            start_button[0], start_button[1], dip_test, 2'b11  };
+            start_button[0], start_button[1], dipsw_c[2:0] };
         1: cabinet <= { joystick1[4], joystick1[0], joystick1[1], joystick1[5],
                         joystick2[4], joystick2[0], joystick2[1], joystick2[5] };
         2: cabinet <= dipsw_a;
