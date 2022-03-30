@@ -24,7 +24,7 @@
     <name>Konami&apos;s Ping-Pong</name>
     <setname>pingpong</setname>
     <rbf>jtpinpon</rbf>
-    <mameversion>0237</mameversion>
+    <mameversion>0241</mameversion>
     <year>1985</year>
     <manufacturer>Konami</manufacturer>
     <players>2</players>
@@ -54,7 +54,7 @@
     <rom index="1">
         <part>00</part>
     </rom>
-    <switches base="16" default="00,1f,ff">
+    <switches base="16" default="f0,1f,07">
         <!-- DSW1 -->
         <dip name="Coin B" bits="4,7" ids="Free Play,2/1,3/2,1/4,4/1,1/6,2/5,1/2,4/3,1/7,3/1,1/3,3/4,1/5,2/3,1/1"/>
         <dip name="Coin A" bits="0,3" ids="Free Play,2/1,3/2,1/4,4/1,1/6,2/5,1/2,4/3,1/7,3/1,1/3,3/4,1/5,2/3,1/1"/>

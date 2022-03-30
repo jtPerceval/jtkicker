@@ -48,13 +48,11 @@ module jtpinpon_obj(
     output              rom_cs,
     input               rom_ok,
 
-    output        [3:0] pxl,
-    input         [7:0] debug_bus
+    output        [3:0] pxl
 );
 
 parameter  [7:0] HOFFSET = 8'd6;
-localparam [4:0] MAXOBJ  = 5'd24;
-//wire [5:0]      MAXOBJ  = debug_bus[7:2];
+localparam [4:0] MAXOBJ  = 5'd24; // 24*16=384 objects x pixels per object = pixels per line
 // Max sprites drawn before the raster line count moves
 localparam [4:0] HALF     = 5'd19;
 localparam       REV_SCAN = 1;
@@ -146,13 +144,17 @@ always @(posedge clk, posedge rst) begin
             3: begin
                 dr_xpos <= scan_dout;
                 scan_addr[1:0] <= scan_addr[1:0] + 2'd1;
+                // The PCB has a design flaw where the attribute is
+                // latched for 16 pixels, that makes the hardware read
+                // the previous object data instead of the current!
+                // They got around it with a software change
+                scan_addr[6:2] <= REV_SCAN ? scan_addr[6:2]-5'd1 : scan_addr[6:2]+5'd1;
                 scan_st <= scan_st+3'd1;
             end
             4: if(!dr_busy) begin
                 dr_start <= inzone;
-                dr_attr <= scan_dout;
+                dr_attr  <= scan_dout;
                 scan_addr[1:0] <= 0;
-                scan_addr[6:2] <= REV_SCAN ? scan_addr[6:2]-5'd1 : scan_addr[6:2]+5'd1;
                 scan_st  <= done ? 0 : 5;
             end
             5: scan_st <= 1; // give time to dr_busy to rise
@@ -196,8 +198,7 @@ jtpinpon_objdraw #(
     .rom_data   ( rom_data  ),
     .rom_ok     ( rom_ok    ),
 
-    .pxl        ( pxl       ),
-    .debug_bus  ( debug_bus )
+    .pxl        ( pxl       )
 );
 
 endmodule

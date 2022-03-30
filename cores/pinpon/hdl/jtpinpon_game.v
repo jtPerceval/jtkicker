@@ -68,9 +68,7 @@ module jtpinpon_game(
     input           enable_psg,
     input           enable_fm,
     // Debug
-    input   [ 3:0]  gfx_en,
-    input   [ 7:0]  debug_bus,
-    output  [ 7:0]  debug_view
+    input   [ 3:0]  gfx_en
 );
 
 // SDRAM offsets
@@ -90,7 +88,7 @@ wire [ 7:0] main_data;
 wire [14:0] main_addr;
 
 wire [ 7:0] dipsw_a, dipsw_b;
-wire [ 3:0] dipsw_c;
+wire [ 2:0] dipsw_c; // The bit 3 is not connected on the board
 wire        LVBL, V16;
 
 wire        cpu_cen, cpu4_cen, ti1_cen, ti2_cen;
@@ -102,9 +100,8 @@ wire        vsync60;
 
 assign prog_rd    = 0;
 assign dwnld_busy = downloading;
-assign { dipsw_c, dipsw_b, dipsw_a } = dipsw[19:0];
+assign { dipsw_c, dipsw_b, dipsw_a } = dipsw[18:0];
 assign dip_flip = flip;
-assign debug_view = 0;
 assign game_led= 0;
 
 reg  [24:0] post_addr;
@@ -257,8 +254,7 @@ jtpinpon_video u_video(
     .red        ( red       ),
     .green      ( green     ),
     .blue       ( blue      ),
-    .gfx_en     ( gfx_en    ),
-    .debug_bus  ( debug_bus )
+    .gfx_en     ( gfx_en    )
 );
 
 

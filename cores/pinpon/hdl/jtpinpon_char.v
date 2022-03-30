@@ -45,8 +45,7 @@ module jtpinpon_char(
     input        [15:0] rom_data,
     input               rom_ok,
 
-    output        [3:0] pxl,
-    input         [7:0] debug_bus
+    output        [3:0] pxl
 );
 
 localparam BSEL = 10;

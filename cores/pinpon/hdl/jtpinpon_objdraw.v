@@ -55,8 +55,7 @@ module jtpinpon_objdraw #(
     output reg          rom_cs,
     input               rom_ok,
 
-    output        [3:0] pxl,
-    input         [7:0] debug_bus
+    output        [3:0] pxl
 );
 
 wire [ 3:0] buf_in;
@@ -72,16 +71,7 @@ reg         cur_hflip;
 
 wire [3:0] sorted;
 
-jtframe_sort u_sort(
-    .debug_bus( debug_bus   ),
-    .busin    ( cur_pal[3:0] ),
-    .busout   ( sorted      )
-);
-
-assign pal_addr = { 1'b0,
-    cur_pal,
-    //debug_bus[4:0],
-    {pxl_data[0], pxl_data[16]} };
+assign pal_addr = { 1'b0, cur_pal, pxl_data[0], pxl_data[16] };
 
 always @(posedge clk, posedge rst) begin
     if( rst ) begin
