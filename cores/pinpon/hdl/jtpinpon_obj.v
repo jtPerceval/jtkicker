@@ -83,7 +83,7 @@ jtframe_dual_ram #(.aw(11),.simfile("oram.bin")) u_hi(
 
 reg        cen2=0;
 reg        inzone;
-wire       done;
+reg        done;
 reg        hinit_x, hinitl;
 reg  [2:0] scan_st;
 reg  [4:0] next;
@@ -94,16 +94,20 @@ reg  [3:0] dr_v;
 reg        dr_start;
 wire [7:0] ydiff;
 reg  [7:0] dr_y;
-// It doesn't seem to need the 1 pixel adjustment, I need to check the PCB video output...
-//wire       adj;
+// This game doesn't seem to need the vertical adjustment
+// depending on the object count. This raises the question
+// of whether the 503 chip actually latches the vertical
+// count and the need for adjustment in the other games is
+// because the V counter doesn't change in those games at the
+// same time
+// wire       adj;
 
 reg        hflip, vflip;
 wire       dr_busy;
 wire [4:0] pal;
 
-//assign adj    = REV_SCAN ? obj_cnt[5:1]<HALF : obj_cnt[5:1]>HALF;
+// assign adj    = obj_cnt>=8 && obj_cnt<=10;
 assign ydiff  = vrender-dr_y-8'd1;
-assign done   = obj_cnt==0;
 
 assign pal    = dr_attr[4:0];
 
@@ -113,7 +117,7 @@ always @* begin
     eff_scan = {4'd0, obj_cnt, sub_cnt};
     hflip = dr_attr[6];
     vflip = dr_attr[7];
-    dr_y   = ~scan_dout;// + ( adj ? 8'h1 : 8'h0 );
+    dr_y   = ~scan_dout; //- ( adj ? 8'h1 : 8'h0 );
 end
 
 always @(posedge clk) begin
@@ -135,13 +139,18 @@ always @(posedge clk, posedge rst) begin
                 obj_cnt <= MAXOBJ;
                 sub_cnt <= 2'd0;
                 scan_st <= 1;
+                done    <= 0;
             end
             1: begin
                 dr_v   <= ydiff[3:0];
                 inzone <= dr_y>=vrender && dr_y<(vrender+8'h10);
                 scan_st <= scan_st+3'd1;
-                next <= /*obj_cnt==5'h10 ? 5'h07 :
-                        obj_cnt==5'h00 ? 5'h0f :*/ obj_cnt-5'd1;
+                // This follows the original scan order reversed
+                // so it matches the drawing order expected by the
+                // double line buffer
+                next <= obj_cnt==5'h10 ? 5'h07 :
+                        obj_cnt==5'h00 ? 5'h0f : obj_cnt-5'd1;
+                done <= obj_cnt==8;
                 sub_cnt <= sub_cnt + 2'd1;
             end
             2: begin
