@@ -52,13 +52,14 @@ module jtpinpon_obj(
 );
 
 parameter  [7:0] HOFFSET = 8'd6;
-localparam [4:0] MAXOBJ  = 5'd24; // 24*16=384 objects x pixels per object = pixels per line
+localparam [4:0] MAXOBJ  = 5'd23; // 24*16=384 objects x pixels per object = pixels per line
 // Max sprites drawn before the raster line count moves
 localparam [4:0] HALF     = 5'd19;
 
 wire [ 7:0] scan_dout;
 wire        obj_we;
-reg  [ 6:0] scan_addr;
+reg  [ 4:0] obj_cnt;
+reg  [ 1:0] sub_cnt;
 reg  [10:0] eff_scan;
 wire [ 3:0] pal_data;
 wire        sel;
@@ -83,8 +84,9 @@ jtframe_dual_ram #(.aw(11),.simfile("oram.bin")) u_hi(
 reg        cen2=0;
 reg        inzone;
 wire       done;
-reg        hinit_x;
+reg        hinit_x, hinitl;
 reg  [2:0] scan_st;
+reg  [4:0] next;
 
 reg  [7:0] dr_attr, dr_xpos;
 reg  [7:0] dr_code;
@@ -99,24 +101,25 @@ reg        hflip, vflip;
 wire       dr_busy;
 wire [4:0] pal;
 
-//assign adj    = REV_SCAN ? scan_addr[5:1]<HALF : scan_addr[5:1]>HALF;
+//assign adj    = REV_SCAN ? obj_cnt[5:1]<HALF : obj_cnt[5:1]>HALF;
 assign ydiff  = vrender-dr_y-8'd1;
-assign done   = scan_addr[6:2]==0;
+assign done   = obj_cnt==0;
 
 assign pal    = dr_attr[4:0];
 
 always @* begin
     // The original count is done with H256&H128,~H256,H64,H32,H16
     // So it
-    eff_scan = {4'd0,scan_addr};
+    eff_scan = {4'd0, obj_cnt, sub_cnt};
     hflip = dr_attr[6];
     vflip = dr_attr[7];
     dr_y   = ~scan_dout;// + ( adj ? 8'h1 : 8'h0 );
 end
 
 always @(posedge clk) begin
-    cen2 <= ~cen2;
-    if( hinit ) hinit_x <= 1;
+    cen2   <= ~cen2;
+    hinitl <= hinit;
+    if( hinit & ~hinitl ) hinit_x <= 1;
     else if(cen2) hinit_x <= 0;
 end
 
@@ -129,34 +132,37 @@ always @(posedge clk, posedge rst) begin
         dr_start <= 0;
         case( scan_st )
             0: if( hinit_x ) begin
-                scan_addr <= {MAXOBJ, 2'd0};
-                scan_st   <= 1;
+                obj_cnt <= MAXOBJ;
+                sub_cnt <= 2'd0;
+                scan_st <= 1;
             end
             1: begin
                 dr_v   <= ydiff[3:0];
                 inzone <= dr_y>=vrender && dr_y<(vrender+8'h10);
                 scan_st <= scan_st+3'd1;
-                scan_addr[1:0] <= scan_addr[1:0] + 2'd1;
+                next <= /*obj_cnt==5'h10 ? 5'h07 :
+                        obj_cnt==5'h00 ? 5'h0f :*/ obj_cnt-5'd1;
+                sub_cnt <= sub_cnt + 2'd1;
             end
             2: begin
                 dr_code   <= scan_dout;
                 scan_st <= scan_st+3'd1;
-                scan_addr[1:0] <= scan_addr[1:0] + 2'd1;
+                sub_cnt <= sub_cnt + 2'd1;
             end
             3: begin
                 dr_xpos <= scan_dout;
-                scan_addr[1:0] <= scan_addr[1:0] + 2'd1;
+                sub_cnt <= sub_cnt + 2'd1;
+                obj_cnt  <= next;
                 // The PCB has a design flaw where the attribute is
                 // latched for 16 pixels, that makes the hardware read
                 // the previous object data instead of the current!
                 // They got around it with a software change
-                scan_addr[6:2] <= scan_addr[6:2]-5'd1;
                 scan_st <= scan_st+3'd1;
             end
             4: if(!dr_busy) begin
                 dr_start <= inzone;
                 dr_attr  <= scan_dout;
-                scan_addr[1:0] <= 0;
+                sub_cnt  <= 0;
                 scan_st  <= done ? 0 : 5;
             end
             5: scan_st <= 1; // give time to dr_busy to rise
