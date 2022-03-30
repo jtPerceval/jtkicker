@@ -93,13 +93,14 @@ reg  [3:0] dr_v;
 reg        dr_start;
 wire [7:0] ydiff;
 reg  [7:0] dr_y;
-wire       adj;
+// It doesn't seem to need the 1 pixel adjustment, I need to check the PCB video output...
+//wire       adj;
 
 reg        hflip, vflip;
 wire       dr_busy;
 wire [4:0] pal;
 
-assign adj    = REV_SCAN ? scan_addr[5:1]<HALF : scan_addr[5:1]>HALF;
+//assign adj    = REV_SCAN ? scan_addr[5:1]<HALF : scan_addr[5:1]>HALF;
 assign ydiff  = vrender-dr_y-8'd1;
 assign done   = REV_SCAN ? scan_addr[6:2]==0 : scan_addr[6:2]==MAXOBJ;
 
@@ -109,7 +110,7 @@ always @* begin
     eff_scan = {4'd0,scan_addr};
     hflip = dr_attr[6];
     vflip = dr_attr[7];
-    dr_y   = ~scan_dout + ( adj ? 8'h1 : 8'h0 );
+    dr_y   = ~scan_dout;// + ( adj ? 8'h1 : 8'h0 );
 end
 
 always @(posedge clk) begin
