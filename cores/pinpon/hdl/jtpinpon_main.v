@@ -67,7 +67,8 @@ wire        irq_trigger, nmi_trigger;
 reg         nmi_clrn, irq_clrn;
 reg         ior_cs, dip2_cs, dip3_cs,
             ti1_cs, tidata1_cs, iow_cs;
-wire        mreq_n, rfsh_n;
+wire        mreq_n, rfsh_n, gated_cen;
+reg         gfx_sel;
 
 assign irq_trigger = ~LVBL & dip_pause; // this should match line 224
 assign nmi_trigger =  V16; // check in sch/PCB
@@ -75,6 +76,7 @@ assign cpu_rnw     = wr_n;
 assign sample      = ti1_cen;
 assign rom_addr    = A[14:0];
 assign flip        = 0;
+assign gated_cen   = gfx_sel & (oram_cs | vram_cs) ? 1'b0 : ti1_cen; // bus contention as the original board
 
 always @(*) begin
     rom_cs     = 0;
@@ -122,6 +124,15 @@ always @(posedge clk) begin
                oram_cs ? obj_dout  :
                ior_cs  ? cabinet   : 8'hff;
 end
+
+always @(posedge clk) begin
+    if( rst ) begin
+        gfx_sel  <= 0;
+    end else if(ti1_cen) begin
+        gfx_sel <= ~gfx_sel;
+    end
+end
+
 
 always @(posedge clk) begin
     if( rst ) begin
@@ -188,7 +199,7 @@ jt89 u_ti1(
 jtframe_z80_romwait  u_cpu(
     .rst_n      ( ~rst        ),
     .clk        ( clk         ),
-    .cen        ( ti1_cen     ),
+    .cen        ( gated_cen   ),
     .cpu_cen    ( cpu_cen     ),
     .int_n      ( int_n       ),
     .nmi_n      ( nmi_n       ),
