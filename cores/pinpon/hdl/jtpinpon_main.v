@@ -65,8 +65,7 @@ wire [15:0] A;
 wire        rd_n, wr_n, int_n, nmi_n, m1_n, iorq_n;
 wire        irq_trigger, nmi_trigger;
 reg         nmi_clrn, irq_clrn;
-reg         ior_cs, dip2_cs, dip3_cs,
-            ti1_cs, tidata1_cs, iow_cs;
+reg         ior_cs, ti1_cs, tidata1_cs, iow_cs;
 wire        mreq_n, rfsh_n, gated_cen;
 reg         gfx_sel;
 
@@ -81,10 +80,7 @@ assign gated_cen   = gfx_sel & (oram_cs | vram_cs) ? 1'b0 : ti1_cen; // bus cont
 always @(*) begin
     rom_cs     = 0;
     iow_cs     = 0;
-    // afe_cs     = 0;
     ti1_cs     = 0;
-    dip2_cs    = 0;
-    dip3_cs    = 0;
     ior_cs     = 0;
     tidata1_cs = 0;
     oram_cs    = 0;
