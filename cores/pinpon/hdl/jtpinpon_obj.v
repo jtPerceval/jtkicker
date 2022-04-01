@@ -94,30 +94,29 @@ reg  [3:0] dr_v;
 reg        dr_start;
 wire [7:0] ydiff;
 reg  [7:0] dr_y;
-// This game doesn't seem to need the vertical adjustment
-// depending on the object count. This raises the question
-// of whether the 503 chip actually latches the vertical
-// count and the need for adjustment in the other games is
-// because the V counter doesn't change in those games at the
-// same time
-// wire       adj;
+wire       adj;
 
 reg        hflip, vflip;
 wire       dr_busy;
 wire [4:0] pal;
 
-// assign adj    = obj_cnt>=8 && obj_cnt<=10;
+assign adj    = obj_cnt>8 && obj_cnt<=10;
 assign ydiff  = vrender-dr_y-8'd1;
 
 assign pal    = dr_attr[4:0];
 
-always @* begin
+`ifdef SIMULATION
     // The original count is done with H256&H128,~H256,H64,H32,H16
-    // So it
+    // It's here as a reference
+    wire [8:0] H = hdump^9'h100;
+    wire [4:0] orig = { H[8]&H[7],~H[8],H[6:4] };
+`endif
+
+always @* begin
     eff_scan = {4'd0, obj_cnt, sub_cnt};
     hflip = dr_attr[6];
     vflip = dr_attr[7];
-    dr_y   = ~scan_dout; //- ( adj ? 8'h1 : 8'h0 );
+    dr_y   = ~scan_dout - ( adj ? 8'h1 : 8'h0 );
 end
 
 always @(posedge clk) begin
