@@ -4,7 +4,6 @@ mraauthor=["jotego"]
 
 [features]
 # debug=true
-beta=true
 
 [parse]
 sourcefile="pingpong.cpp"

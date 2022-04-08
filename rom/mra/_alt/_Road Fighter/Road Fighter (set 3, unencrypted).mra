@@ -62,9 +62,6 @@
         <part name="a09_c29.bin" crc="5b3b5f2a"/>
         <!-- Total 0x32220 bytes - 200 kBytes -->
     </rom>
-    <rom index="17" zip="jtbeta.zip" md5="None">
-        <part name="beta.bin"/>
-    </rom>
     <nvram index="2" size="2048"/>
     <!-- Vertical game -->
     <rom index="1">

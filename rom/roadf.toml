@@ -4,7 +4,6 @@ mraauthor=["jotego"]
 
 [features]
 # debug=true
-beta=true
 nvram=$JTFRAME_IOCTL_RD
 
 [parse]
