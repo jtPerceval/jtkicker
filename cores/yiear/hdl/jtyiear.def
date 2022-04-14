@@ -1,12 +1,11 @@
 [all]
+include ../../kicker/hdl/common.def
+
 CORENAME=JTYIEAR
 GAMETOP=jtkicker_game
 
 VIDEO_MODULE=jtyiear_video
 MAIN_MODULE=jtyiear_main
-
-JTFRAME_CLK24
-JTFRAME_BUTTONS=2
 
 # Enable VLM5030 ROM
 PCM
@@ -21,10 +20,5 @@ JTFRAME_MRA_DIP
 CORE_OSD=OD,Force 60Hz,Off,On;
 
 # Video
-JTFRAME_CREDITS
-JTFRAME_WIDTH=256
-JTFRAME_HEIGHT=224
 JTFRAME_DEBUG
 
-[mister]
-JTFRAME_OSD_NOLOAD

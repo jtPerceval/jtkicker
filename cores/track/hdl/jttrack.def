@@ -1,4 +1,6 @@
 [all]
+include ../../kicker/hdl/common.def
+
 CORENAME=JTTRACK
 GAMETOP=jttrack_game
 
