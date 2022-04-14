@@ -17,7 +17,7 @@ Screen synchronization can be a problem with the original PCB too. Connecting us
 
 # System Comparison
 
-Games based on 082, 083 and 503 graphic chips
+Games based on 082, 083 and 503 graphic chips. All have a pixel clock of 6.144MHz derived from a 18.432MHz oscillator.
 
 Game            | Date       | ID  | Palette PROM  | 085 | CPU1 | CPU2     | PSG   | VLM5030  | Sch                         | eBay price    |     YT views      |
 ----------------|------------|-----|---------------|-----|------|----------|-------|----------|-----------------------------|---------------|-------------------|

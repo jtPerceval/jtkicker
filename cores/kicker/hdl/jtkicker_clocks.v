@@ -31,21 +31,24 @@ module jtkicker_clocks(
     output         pxl2_cen
 );
 
+// Define JTFRAME_PLL=jtframe_pll6144 in the .def file
+// so the base clock is 49.152MHz instead of 48MHz
+// That will make the pixel clock 6.144 instead of 6.0
+
 wire       vsync60;
 wire [3:0] cen_base;
 
-assign vsync60  = status[13];   // high to use a 6MHz pixel clock, instead of 6.144MHz
-assign pxl2_cen = cen_base[0]; // ~12MHz
-assign pxl_cen  = cen_base[1]; // ~ 6MHz
+assign pxl2_cen = cen_base[0]; // 12.288 MHz
+assign pxl_cen  = cen_base[1]; //  6.144 MHz
 
-// Using an integer divider for the 6.144MHz
+// Using an integer divider for the 6.144 MHz
 // cen_base will probably help with the video
 // compatibility in MiSTer. MiST seems to be
 // doing well with the fractional divider.
 jtframe_frac_cen #(.W(4)) u_pxl_cen (
     .clk    ( clk       ),
-    .n      ( vsync60 ? 10'd1 : 10'd32    ),
-    .m      ( vsync60 ? 10'd4 : 10'd125   ),
+    .n      ( 10'd1     ),
+    .m      ( 10'd4     ),
     .cen    ( cen_base  ),
     .cenb   (           ) // 180 shifted
 );
