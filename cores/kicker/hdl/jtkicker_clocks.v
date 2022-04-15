@@ -45,6 +45,17 @@ assign pxl_cen  = cen_base[1]; //  6.144 MHz
 // cen_base will probably help with the video
 // compatibility in MiSTer. MiST seems to be
 // doing well with the fractional divider.
+`ifdef MISTER
+assign vsync60  = status[13];   // high to use a 6MHz pixel clock, instead of 6.144MHz
+
+jtframe_frac_cen #(.W(4)) u_pxl_cen (
+    .clk    ( clk       ),
+    .n      ( vsync60 ? 10'd1 : 10'd32    ),
+    .m      ( vsync60 ? 10'd4 : 10'd125   ),
+    .cen    ( cen_base  ),
+    .cenb   (           ) // 180 shifted
+);
+`else
 jtframe_frac_cen #(.W(4)) u_pxl_cen (
     .clk    ( clk       ),
     .n      ( 10'd1     ),
@@ -52,6 +63,7 @@ jtframe_frac_cen #(.W(4)) u_pxl_cen (
     .cen    ( cen_base  ),
     .cenb   (           ) // 180 shifted
 );
+`endif
 
 // The CPU clock is derived from the pixel clock
 // but translated to the 24MHz domain 

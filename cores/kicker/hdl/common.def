@@ -1,7 +1,6 @@
 [all]
 JTFRAME_CLK24
 JTFRAME_BUTTONS=2
-JTFRAME_PLL=jtframe_pll6144
 
 # OSD options
 JTFRAME_MRA_DIP
@@ -10,3 +9,10 @@ JTFRAME_MRA_DIP
 JTFRAME_WIDTH=256
 JTFRAME_HEIGHT=224
 JTFRAME_CREDITS
+
+[mist|sidi|neptuno|mcp|mc2]
+JTFRAME_PLL=jtframe_pll6144
+
+[mister]
+# MiSTer uses the 48MHz PLL
+CORE_OSD=OD,Force 60Hz,Off,On;
