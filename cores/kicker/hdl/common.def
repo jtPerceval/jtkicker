@@ -15,4 +15,4 @@ JTFRAME_PLL=jtframe_pll6144
 
 [mister]
 # MiSTer uses the 48MHz PLL
-CORE_OSD=OD,Force 60Hz,Off,On;
+JTFRAME_OSD60HZ

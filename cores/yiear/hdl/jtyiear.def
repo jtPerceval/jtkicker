@@ -17,7 +17,6 @@ PCM_START=0x24000
 
 # OSD options
 JTFRAME_MRA_DIP
-CORE_OSD=OD,Force 60Hz,Off,On;
 
 # Video
 JTFRAME_DEBUG
