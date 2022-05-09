@@ -109,10 +109,10 @@ jtframe_prom #(
 jtframe_blank #(.DLY(9)) u_blank(
     .clk        ( clk       ),
     .pxl_cen    ( pxl_cen   ),
-    .LHBL       ( LHBL      ),
-    .LVBL       ( LVBL      ),
-    .LHBL_dly   ( LHBL_dly  ),
-    .LVBL_dly   ( LVBL_dly  ),
+    .preLHBL    ( LHBL      ),
+    .preLVBL    ( LVBL      ),
+    .LHBL       ( LHBL_dly  ),
+    .LVBL       ( LVBL_dly  ),
     .preLBL     (           ),
     .rgb_in     ( raw       ),
     .rgb_out    ( rgb       )

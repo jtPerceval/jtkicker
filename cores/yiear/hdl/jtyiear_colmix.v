@@ -24,8 +24,8 @@ module jtyiear_colmix(
     // video inputs
     input         [3:0] obj_pxl,
     input         [3:0] scr_pxl,
-    input               LHBL,
-    input               LVBL,
+    input               preLHBL,
+    input               preLVBL,
 
     // PROMs
     input         [7:0] prog_data,
@@ -35,8 +35,8 @@ module jtyiear_colmix(
     output        [3:0] red,
     output        [3:0] green,
     output        [3:0] blue,
-    output              LHBL_dly,
-    output              LVBL_dly,
+    output              LHBL,
+    output              LVBL,
     input         [3:0] gfx_en
 );
 
@@ -77,10 +77,10 @@ jtframe_prom #(
 jtframe_blank #(.DLY(BLANK_DLY),.DW(8)) u_blank(
     .clk        ( clk       ),
     .pxl_cen    ( pxl_cen   ),
+    .preLHBL    ( preLHBL   ),
+    .preLVBL    ( preLVBL   ),
     .LHBL       ( LHBL      ),
     .LVBL       ( LVBL      ),
-    .LHBL_dly   ( LHBL_dly  ),
-    .LVBL_dly   ( LVBL_dly  ),
     .preLBL     (           ),
     .rgb_in     ( raw       ),
     .rgb_out    ( rgb       )

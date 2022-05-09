@@ -26,8 +26,8 @@ module jttrack_game(
     output   [3:0]  red,
     output   [3:0]  green,
     output   [3:0]  blue,
-    output          LHBL_dly,
-    output          LVBL_dly,
+    output          LHBL,
+    output          LVBL,
     output          HS,
     output          VS,
     // cabinet I/O
@@ -98,7 +98,6 @@ wire [ 7:0] main_data;
 wire [15:0] main_addr;
 
 wire [ 7:0] dipsw_a, dipsw_b;
-wire        LVBL;
 
 wire        cpu_cen, cpu4_cen;
 wire        cpu_rnw, cpu_irqn, cpu_nmin;
@@ -288,11 +287,10 @@ jttrack_video u_video(
     .obj_cs     ( objrom_cs ),
     .obj_ok     ( obj_ok    ),
 
-    .LVBL       ( LVBL      ),
     .HS         ( HS        ),
     .VS         ( VS        ),
-    .LHBL_dly   ( LHBL_dly  ),
-    .LVBL_dly   ( LVBL_dly  ),
+    .LHBL       ( LHBL      ),
+    .LVBL       ( LVBL      ),
 
     .red        ( red       ),
     .green      ( green     ),

@@ -137,7 +137,7 @@ reg        hflip, vflip;
 wire       dr_busy;
 wire [3:0] pal;
 
-assign adj    = LAYOUT==3 ? 0 :
+assign adj    = LAYOUT==3 ? 1'b0 :
                 // Y adjustment on KONAMI 503 based games only:
                 REV_SCAN ? scan_addr[5:1]<HALF : scan_addr[5:1]>HALF;
 assign vrf    = vrender ^ {8{flip}};

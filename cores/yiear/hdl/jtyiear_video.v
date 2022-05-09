@@ -61,9 +61,8 @@ module jtyiear_video(
     output              HS,
     output              VS,
     output              V16,
+    output              LHBL,
     output              LVBL,
-    output              LHBL_dly,
-    output              LVBL_dly,
     output        [3:0] red,
     output        [3:0] green,
     output        [3:0] blue,
@@ -71,7 +70,7 @@ module jtyiear_video(
     input         [7:0] debug_bus
 );
 
-wire       LHBL, hinit;
+wire       preLHBL, preLVBL, hinit;
 wire [8:0] vdump, vrender, hdump;
 wire [3:0] obj_pxl, scr_pxl;
 
@@ -84,8 +83,8 @@ jtkicker_vtimer u_vtimer(
     .vrender( vrender   ),
     .hdump  ( hdump     ),
     .hinit  ( hinit     ),
-    .LHBL   ( LHBL      ),
-    .LVBL   ( LVBL      ),
+    .LHBL   ( preLHBL   ),
+    .LVBL   ( preLVBL   ),
     .HS     ( HS        ),
     .VS     ( VS        )
 );
@@ -177,19 +176,19 @@ jtyiear_colmix u_colmix(
     // video inputs
     .obj_pxl    ( obj_pxl   ),
     .scr_pxl    ( scr_pxl   ),
-    .LHBL       ( LHBL      ),
-    .LVBL       ( LVBL      ),
+    .preLHBL    ( preLHBL   ),
+    .preLVBL    ( preLVBL   ),
 
     // PROMs
     .prog_data  ( prog_data ),
     .prog_addr  ( prog_addr[4:0] ),
     .prog_en    ( prom_en   ),
 
+    .LHBL       ( LHBL      ),
+    .LVBL       ( LVBL      ),
     .red        ( red       ),
     .green      ( green     ),
     .blue       ( blue      ),
-    .LHBL_dly   ( LHBL_dly  ),
-    .LVBL_dly   ( LVBL_dly  ),
     .gfx_en     ( gfx_en    )
 );
 

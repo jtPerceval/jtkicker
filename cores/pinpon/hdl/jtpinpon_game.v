@@ -26,8 +26,8 @@ module jtpinpon_game(
     output   [3:0]  red,
     output   [3:0]  green,
     output   [3:0]  blue,
-    output          LHBL_dly,
-    output          LVBL_dly,
+    output          LHBL,
+    output          LVBL,
     output          HS,
     output          VS,
     // cabinet I/O
@@ -89,7 +89,7 @@ wire [14:0] main_addr;
 
 wire [ 7:0] dipsw_a, dipsw_b;
 wire [ 2:0] dipsw_c; // The bit 3 is not connected on the board
-wire        LVBL, V16;
+wire        V16;
 
 wire        cpu_cen, cpu4_cen, ti1_cen, ti2_cen;
 wire        cpu_rnw, cpu_irqn, cpu_nmin;
@@ -245,12 +245,11 @@ jtpinpon_video u_video(
     .obj_cs     ( objrom_cs ),
     .obj_ok     ( obj_ok    ),
 
-    .LVBL       ( LVBL      ),
     .V16        ( V16       ),
     .HS         ( HS        ),
     .VS         ( VS        ),
-    .LHBL_dly   ( LHBL_dly  ),
-    .LVBL_dly   ( LVBL_dly  ),
+    .LHBL       ( LHBL      ),
+    .LVBL       ( LVBL      ),
     .red        ( red       ),
     .green      ( green     ),
     .blue       ( blue      ),

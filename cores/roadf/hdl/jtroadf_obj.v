@@ -103,7 +103,6 @@ reg  [ 7:0] scan_addr;  // although the DMA bus in the schematics has 8 bits
     // to zero at the beginning of each raster line
 reg  [ 9:0] eff_scan;
 wire [ 3:0] pal_data;
-reg         scr_rd;
 
 assign obj_dout = obj_frame ? obj1_dout : obj2_dout;
 assign obj1_we  = obj_cs &  obj_frame & ~cpu_rnw;
@@ -188,14 +187,12 @@ always @(posedge clk, posedge rst) begin
     if( rst ) begin
         scan_st  <= 0;
         dr_start <= 0;
-        scr_rd   <= 0;
         scr_we   <= 0;
     end else if( cen2 ) begin
         dr_start <= 0;
         scr_we   <= 0;
         case( scan_st )
             0: if( hinit_x ) begin
-                scr_rd    <= 1;
                 scan_addr <= { 2'b11, vdf[7:3], 1'b0 };
                 scan_st   <= 6;
             end
@@ -235,7 +232,6 @@ always @(posedge clk, posedge rst) begin
             end
             7: begin
                 hpos[7]   <= scan_dout[0];
-                scr_rd    <= 0;
                 scr_we    <= 1;
                 scan_addr <= 8'd33<<2;
                 scan_st   <= 1;
