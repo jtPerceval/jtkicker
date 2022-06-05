@@ -115,7 +115,7 @@ wire [ 7:0] nc, pre_data;
 assign prog_rd    = 0;
 assign dwnld_busy = downloading;
 assign { dipsw_c, dipsw_b, dipsw_a } = dipsw[17:0];
-assign dip_flip = ~flip;
+assign dip_flip = ~dipsw_c[0];
 assign debug_view = 0;
 
 always @(*) begin
