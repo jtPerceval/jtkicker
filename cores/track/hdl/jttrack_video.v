@@ -119,7 +119,7 @@ jttrack_scroll u_scroll(
     .hpos       ( hpos      ),
 
     // video inputs
-    .LHBL       ( LHBL      ),
+    .LHBL       ( preLHBL   ),
     .vdump      ( vdump[7:0]),
     .hdump      ( hdump     ),
     .flip       ( flip      ),
@@ -154,7 +154,7 @@ jttrack_obj u_obj(
 
     // video inputs
     .hinit      ( HS        ), // to ensure that vdump is right for the row scroll
-    .LHBL       ( LHBL      ),
+    .LHBL       ( preLHBL   ),
     .LVBL       ( LVBL      ),
     .vdump      ( vdump     ),
     .hdump      ( hdump     ),
