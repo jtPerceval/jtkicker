@@ -34,8 +34,8 @@ module jtmikie_snd(
 );
 
 localparam CNTW=14;
-localparam [7:0] PSG_GAIN = 8'h18,
-                 DAC_GAIN = 8'H10;
+localparam [7:0] PSG_GAIN = 8'h0C,
+                 DAC_GAIN = 8'H08;
 
 reg  [ 7:0] psg_data, din, rdac;
 wire [ 7:0] ram_dout, dout;
