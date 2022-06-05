@@ -109,8 +109,8 @@ wire        pcm_ok;
 assign prog_rd    = 0;
 assign dwnld_busy = downloading;
 assign { dipsw_c, dipsw_b, dipsw_a } = dipsw[19:0];
-assign dip_flip = flip;
-assign debug_view = 0;
+assign dip_flip = ~dipsw_c[0];
+assign debug_view = {4'hf, dipsw_c};
 
 wire [21:0] pre_addr;
 wire [ 7:0] nc;
