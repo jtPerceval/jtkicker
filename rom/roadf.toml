@@ -25,6 +25,11 @@ bitcnt = 19
 extra = [
     { machine="roadf", name="Flip", bits="16", Options="Off,On" }
 ]
+rename = [
+    { name="After Last Event", To="After ending"},
+    { name="World Records", To="Records"},
+    { name="Number of Opponents", To ="Other cars"}
+]
 
 [ROM]
 # values starting with $ refer to macro definitions in the .def file

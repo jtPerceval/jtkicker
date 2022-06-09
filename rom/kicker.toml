@@ -20,6 +20,7 @@ name="jtkicker"
 
 [dipsw]
 delete = [ "Unused", "Unknown" ]
+rename = [ {name="Bonus Life", to="Bonus"} ]
 # base = 16
 
 [ROM]

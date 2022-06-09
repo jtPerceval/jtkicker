@@ -22,6 +22,10 @@ name="jttrack"
 
 [dipsw]
 delete = [ "Unused", "Unknown" ]
+rename = [
+    { name="World Records", to="Records"},
+    { name="After Last Event", to="After ending"}
+]
 
 [ROM]
 # values starting with $ refer to macro definitions in the .def file
