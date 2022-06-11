@@ -80,15 +80,12 @@ wire        irq_trigger;
 reg         irq_clrn, ram_cs;
 reg         ior_cs, in5_cs, intst_cs, intst_l,
             iow_cs;
-wire        VMA;
-reg         nvram_we;
+wire        VMA, nvram_we;
 
 assign irq_trigger = ~LVBL & dip_pause;
 assign cpu_rnw     = RnW;
 assign rom_addr    = A;
-
-always @(posedge clk)
-    nvram_we <= ioctl_ram && ioctl_wr && ioctl_addr[15:11]==0;
+assign nvram_we    = ioctl_ram && ioctl_wr && ioctl_addr[15:11]==0;
 
 always @(*) begin
     // the ROM logic has some optional jumpers and the PCB we got
