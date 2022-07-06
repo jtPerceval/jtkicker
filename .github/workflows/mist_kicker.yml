@@ -7,6 +7,7 @@ on:
       - build
       - mist
       - build_kicker
+      - master
 
   workflow_dispatch:
 

@@ -7,6 +7,7 @@ on:
       - build
       - mist
       - build_sbaskt
+      - master
 
   workflow_dispatch:
 
