@@ -30,6 +30,10 @@ macros.f
 core.def
 jtsim.f
 jtsim_vhdl.f
+defmacros.h
+*.raw
+game_env.F
+video.info
 mame.xml
 .DS_Store
 *.cfg

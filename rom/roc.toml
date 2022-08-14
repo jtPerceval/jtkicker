@@ -1,0 +1,39 @@
+[global]
+# info = [ {tag="mameversion", value="0229"} ]
+mraauthor=["jotego"]
+
+[features]
+# debug=true
+
+[parse]
+sourcefile="rocnrope.cpp"
+skip.bootlegs=true
+
+[buttons]
+core=2 # max number of buttons supported by the core
+names=[{ names="Rope,Flash" }]
+
+[rbf]
+name="jtroc"
+
+[dipsw]
+delete = [ "Unused", "Unknown" ]
+bitcnt = 23
+
+[ROM]
+# values starting with $ refer to macro definitions in the .def file
+# or arguments passed to mame2mra
+regions = [
+    { name="maincpu", no_offset=true },
+    { name="timeplt_audio:tpsound" },
+    { name="gfx2", width=16, no_offset=true, Sort_even=true },
+    { name="gfx1", width=16, no_offset=true, start=$OBJ_START },
+    { name="proms", start=$PROM_START },
+    { name="pal_cpuvidbd", skip=true },
+    { name="pals_daughterbd", skip=true }
+]
+
+order = [
+    "maincpu", "timeplt_audio:tpsound", "gfx2", "gfx1",  "proms"
+]
+
