@@ -110,11 +110,10 @@ wire [ 7:0] nc, pre_data;
 
 assign prog_rd    = 0;
 assign dwnld_busy = downloading;
-assign dip_flip   = flip;
+assign dip_flip   = ~flip;
 assign debug_view = st_main;
 
 wire [21:0] pre_addr;
-wire [ 7:0] nc;
 
 always @(*) begin
     prog_addr = pre_addr;
@@ -165,7 +164,7 @@ jtroc_main u_main(
     .cpu_dout       ( cpu_dout      ),
     .cpu_rnw        ( cpu_rnw       ),
 
-    .bus_addr       ( cpu_addr      )
+    .bus_addr       ( cpu_addr      ),
     .vram_cs        ( vram_cs       ),
     .vram_dout      ( vram_dout     ),
 

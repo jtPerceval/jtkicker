@@ -77,7 +77,7 @@ wire        VMA;
 assign irq_trigger = ~LVBL & dip_pause;
 assign cpu_rnw     = RnW;
 assign rom_addr    = A[15:0]-16'h6000;
-assign bus_addr    = cpu_addr[10:0];
+assign bus_addr    = A[10:0];
 assign st_dout     = { 3'd0, mute, snd_on, flip, firq_en, irq_en };
 
 always @(*) begin
