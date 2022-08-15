@@ -61,11 +61,11 @@ WRITE_LINE_MEMBER(rocnrope_state::coin_counter_w)
 
 void rocnrope_state::main_map(address_map &map)
 {
+	map(0x3000, 0x3000).portr("DSW2");
 	map(0x3080, 0x3080).portr("SYSTEM");
 	map(0x3081, 0x3081).portr("P1");
 	map(0x3082, 0x3082).portr("P2");
 	map(0x3083, 0x3083).portr("DSW1");
-	map(0x3000, 0x3000).portr("DSW2");
 	map(0x3100, 0x3100).portr("DSW3");
 	map(0x4000, 0x402f).ram().share(m_spriteram[1]);
 	map(0x4030, 0x43ff).ram();

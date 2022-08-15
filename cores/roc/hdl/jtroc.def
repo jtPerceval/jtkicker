@@ -4,7 +4,7 @@ include ../../kicker/hdl/common.def
 CORENAME=JTROC
 GAMETOP=jtroc_game
 
-SND_START =0x0A000
+SCR_START =0x0A000
 GFX_START =0x0C000
 OBJ_START =0x10000
 PROM_START=0x18000

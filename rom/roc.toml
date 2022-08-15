@@ -26,7 +26,7 @@ bitcnt = 23
 regions = [
     { name="maincpu", no_offset=true },
     { name="timeplt_audio:tpsound" },
-    { name="gfx2", width=16, no_offset=true, Sort_even=true },
+    { name="gfx2", width=16, no_offset=true, Sort_even=true, start=$SCR_START },
     { name="gfx1", width=16, no_offset=true, start=$OBJ_START },
     { name="proms", start=$PROM_START },
     { name="pal_cpuvidbd", skip=true },
@@ -37,3 +37,8 @@ order = [
     "maincpu", "timeplt_audio:tpsound", "gfx2", "gfx1",  "proms"
 ]
 
+# MAME applies this patch: fixes a bad dump?
+patches = [
+    { setname="rocnrope", offset=0x103d, value="BA" },
+    { setname="ropeman", offset=0x103d, value="BA" }
+]

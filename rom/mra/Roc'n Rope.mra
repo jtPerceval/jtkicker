@@ -61,6 +61,7 @@
         <part name="b16_prom.bin" crc="750a9677"/>
         <part name="rocnrope.pr3" crc="b5c75a27"/>
         <!-- Total 0x18220 bytes - 96 kBytes -->
+        <patch offset="0x103D">BA</patch>
     </rom>
     <!-- Vertical game -->
     <rom index="1">

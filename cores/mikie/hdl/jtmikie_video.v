@@ -69,7 +69,7 @@ module jtmikie_video(
     input         [7:0] debug_bus
 );
 
-localparam LAYOUT=3;
+parameter LAYOUT=3;
 
 wire       preLHBL, preLVBL, hinit;
 wire [8:0] vdump, vrender, hdump;
@@ -150,7 +150,7 @@ jtkicker_scroll #(.LAYOUT(LAYOUT),.NOSCROLL(1)) u_scroll(
 
 jtkicker_obj #(.LAYOUT(LAYOUT)) u_obj(
     .rst        ( rst       ),
-    .clk        ( clk       ),        // 48 MHz
+    .clk        ( clk       ),      // 48 MHz
     .clk24      ( clk24     ),      // 24 MHz
 
     .pxl_cen    ( pxl_cen   ),
