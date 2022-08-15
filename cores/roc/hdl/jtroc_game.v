@@ -48,7 +48,7 @@ module jtroc_game(
     input   [24:0]  ioctl_addr,
     input   [ 7:0]  ioctl_dout,
     input           ioctl_wr,
-    output   [21:0] prog_addr,
+    output reg [21:0] prog_addr,
     output   [ 7:0] prog_data,
     output   [ 1:0] prog_mask,
     output          prog_we,
@@ -91,6 +91,7 @@ wire        snd_ok, snd_cs;
 
 wire [ 7:0] main_data;
 wire [15:0] main_addr;
+wire [10:0] cpu_addr;
 wire [ 7:0] st_main;
 
 wire        cpu_cen, cpu4_cen, ti1_cen, ti2_cen;
@@ -111,6 +112,22 @@ assign prog_rd    = 0;
 assign dwnld_busy = downloading;
 assign dip_flip   = flip;
 assign debug_view = st_main;
+
+wire [21:0] pre_addr;
+wire [ 7:0] nc;
+
+always @(*) begin
+    prog_addr = pre_addr;
+    if( ioctl_addr[21:0] >= SCR_START && ioctl_addr[21:0]<OBJ_START ) begin
+        prog_addr[0]   = ~pre_addr[3];
+        prog_addr[3:1] =  pre_addr[2:0];
+    end
+    if( ioctl_addr[21:0] >= OBJ_START && ioctl_addr[21:0]<PROM_START ) begin
+        prog_addr[0]   = ~pre_addr[3];
+        prog_addr[1]   = ~pre_addr[4];
+        prog_addr[5:2] =  { pre_addr[5], pre_addr[2:0] }; // making [5] explicit for now
+    end
+end
 
 jtkicker_clocks u_clocks(
     .status     ( status    ),
@@ -148,6 +165,7 @@ jtroc_main u_main(
     .cpu_dout       ( cpu_dout      ),
     .cpu_rnw        ( cpu_rnw       ),
 
+    .bus_addr       ( cpu_addr      )
     .vram_cs        ( vram_cs       ),
     .vram_dout      ( vram_dout     ),
 
@@ -167,15 +185,11 @@ jtroc_main u_main(
     .st_dout        ( st_main       )
 );
 `else
-    assign main_cs = 0;
     assign objram_cs = 0;
-    assign snd     = 0;
-    assign sample  = 0;
-    assign game_led= 0;
-    `ifndef PALSEL
-    `define PALSEL 0
-    `endif
-    assign pal_sel = `PALSEL;
+    assign vram_cs = 0;
+    assign cpu_rnw = 1;
+    assign cpu_addr = 0;
+    assign cpu_dout = 0;
     assign flip    = 0;
 `endif
 
@@ -216,7 +230,7 @@ jtroc_video u_video(
     .flip       ( flip      ),
 
     // CPU interface
-    .cpu_addr   ( main_addr[10:0]  ),
+    .cpu_addr   ( cpu_addr[10:0]  ),
     .cpu_dout   ( cpu_dout  ),
     .cpu_rnw    ( cpu_rnw   ),
     // Scroll
@@ -261,7 +275,7 @@ u_dwnld(
     .ioctl_addr     ( ioctl_addr    ),
     .ioctl_dout     ( ioctl_dout    ),
     .ioctl_wr       ( ioctl_wr      ),
-    .prog_addr      ( prog_addr     ),
+    .prog_addr      ( pre_addr      ),
     .prog_data      ( prog_data     ),
     .prog_mask      ( prog_mask     ), // active low
     .prog_we        ( prog_we       ),

@@ -64,14 +64,15 @@ module jtkicker_scroll(
 parameter BYPASS_PROM=0, NOSCROLL=0;
 parameter LAYOUT = !NOSCROLL ? 0 : 1;
 parameter BSEL =
-    LAYOUT==2 || LAYOUT==3 ? 10 :
+    LAYOUT==2 || LAYOUT==3 || LAYOUT==5 ? 10 :
     NOSCROLL ? 0 : 10;
 parameter PACKED = LAYOUT==2 || LAYOUT==3;
 // Column at which the score table ends. This is set by fixed logic
 // in all games inspected so far. Thus, I encode it as a parameter
-localparam [8:0] SCRCOL = LAYOUT==2 ? 9'o60 : // Super Basketball
-                          LAYOUT==3 ? 9'o00 : // Mikie - doesn't use this feature
-                          9'o40;
+parameter [8:0] SCRCOL = LAYOUT==2 ? 9'o60 : // Super Basketball
+                         LAYOUT==3 ? 9'o00 : // Mikie - doesn't use this feature
+                         LAYOUT==5 ? 9'o00 : // Roc   - doesn't use this feature
+                         9'o40;
 
 wire [ 7:0] code, attr, vram_high, vram_low, pal_addr;
 reg  [ 3:0] pal_msb;
@@ -124,6 +125,13 @@ always @* begin
             hflip    = attr[4];
             pal_msb  = attr[3:0];
             scr_prio = attr[4];
+        end
+        5: begin // Roc'n Rope
+            code_msb = {1'b0,attr[7]};
+            vflip    = attr[5];
+            hflip    = attr[6];
+            scr_prio = attr[4];
+            pal_msb  = attr[3:0];
         end
     endcase
 end

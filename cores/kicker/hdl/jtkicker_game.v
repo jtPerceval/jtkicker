@@ -215,12 +215,11 @@ u_dwnld(
     assign main_cs = 0;
     assign obj1_cs = 0;
     assign obj2_cs = 0;
-    assign snd     = 0;
-    assign sample  = 0;
-    assign game_led= 0;
-    assign pal_sel = 0;
+    assign vram_cs = 0;
     assign flip    = 0;
-    assign pcm_addr= 0;
+    assign cpu_rnw = 1;
+    assign cpu_addr = 0;
+    assign cpu_dout = 0;
 `endif
 
 `ifndef PCM

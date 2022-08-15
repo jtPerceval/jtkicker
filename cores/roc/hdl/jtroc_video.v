@@ -65,7 +65,7 @@ module jtroc_video(
     input         [7:0] debug_bus
 );
 
-parameter LAYOUT=3;
+parameter LAYOUT=5;
 
 wire       preLHBL, preLVBL, hinit;
 wire [8:0] vdump, vrender, hdump;
@@ -96,8 +96,6 @@ jtkicker_vtimer #(.LAYOUT(LAYOUT)) u_vtimer(
     .VS     ( VS        )
 );
 
-wire [7:0] vdumpx = vdump[7:0]+8'd1;
-
 jtkicker_scroll #(.LAYOUT(LAYOUT),.NOSCROLL(1)) u_scroll(
     .rst        ( rst       ),
     .clk        ( clk       ),
@@ -117,14 +115,14 @@ jtkicker_scroll #(.LAYOUT(LAYOUT),.NOSCROLL(1)) u_scroll(
     // video inputs
     .LHBL       ( LHBL      ),
     .LVBL       ( LVBL      ),
-    .vdump      ( vdumpx    ),
+    .vdump      ( vdump     ),
     .hdump      ( hdump     ),
     .flip       ( flip      ),
 
     // PROMs
     .prog_data  ( prog_data[3:0] ),
     .prog_addr  ( prog_addr[7:0] ),
-    .prog_en    ( prom_we[0]),
+    .prog_en    ( prom_we[1]),
 
     // SDRAM
     .rom_addr   ( scr_addr  ),
@@ -164,7 +162,7 @@ jtkicker_obj #(.LAYOUT(LAYOUT)) u_obj(
     // In order to keep the bit plane order in jtkicker_obj intact,
     // I am sorting the bits in the colour PROM
     .prog_addr  ( prog_addr[7:0] ),
-    .prog_en    ( prom_we[1]),
+    .prog_en    ( prom_we[0]),
 
     // SDRAM
     .rom_cs     ( obj_cs    ),

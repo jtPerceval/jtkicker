@@ -21,6 +21,8 @@ module jtroc_main(
     input               clk,        // 24 MHz
     input               cpu4_cen,   // 6.14 MHz
     output              cpu_cen,    // Q clock
+
+    output      [10:0]  bus_addr,
     // ROM
     output      [15:0]  rom_addr,
     output reg          rom_cs,
@@ -75,6 +77,7 @@ wire        VMA;
 assign irq_trigger = ~LVBL & dip_pause;
 assign cpu_rnw     = RnW;
 assign rom_addr    = A[15:0]-16'h6000;
+assign bus_addr    = cpu_addr[10:0];
 assign st_dout     = { 3'd0, mute, snd_on, flip, firq_en, irq_en };
 
 always @(*) begin
