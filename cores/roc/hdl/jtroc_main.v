@@ -19,10 +19,10 @@
 module jtroc_main(
     input               rst,
     input               clk,        // 24 MHz
-    input               cpu4_cen,   // 7.14 MHz
+    input               cpu4_cen,   // 6.14 MHz
     output              cpu_cen,    // Q clock
     // ROM
-    output      [14:0]  rom_addr,
+    output      [15:0]  rom_addr,
     output reg          rom_cs,
     input       [ 7:0]  rom_data,
     input               rom_ok,
@@ -30,101 +30,129 @@ module jtroc_main(
     // cabinet I/O
     input       [ 1:0]  start_button,
     input       [ 1:0]  coin_input,
-    input       [ 6:0]  joystick1,
-    input       [ 6:0]  joystick2,
+    input       [ 5:0]  joystick1,
+    input       [ 5:0]  joystick2,
     input               service,
 
     // GFX
     output              cpu_rnw,
     output      [ 7:0]  cpu_dout,
-    output reg          char_cs,
     output reg          vram_cs,
     output reg          objram_cs,
-    output reg          obj_frame,
 
     // Sound
-    output reg          snd_data_cs,
-    output reg          snd_on_cs,
+    output reg  [ 7:0]  snd_latch,
+    output reg          snd_on,
+    output reg          mute,
 
     // configuration
-    output reg  [ 3:0]  pal_sel,
     output reg          flip,
 
     // interrupt triggers
     input               LVBL,
-    input               V16,
 
     input      [7:0]    vram_dout,
-    input      [7:0]    vscr_dout,  // output from Konami 085 custom chip
     input      [7:0]    obj_dout,
     // DIP switches
     input               dip_pause,
-    input      [7:0]    dipsw_a,
-    input      [7:0]    dipsw_b
+    input     [23:0]    dipsw,
+
+    output    [ 7:0]    st_dout
 );
 
-reg  [ 7:0] cabinet, cpu_din;
+reg  [ 7:0] cabinet, cpu_din, vectors_dout;
 wire [ 7:0] ram_dout;
 wire [15:0] A;
+reg  [ 7:0] vectors[0:15];
 wire        RnW, irq_n, nmi_n;
 wire        irq_trigger;
-reg         irq_clrn, ram_cs, vgap_cs;
-reg         ior_cs, in5_cs, in6_cs, int_cs,
-            color_cs, iow_cs, intshow_cs;
-// reg         afe_cs; // watchdog
+reg         vector_rd, io_cs, ram_cs,
+            vector_cs, dip3_cs, dip1_cs, imux_cs,
+            snd_cs, oreg_cs,
+            firq_n, firq_en, irq_en, even, LVBLl;
 wire        VMA;
 
 assign irq_trigger = ~LVBL & dip_pause;
 assign cpu_rnw     = RnW;
-assign rom_addr    = A;
+assign rom_addr    = A[15:0]-16'h6000;
+assign st_dout     = { 3'd0, mute, snd_on, flip, firq_en, irq_en };
 
 always @(*) begin
-    vector_rd = &A[15:4]; // The KONAMI-1 chip seems to have pin #26 serve as
-                          // an interrupt vector request signal
-    io_cs = VMA && A[15:9]==(RnW ? 7'h40 : 7'h18);
+    vector_rd = &A[15:4] & ~&A[3:1];
+        // The KONAMI-1 chip seems to have pin #26 serve as
+        // an interrupt vector request signal
+    io_cs     = VMA && A[15:9]==(RnW ? 7'h40 : 7'h18);
     vector_cs = io_cs && A[8:7] == 3;
-    dip3_cs = io_cs && { RnW, A[8:7] } == 3'b1_10;
-    imux_cs = io_cs && { RnW, A[8:7] } == 3'b1_01;
-    dip2_cs = io_cs && { RnW, A[8:7] } == 3'b1_00;
-    snd_data_cs = io_cs && { RnW, A[8:7] } == 3'b0_10;
-    oreg_cs = io_cs && { RnW, A[8:7] } == 3'b0_01;
+    dip3_cs   = io_cs && { RnW, A[8:7] } == 3'b1_10;
+    imux_cs   = io_cs && { RnW, A[8:7] } == 3'b1_01;
+    dip1_cs   = io_cs && { RnW, A[8:7] } == 3'b1_00;
+    snd_cs    = io_cs && { RnW, A[8:7] } == 3'b0_10;
+    oreg_cs   = io_cs && { RnW, A[8:7] } == 3'b0_01;
+    objram_cs = VMA && A[15:11]==5'b0100_0; // $40../$44..
+    vram_cs   = VMA && A[15:11]==5'b0100_1; // $48../$4C..
+    ram_cs    = VMA && A[15:12]==4'b0101; // $5...
+    rom_cs    = VMA && A[15:12]>=6 && !vector_rd && RnW; // ROM = 6000 - FFFF
+end
 
-    rom_cs  = VMA && A[15:10]>=6 && !vector_rd && RnW; // ROM = 6000 - FFFF
+always @(posedge clk) begin
+    if( vector_cs && cpu_cen && !RnW ) vectors[A[3:0]] <= cpu_dout;
+    vectors_dout <= vectors[ A[3:0] ];
+end
+
+always @(posedge clk, posedge rst) begin
+    if( rst ) begin
+        LVBLl  <= 0;
+        even   <= 0;
+        firq_n <= 1;
+    end else begin
+        // There is an interrupt triggered
+        // every two frames. Not clear which one is FIRQ and which one IRQ
+        LVBLl <= LVBL;
+        if( !LVBL && LVBLl && dip_pause ) begin
+            even <= ~even;
+            if( ~even ) firq_n <= 0;
+        end
+        if( !firq_en || !dip_pause ) firq_n <= 1;
+    end
 end
 
 always @(posedge clk) begin
     case( A[1:0] )
         0: cabinet <= { ~3'd0, start_button, service, coin_input };
-        1: cabinet <= {1'b1, joystick1[6:4], joystick1[2], joystick1[3], joystick1[0], joystick1[1]};
-        2: cabinet <= {1'b1, joystick2[6:4], joystick2[2], joystick2[3], joystick2[0], joystick2[1]};
-        3: cabinet <= 8'hff;
+        1: cabinet <= { 2'd3, joystick1[5:4], joystick1[2], joystick1[3], joystick1[0], joystick1[1] };
+        2: cabinet <= { 2'd3, joystick2[5:4], joystick2[2], joystick2[3], joystick2[0], joystick2[1] };
+        3: cabinet <= dipsw[15:8];
     endcase
-    cpu_din <= rom_cs  ? rom_data  :
-               ram_cs  ? ram_dout  :
-               vram_cs ? vram_dout :
-               intshow_cs ? vscr_dout :
+    cpu_din <= rom_cs     ? rom_data  :
+               vram_cs    ? vram_dout :
                objram_cs  ? obj_dout :
-               ior_cs  ? cabinet  :
-               in6_cs  ? dipsw_a  :
-               in5_cs  ? dipsw_b  : 8'hff;
+               dip3_cs    ? dipsw[23-:8] :
+               dip1_cs    ? dipsw[  7:0] :
+               imux_cs    ? cabinet :
+               vector_cs  ? vectors_dout :
+               8'hff;
 end
 
 always @(posedge clk) begin
     if( rst ) begin
-        obj_frame   <= 0;
-        irq_clrn <= 0;
-        flip     <= 0;
-        pal_sel  <= 0;
-    end else if(cpu_cen) begin
-        if( iow_cs && !RnW ) begin
+        flip      <= 0;
+        snd_on    <= 0;
+        mute      <= 0;
+        snd_latch <= 0;
+    end else if(cpu_cen && !RnW) begin
+        if( snd_cs ) snd_latch <= cpu_dout;
+        if( oreg_cs ) begin
             case(A[2:0]) // 74LS259
-                5: obj_frame <= cpu_dout[0];
-                1: irq_clrn  <= cpu_dout[0];
-                0: flip      <= cpu_dout[0];
+                0: flip   <= cpu_dout[0];
+                1: snd_on <= cpu_dout[0];
+                2: mute   <= cpu_dout[0];
+                // 3, 4, coin counters
+                // 5 unconnected
+                6: firq_en <= cpu_dout[0];
+                7: irq_en  <= cpu_dout[0];
                 default:;
             endcase
         end
-        if( color_cs ) pal_sel <= cpu_dout[3:0];
     end
 end
 
@@ -136,7 +164,7 @@ jtframe_ff u_irq(
     .q        (             ),
     .qn       ( irq_n       ),
     .set      (             ),    // active high
-    .clr      ( ~irq_clrn   ),    // active high
+    .clr      ( ~irq_en     ),    // active high
     .sigedge  ( irq_trigger )     // signal whose edge will trigger the FF
 );
 
@@ -148,7 +176,7 @@ jtframe_sys6809 #(.RAM_AW(12),.KONAMI1(1)) u_cpu(
 
     // Interrupts
     .nIRQ       ( irq_n     ),
-    .nFIRQ      ( 1'b1      ),
+    .nFIRQ      ( firq_n    ),
     .nNMI       ( 1'b1      ),
     .irq_ack    (           ),
     // Bus sharing

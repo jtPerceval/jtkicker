@@ -1,10 +1,17 @@
 game:
-  - from: kicker
-    get:
-      - jtkicker_vtimer.v
   - from: roc
     get:
+      - jtroc_game.v
+      - jtroc_main.v
       - jtroc_snd.v
+      - jtroc_video.v
+  - from: kicker
+    get:
+      - jtkicker_colmix.v
+      - common.yaml
+  - from: yiear
+    get:
+      - jtyiear_colmix.v
 jtframe:
   - get:
       - jtframe_ff.v
@@ -31,3 +38,6 @@ jtframe:
       - jtframe_cen48.v
       - jtframe_frac_cen.v
       - jtframe_crossclk_cen.v
+modules:
+  jt:
+    - name: jt49

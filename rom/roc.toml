@@ -25,10 +25,10 @@ bitcnt = 23
 # or arguments passed to mame2mra
 regions = [
     { name="maincpu", no_offset=true },
-    { name="timeplt_audio:tpsound" },
+    { name="timeplt_audio:tpsound", start=$SND_START },
     { name="gfx2", width=16, no_offset=true, Sort_even=true, start=$SCR_START },
     { name="gfx1", width=16, no_offset=true, start=$OBJ_START },
-    { name="proms", start=$PROM_START },
+    { name="proms", start=$PROM_START, name_sort=["b16_prom.bin","rocnrope.pr3","a17_prom.bin"], no_offset=true },
     { name="pal_cpuvidbd", skip=true },
     { name="pals_daughterbd", skip=true }
 ]

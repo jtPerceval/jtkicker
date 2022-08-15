@@ -1,8 +1,6 @@
 #!/bin/bash
 
-AUXTMP=/tmp/$RANDOM$RANDOM
-jtcfgstr -target=mist -output=bash -parse ../../hdl/jtsbakt.def > $AUXTMP
-source $AUXTMP
+eval `jtcfgstr -target=mist -output=bash -core sbakt`
 
 if [ -e vram.bin ]; then
     cat vram.bin | drop1    > vram_hi.bin
@@ -21,9 +19,6 @@ for i in $*; do
     esac
 done
 
-export M6809=1
-
 jtsim -mist -sysname sbaskt -load \
     $PROM_ONLY -d JTFRAME_SIM_ROMRQ_NOCHECK \
-    -videow 256 -videoh 224 \
     $*

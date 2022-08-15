@@ -48,8 +48,8 @@ module jtroc_game(
     input   [24:0]  ioctl_addr,
     input   [ 7:0]  ioctl_dout,
     input           ioctl_wr,
-    output     [21:0] prog_addr,
-    output reg [ 7:0] prog_data,
+    output   [21:0] prog_addr,
+    output   [ 7:0] prog_data,
     output   [ 1:0] prog_mask,
     output          prog_we,
     output          prog_rd,
@@ -91,22 +91,17 @@ wire        snd_ok, snd_cs;
 
 wire [ 7:0] main_data;
 wire [15:0] main_addr;
+wire [ 7:0] st_main;
 
-wire [ 7:0] dipsw_a, dipsw_b;
-wire [ 1:0] dipsw_c;
-wire        V16;
-
-wire [ 2:0] pal_sel;
 wire        cpu_cen, cpu4_cen, ti1_cen, ti2_cen;
 wire        cpu_rnw, cpu_irqn, cpu_nmin;
 wire        vram_cs, objram_cs,
             prom_we, flip;
-wire [ 7:0] vscr_dout, vram_dout, obj_dout, cpu_dout;
-wire        vsync60;
-wire        snd_cen, psg_cen;
+wire [ 7:0] vram_dout, obj_dout, cpu_dout;
 
-// PCM
+// Sound
 wire [ 7:0] snd_latch;
+wire        mute, snd_on;
 
 wire        m2s_on;
 reg  [24:0] dwn_addr;
@@ -114,29 +109,8 @@ wire [ 7:0] nc, pre_data;
 
 assign prog_rd    = 0;
 assign dwnld_busy = downloading;
-assign { dipsw_c, dipsw_b, dipsw_a } = dipsw[17:0];
-assign dip_flip = ~dipsw_c[0];
-assign debug_view = 0;
-
-always @(*) begin
-    prog_data = pre_data;
-    dwn_addr  = ioctl_addr;
-    if( ioctl_addr[21:0] >= SCR_START && ioctl_addr[21:0]<OBJ_START ) begin
-        prog_data = { pre_data[3:0], pre_data[7:4] };
-    end
-    if( ioctl_addr[21:0] >= OBJ_START && ioctl_addr<PROM_START ) begin
-        dwn_addr[15]  =  ioctl_addr[0];
-        dwn_addr[14]  =  ioctl_addr[15];
-        dwn_addr[0]   =  ~ioctl_addr[14];
-        case( ioctl_addr[5:4])
-            0: {dwn_addr[2:1]} = 1;
-            1: {dwn_addr[2:1]} = 2;
-            2: {dwn_addr[2:1]} = 3;
-            3: {dwn_addr[2:1]} = 0;
-        endcase
-        dwn_addr[6:3] =  { ioctl_addr[6], ioctl_addr[3:1] };
-    end
-end
+assign dip_flip   = flip;
+assign debug_view = st_main;
 
 jtkicker_clocks u_clocks(
     .status     ( status    ),
@@ -145,8 +119,8 @@ jtkicker_clocks u_clocks(
     .cpu4_cen   ( cpu4_cen  ),
     .snd_cen    (           ),
     .psg_cen    (           ),
-    .ti1_cen    ( ti1_cen   ),
-    .ti2_cen    ( ti2_cen   ),
+    .ti1_cen    (           ),
+    .ti2_cen    (           ),
     // 48 MHz domain
     .clk        ( clk       ),
     .pxl_cen    ( pxl_cen   ),
@@ -176,23 +150,21 @@ jtroc_main u_main(
 
     .vram_cs        ( vram_cs       ),
     .vram_dout      ( vram_dout     ),
-    .vscr_dout      ( vscr_dout     ),
 
     .objram_cs      ( objram_cs     ),
     .obj_dout       ( obj_dout      ),
     // Sound control
     .snd_latch      ( snd_latch     ),
-    .snd_on         ( m2s_on        ),
+    .snd_on         ( snd_on        ),
+    .mute           ( mute          ),
     // GFX configuration
-    .pal_sel        ( pal_sel       ),
     .flip           ( flip          ),
     // interrupt triggers
     .LVBL           ( LVBL          ),
     // DIP switches
     .dip_pause      ( dip_pause     ),
-    .dipsw_a        ( dipsw_a       ),
-    .dipsw_b        ( dipsw_b       ),
-    .dipsw_c        ( dipsw_c       )
+    .dipsw          ( dipsw[23:0]   ),
+    .st_dout        ( st_main       )
 );
 `else
     assign main_cs = 0;
@@ -218,7 +190,7 @@ jtroc_snd u_sound(
     .rom_ok     ( snd_ok    ),
     // From main CPU
     .main_latch ( snd_latch ),
-    .m2s_on     ( m2s_on    ),
+    .snd_on     ( snd_on    ),
     // Sound
     .snd        ( snd       ),
     .sample     ( sample    ),
@@ -232,7 +204,7 @@ jtroc_snd u_sound(
     assign game_led=0;
 `endif
 
-jtmikie_video u_video(
+jtroc_video u_video(
     .rst        ( rst       ),
     .clk        ( clk       ),
     .clk24      ( clk24     ),
@@ -241,7 +213,6 @@ jtmikie_video u_video(
     .pxl2_cen   ( pxl2_cen  ),
 
     // configuration
-    .pal_sel    ( pal_sel   ),
     .flip       ( flip      ),
 
     // CPU interface
@@ -250,16 +221,14 @@ jtmikie_video u_video(
     .cpu_rnw    ( cpu_rnw   ),
     // Scroll
     .vram_cs    ( vram_cs   ),
-    .vscr_cs    ( 1'b0      ),
     .vram_dout  ( vram_dout ),
-    .vscr_dout  ( vscr_dout ),
     // Objects
     .objram_cs  ( objram_cs ),
     .obj_dout   ( obj_dout  ),
 
     // PROMs
     .prog_data  ( prog_data ),
-    .prog_addr  ( prog_addr[10:0] ),
+    .prog_addr  ( prog_addr[9:0] ),
     .prom_en    ( prom_we   ),
 
     // Scroll
@@ -272,7 +241,6 @@ jtmikie_video u_video(
     .obj_cs     ( objrom_cs ),
     .obj_ok     ( obj_ok    ),
 
-    .V16        ( V16       ),
     .HS         ( HS        ),
     .VS         ( VS        ),
     .LHBL       ( LHBL      ),
@@ -290,11 +258,11 @@ jtframe_dwnld #(.PROM_START(PROM_START),.SWAB(1))
 u_dwnld(
     .clk            ( clk           ),
     .downloading    ( downloading   ),
-    .ioctl_addr     ( dwn_addr      ),
+    .ioctl_addr     ( ioctl_addr    ),
     .ioctl_dout     ( ioctl_dout    ),
     .ioctl_wr       ( ioctl_wr      ),
     .prog_addr      ( prog_addr     ),
-    .prog_data      ( {nc,pre_data} ),
+    .prog_data      ( prog_data     ),
     .prog_mask      ( prog_mask     ), // active low
     .prog_we        ( prog_we       ),
     .prom_we        ( prom_we       ),

@@ -40,14 +40,14 @@ module jtyiear_colmix(
     input         [3:0] gfx_en
 );
 
-parameter BLANK_DLY=8;
+parameter BLANK_DLY=8, LOWONLY=0;
 
 reg  [4:0] mux;
 wire       obj_blank = obj_pxl[3:0]==0 || !gfx_en[3];
 wire [3:0] scr_gated = gfx_en[0] ? scr_pxl : 4'd0;
 
 always @(posedge clk) if(pxl_cen) begin
-    mux[4]   <= obj_blank;
+    mux[4]   <= obj_blank & ~LOWONLY[0]; // the upper half is used as blanking in Roc'n Rope
     mux[3:0] <= obj_blank ? scr_gated : obj_pxl;
 end
 

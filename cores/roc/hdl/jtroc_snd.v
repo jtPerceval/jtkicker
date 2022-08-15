@@ -17,16 +17,16 @@
     Date: 15-8-2022 */
 
 module jtroc_snd(
-    input               rst,
-    input               clk,
+    input                rst,
+    input                clk,
     // ROM
-    output      [13:0]  rom_addr, // the schematics a third 4kB ROM chip, which is unused
-    output reg          rom_cs,
-    input       [ 7:0]  rom_data,
-    input               rom_ok,
+    output       [13:0]  rom_addr, // the schematics a third 4kB ROM chip, which is unused
+    output  reg          rom_cs,
+    input        [ 7:0]  rom_data,
+    input                rom_ok,
     // From main CPU
-    input       [ 7:0]  main_latch,
-    input               m2s_on,
+    input        [ 7:0]  main_latch,
+    input                snd_on,
 
     output signed [15:0] snd,
     output               sample,
@@ -84,7 +84,7 @@ always @* begin
     ram_cs      = 0;
     sen         = 4'b1111;
     filter_cs   = A[15];
-    if( !mreq_n && !rfsh_n ) begin
+    if( !mreq_n && rfsh_n ) begin
         case(A[15:13])
             0,1,2: rom_cs = 1;
             3:     ram_cs = 1; // 8000
@@ -177,7 +177,7 @@ jtframe_ff u_irq(
     .qn       ( int_n       ),
     .set      (             ),
     .clr      ( irq_ack     ),
-    .sigedge  ( m2s_on      )
+    .sigedge  ( snd_on      )
 );
 
 /* verilator tracing_off */
@@ -185,7 +185,7 @@ jtframe_ff u_irq(
 jtframe_sysz80 #(.RAM_AW(10)) u_cpu(
     .rst_n      ( ~rst        ),
     .clk        ( clk         ),
-    .cen        ( psg1_cen    ),
+    .cen        ( psg_cen     ),
     .cpu_cen    (             ),
     .int_n      ( int_n       ),
     .nmi_n      ( 1'b1        ),

@@ -32,7 +32,7 @@ module jtkicker_obj(
     input               pxl_cen,
 
     // CPU interface
-    input        [10:0] cpu_addr,
+    input         [9:0] cpu_addr,
     input         [7:0] cpu_dout,
     input               obj1_cs,
     input               obj2_cs,
@@ -89,7 +89,7 @@ jtframe_dual_ram #(.simfile("obj2.bin")) u_hi(
     // Port 0, CPU
     .clk0   ( clk24         ),
     .data0  ( cpu_dout      ),
-    .addr0  ( cpu_addr[9:0] ),
+    .addr0  ( cpu_addr      ),
     .we0    ( obj1_we       ),
     .q0     ( obj1_dout     ),
     // Port 1
@@ -105,7 +105,7 @@ jtframe_dual_ram #(.simfile("obj1.bin")) u_low(
     // Port 0, CPU
     .clk0   ( clk24         ),
     .data0  ( cpu_dout      ),
-    .addr0  ( cpu_addr[9:0] ),
+    .addr0  ( cpu_addr      ),
     .we0    ( obj2_we       ),
     .q0     ( obj2_dout     ),
     // Port 1

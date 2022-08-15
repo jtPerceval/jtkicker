@@ -57,9 +57,9 @@
             <part name="rnr_a10.vid" crc="aff6e22f" map="10"/>
         </interleave>
         <!-- proms - starts at 0x18000 -->
-        <part name="a17_prom.bin" crc="22ad2c3e"/>
         <part name="b16_prom.bin" crc="750a9677"/>
         <part name="rocnrope.pr3" crc="b5c75a27"/>
+        <part name="a17_prom.bin" crc="22ad2c3e"/>
         <!-- Total 0x18220 bytes - 96 kBytes -->
         <patch offset="0x103D">BA</patch>
     </rom>

@@ -48,9 +48,11 @@ reg  [4:0] mux;
 wire       obj_blank = obj_pxl[3:0]==0 || !gfx_en[3];
 wire [3:0] scr_gated = gfx_en[0] ? scr_pxl : 4'd0;
 
+/* verilator lint_off WIDTH */
 assign pal_addr = PALSELW==3 ?
     { pal_sel, mux} :
     { pal_sel, mux[3:0] };
+/* verilator lint_on WIDTH */
 
 always @(posedge clk) if(pxl_cen) begin
     mux[4]   <= obj_blank;
