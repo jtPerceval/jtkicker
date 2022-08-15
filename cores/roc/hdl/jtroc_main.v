@@ -78,13 +78,15 @@ assign irq_trigger = ~LVBL & dip_pause;
 assign cpu_rnw     = RnW;
 assign rom_addr    = A[15:0]-16'h6000;
 assign bus_addr    = A[10:0];
-assign st_dout     = { 3'd0, mute, snd_on, flip, firq_en, irq_en };
+assign st_dout     = { 2'd0, bus_error, mute, snd_on, flip, firq_en, irq_en };
+
+reg bus_error;
 
 always @(*) begin
     vector_rd = &A[15:4] & ~&A[3:1];
         // The KONAMI-1 chip seems to have pin #26 serve as
         // an interrupt vector request signal
-    io_cs     = VMA && A[15:9]==(RnW ? 7'h40 : 7'h18);
+    io_cs     = VMA && A[15:9]==(RnW ? 7'h18 : 7'h40);
     vector_cs = io_cs && A[8:7] == 3;
     dip3_cs   = io_cs && { RnW, A[8:7] } == 3'b1_10;
     imux_cs   = io_cs && { RnW, A[8:7] } == 3'b1_01;
@@ -95,6 +97,7 @@ always @(*) begin
     vram_cs   = VMA && A[15:11]==5'b0100_1; // $48../$4C..
     ram_cs    = VMA && A[15:12]==4'b0101; // $5...
     rom_cs    = VMA && A[15:12]>=6 && !vector_rd && RnW; // ROM = 6000 - FFFF
+    bus_error = VMA && {io_cs,vector_cs,dip3_cs,imux_cs,dip1_cs,snd_cs,oreg_cs,objram_cs,vram_cs,ram_cs,rom_cs,vector_rd}==0;
 end
 
 always @(posedge clk) begin
