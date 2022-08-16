@@ -4,10 +4,10 @@ mraauthor=["jotego"]
 
 [features]
 # debug=true
+beta=true
 
 [parse]
 sourcefile="rocnrope.cpp"
-skip.bootlegs=true
 
 [buttons]
 core=2 # max number of buttons supported by the core
