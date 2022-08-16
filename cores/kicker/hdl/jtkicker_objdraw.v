@@ -55,13 +55,15 @@ module jtkicker_objdraw #(
     output reg          rom_cs,
     input               rom_ok,
 
-    output        [3:0] pxl
+    output        [3:0] pxl,
+    input         [7:0] debug_bus
 );
 
 wire [ 3:0] buf_in;
 reg  [ 7:0] buf_a;
 reg         buf_we;
 wire [ 7:0] pal_addr;
+wire [ 8:0] hread;
 
 reg  [31:0] pxl_data;
 reg  [ 2:0] cnt;
@@ -70,6 +72,7 @@ reg  [ 3:0] cur_pal;
 reg         cur_hflip;
 
 assign pal_addr = { cur_pal, pxl_data[3:0] };
+assign hread    = hdump - {1'd0,HOFFSET};
 
 always @(posedge clk, posedge rst) begin
     if( rst ) begin
@@ -85,7 +88,7 @@ always @(posedge clk, posedge rst) begin
             rom_addr <= { code, ysub^{4{vflip}}, 1'b0 };
             rom_cs   <= 1;
             cnt      <= 7;
-            buf_a    <= xpos + (hflip ? 8'd15 : 8'h0) + HOFFSET;
+            buf_a    <= xpos + (hflip ? 8'd15 : 8'h0);
             busy     <= 1;
             cur_pal  <= pal;
             cur_hflip<= hflip;
@@ -123,16 +126,9 @@ always @(posedge clk, posedge rst) begin
     end
 end
 
-wire buf_clr, LHBL_dly;
+wire buf_clr;
 
-assign buf_clr = pxl_cen && (!hdump[8] || hdump<9'h104);
-
-jtframe_sh #(.width(1),.stages(HOFFSET-1) ) u_dly(
-    .clk    ( clk       ),
-    .clk_en ( pxl_cen   ),
-    .din    ( LHBL      ),
-    .drop   ( LHBL_dly  )
-);
+assign buf_clr = pxl_cen && hread < { 1'b1, HOFFSET };
 
 reg [7:0] buf_al;
 reg       buf_wel;
@@ -146,7 +142,7 @@ jtframe_obj_buffer #(.AW(8),.DW(4), .ALPHA(0)) u_buffer(
     .wr_addr( buf_al    ),
     .we     ( buf_wel   ),
     // Old data reads (and erases)
-    .rd_addr( hdump[7:0]),
+    .rd_addr( hread[7:0]),
     .rd     ( buf_clr   ),  // data will be erased after the rd event
     .rd_data( pxl       )
 );
