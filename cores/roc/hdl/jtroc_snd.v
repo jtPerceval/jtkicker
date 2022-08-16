@@ -27,13 +27,15 @@ module jtroc_snd(
     // From main CPU
     input        [ 7:0]  main_latch,
     input                snd_on,
+    input                mute,
 
     output signed [15:0] snd,
     output               sample,
-    output               peak
+    output               peak,
+    output        [ 7:0] st_dout
 );
 
-localparam [7:0] PSG_GAIN = 8'h08;
+localparam [7:0] PSG_GAIN = 8'h10;
 
 reg  [ 7:0] din;
 wire [ 7:0] ram_dout, dout, psg0_dout, psg1_dout;
@@ -56,6 +58,7 @@ assign bdir[0]  = ~(sen[1] | wrn) | ~sen[2];
 assign bc1[0]   = ~(sen[1] | rdn) | ~sen[2];
 assign bdir[1]  = ~(sen[3] | wrn) | ~sen[4];
 assign bc1[1]   = ~(sen[3] | rdn) | ~sen[4];
+assign st_dout  = filter_en[7:0];
 
 jtframe_cen3p57 #(.CLK24(1)) u_cen3p57(
     .clk      ( clk      ),
@@ -84,8 +87,8 @@ always @* begin
     ram_cs      = 0;
     sen         = 4'b1111;
     filter_cs   = A[15];
-    if( !mreq_n && rfsh_n ) begin
-        case(A[15:13])
+    if( !mreq_n && rfsh_n && !A[15]) begin
+        case(A[14:12])
             0,1,2: rom_cs = 1;
             3:     ram_cs = 1; // 8000
             4:     sen[1] = 0;

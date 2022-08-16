@@ -68,9 +68,9 @@ module jtroc_game(
     input           enable_psg,
     input           enable_fm,
     // Debug
-    input   [ 3:0]  gfx_en,
-    input   [ 7:0]  debug_bus,
-    output  [ 7:0]  debug_view
+    input      [3:0] gfx_en,
+    input      [7:0] debug_bus,
+    output reg [7:0] debug_view
 );
 
 // SDRAM offsets
@@ -111,9 +111,17 @@ wire [ 7:0] nc, pre_data;
 assign prog_rd    = 0;
 assign dwnld_busy = downloading;
 assign dip_flip   = ~flip;
-assign debug_view = st_main;
 
 wire [21:0] pre_addr;
+
+always @(*) begin
+    case( debug_bus[1:0])
+        0: debug_view = 0;
+        1: debug_view = st_main;
+        2: debug_view = snd_latch;
+        3: debug_view = st_snd;
+    endcase
+end
 
 always @(*) begin
     prog_addr = pre_addr;
@@ -185,11 +193,11 @@ jtroc_main u_main(
 );
 `else
     assign objram_cs = 0;
-    assign vram_cs = 0;
-    assign cpu_rnw = 1;
-    assign cpu_addr = 0;
-    assign cpu_dout = 0;
-    assign flip    = 0;
+    assign vram_cs   = 0;
+    assign cpu_rnw   = 1;
+    assign cpu_addr  = 0;
+    assign cpu_dout  = 0;
+    assign flip      = 1;
 `endif
 
 `ifndef NOSOUND
@@ -204,15 +212,18 @@ jtroc_snd u_sound(
     // From main CPU
     .main_latch ( snd_latch ),
     .snd_on     ( snd_on    ),
+    .mute       ( mute      ),
     // Sound
     .snd        ( snd       ),
     .sample     ( sample    ),
-    .peak       ( game_led  )
+    .peak       ( game_led  ),
+    .st_dout    ( st_snd    )
 );
 `else
     assign snd_cs=0;
     assign snd_addr=0;
     assign snd=0;
+    assign st_snd=0;
     assign sample=0;
     assign game_led=0;
 `endif

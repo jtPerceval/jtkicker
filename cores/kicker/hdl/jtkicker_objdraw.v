@@ -125,7 +125,7 @@ end
 
 wire buf_clr, LHBL_dly;
 
-assign buf_clr = pxl_cen & LHBL_dly;
+assign buf_clr = pxl_cen && (!hdump[8] || hdump<9'h104);
 
 jtframe_sh #(.width(1),.stages(HOFFSET-1) ) u_dly(
     .clk    ( clk       ),

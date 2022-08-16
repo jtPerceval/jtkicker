@@ -127,14 +127,14 @@ always @(posedge clk) begin
         0: cabinet <= { ~3'd0, start_button, service, coin_input };
         1: cabinet <= { 2'd3, joystick1[5:4], joystick1[2], joystick1[3], joystick1[0], joystick1[1] };
         2: cabinet <= { 2'd3, joystick2[5:4], joystick2[2], joystick2[3], joystick2[0], joystick2[1] };
-        3: cabinet <= dipsw[15:8];
+        3: cabinet <= dipsw[ 7-:8]; //
     endcase
     cpu_din <= rom_cs     ? rom_data  :
                vram_cs    ? vram_dout :
                objram_cs  ? obj_dout :
                ram_cs     ? ram_dout :
-               dip1_cs    ? dipsw[23-:8] :
-               dip3_cs    ? dipsw[  7:0] :
+               dip1_cs    ? dipsw[15-:8] : //
+               dip3_cs    ? dipsw[23-:8] :
                imux_cs    ? cabinet :
                vector_cs || vector_rd ? vectors_dout :
                8'hff;

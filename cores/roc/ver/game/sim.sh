@@ -8,8 +8,8 @@ if [ -e vram.bin ]; then
 fi
 
 if [ -e objram.bin ]; then
-    dd if=objram.bin of=obj2.bin count=2
-    dd if=objram.bin of=obj1.bin count=2 skip=2
+    dd if=objram.bin of=obj1.bin count=2
+    dd if=objram.bin of=obj2.bin count=2 skip=2
 fi
 
 if [ ! -e rom.bin ]; then
