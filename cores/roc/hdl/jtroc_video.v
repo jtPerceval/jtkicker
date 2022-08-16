@@ -83,6 +83,13 @@ always @* begin
     prom_we[ prog_addr[9:8] ] = prom_en;
 end
 
+reg [10:0] vram_addr, objram_addr;
+
+always @(posedge clk) begin
+    if( vram_cs) vram_addr <= cpu_addr;
+    if( objram_cs ) objram_addr <= cpu_addr;
+end
+
 jtkicker_vtimer #(.LAYOUT(LAYOUT)) u_vtimer(
     .clk    ( clk       ),
     .pxl_cen( pxl_cen   ),
@@ -115,7 +122,7 @@ jtkicker_scroll #(.LAYOUT(LAYOUT),.NOSCROLL(1)) u_scroll(
     // video inputs
     .LHBL       ( LHBL      ),
     .LVBL       ( LVBL      ),
-    .vdump      ( vdump     ),
+    .vdump      ( vdump[7:0] ),
     .hdump      ( hdump     ),
     .flip       ( flip      ),
 

@@ -132,10 +132,11 @@ always @(posedge clk) begin
     cpu_din <= rom_cs     ? rom_data  :
                vram_cs    ? vram_dout :
                objram_cs  ? obj_dout :
+               ram_cs     ? ram_dout :
                dip3_cs    ? dipsw[23-:8] :
                dip1_cs    ? dipsw[  7:0] :
                imux_cs    ? cabinet :
-               vector_cs  ? vectors_dout :
+               vector_cs || vector_rd ? vectors_dout :
                8'hff;
 end
 

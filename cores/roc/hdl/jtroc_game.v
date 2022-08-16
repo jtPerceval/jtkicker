@@ -194,8 +194,8 @@ jtroc_main u_main(
 
 `ifndef NOSOUND
 jtroc_snd u_sound(
-    .rst        ( rst       ),
-    .clk        ( clk       ),
+    .rst        ( rst24     ),
+    .clk        ( clk24     ),
     // ROM
     .rom_addr   ( snd_addr  ),
     .rom_cs     ( snd_cs    ),

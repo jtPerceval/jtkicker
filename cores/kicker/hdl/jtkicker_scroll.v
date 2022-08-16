@@ -96,7 +96,9 @@ assign vram_dout    = cpu_addr[BSEL] ? vram_high : vram_low;
 
 always @* begin
     hdf = flip ? (~hdump[7:0]-8'd3) : hdump[7:0];
-    eff_addr = (NOSCROLL && LAYOUT!=3) ? cpu_addr[10:1] : cpu_addr[9:0];
+    eff_addr =  LAYOUT==5 ? cpu_addr[9:0] :
+                (NOSCROLL && LAYOUT!=3) ? cpu_addr[10:1] :
+                cpu_addr[9:0];
     case( LAYOUT )
         0: begin // Kicker
             vflip    = attr[5];
