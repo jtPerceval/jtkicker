@@ -50,10 +50,10 @@
         <!-- gfx1 - starts at 0x10000 -->
         <interleave output="16">
             <part name="rnr_a11.vid" crc="afdaba5e" map="01"/>
-            <part name="rnr_a12.vid" crc="054cafeb" map="10"/>
+            <part name="rnr_a9.vid" crc="9d2166b2" map="10"/>
         </interleave>
         <interleave output="16">
-            <part name="rnr_a9.vid" crc="9d2166b2" map="01"/>
+            <part name="rnr_a12.vid" crc="054cafeb" map="01"/>
             <part name="rnr_a10.vid" crc="aff6e22f" map="10"/>
         </interleave>
         <!-- proms - starts at 0x18000 -->

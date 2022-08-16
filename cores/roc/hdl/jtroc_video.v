@@ -74,8 +74,8 @@ reg  [2:0] prom_we;
 wire       obj1_cs, obj2_cs, prio, obj_en;
 reg  [1:0] fix_addr;
 
-assign obj1_cs = objram_cs & ~cpu_addr[10];
-assign obj2_cs = objram_cs &  cpu_addr[10];
+assign obj1_cs = objram_cs &  cpu_addr[10];
+assign obj2_cs = objram_cs & ~cpu_addr[10];
 assign obj_en  = gfx_en[3] & ~prio;
 
 always @* begin
@@ -162,7 +162,7 @@ jtkicker_obj #(.LAYOUT(LAYOUT)) u_obj(
     .LVBL       ( LVBL      ),
     .vrender    (vrender[7:0]),
     .hdump      ( hdump     ),
-    .flip       ( flip      ),      // unconnected in the original
+    .flip       ( 1'd0      ),      // unconnected in the original
 
     // PROMs
     .prog_data  ( prog_data[3:0] ),
@@ -181,7 +181,7 @@ jtkicker_obj #(.LAYOUT(LAYOUT)) u_obj(
     .pxl        ( obj_pxl   )
 );
 
-jtyiear_colmix #(.LOWONLY(1)) u_colmix(
+jtyiear_colmix #(.BLANK_DLY(9),.LOWONLY(1)) u_colmix(
     .clk        ( clk       ),
 
     .pxl_cen    ( pxl_cen   ),

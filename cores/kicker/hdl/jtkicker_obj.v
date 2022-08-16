@@ -68,7 +68,6 @@ parameter LAYOUT=0; // 0 other games
                     // 3 Mikie
 parameter REV_SCAN= LAYOUT == 3 ? 0 : 1;
 localparam [5:0] MAXOBJ = LAYOUT==3 ? 6'd35 : 6'd23;
-// Mikie can
 
 wire [ 7:0] obj1_dout, obj2_dout,
             low_dout, hi_dout;
