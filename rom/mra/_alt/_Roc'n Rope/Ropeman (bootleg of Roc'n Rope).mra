@@ -50,10 +50,10 @@
         <!-- gfx1 - starts at 0x10000 -->
         <interleave output="16">
             <part name="r10.11a" crc="afdaba5e" map="01"/>
-            <part name="r11.12a" crc="054cafeb" map="10"/>
+            <part name="r8.9a" crc="9d2166b2" map="10"/>
         </interleave>
         <interleave output="16">
-            <part name="r8.9a" crc="9d2166b2" map="01"/>
+            <part name="r11.12a" crc="054cafeb" map="01"/>
             <part name="r9.10a" crc="aff6e22f" map="10"/>
         </interleave>
         <!-- proms - starts at 0x18000 -->
