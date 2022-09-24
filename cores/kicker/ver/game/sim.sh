@@ -1,12 +1,8 @@
 #!/bin/bash
 
-AUXTMP=/tmp/$RANDOM$RANDOM
-jtcfgstr -target=mist -output=bash -parse ../../hdl/jtkicker.def |grep _START > $AUXTMP
-source $AUXTMP
+eval $(jtframe cfgstr kicker --target=mist --output=bash)
 
 #jtsim_sdram
-
-export M6809=1
 
 # Generic simulation script from JTFRAME
 jtsim -mist -sysname kicker  \
