@@ -1,0 +1,3 @@
+include ../../sbaskt/cfg/jtsbaskt.def
+
+KONAMI1=1

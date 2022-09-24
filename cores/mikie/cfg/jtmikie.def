@@ -1,5 +1,5 @@
 [all]
-include ../../kicker/hdl/common.def
+include ../../kicker/cfg/common.def
 
 CORENAME=JTMIKIE
 GAMETOP=jtmikie_game

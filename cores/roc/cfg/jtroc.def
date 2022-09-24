@@ -1,5 +1,5 @@
 [all]
-include ../../kicker/hdl/common.def
+include ../../kicker/cfg/common.def
 
 CORENAME=JTROC
 GAMETOP=jtroc_game

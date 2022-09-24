@@ -6,7 +6,7 @@ game:
       - jtsbaskt_video.v
       - jtsbaskt_obj.v
       - jtsbaskt_colmix.v
-      - sound.yaml
+      - ../cfg/sound.yaml
   - from: kicker
     get:
       - common.yaml
