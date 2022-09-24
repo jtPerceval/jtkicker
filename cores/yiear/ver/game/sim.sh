@@ -1,8 +1,6 @@
 #!/bin/bash
 
-AUXTMP=/tmp/$RANDOM$RANDOM
-jtcfgstr -target=mist -output=bash -parse ../../hdl/jtyiear.def > $AUXTMP
-source $AUXTMP
+eval $(jtframe cfgstr kicker --target=mist --output=bash)
 
 #jtsim_sdram
 if [ -e vram.bin ]; then
@@ -17,8 +15,6 @@ for i in $*; do
         -load) PROM_ONLY=;;
     esac
 done
-
-export M6809=1
 
 # Generic simulation script from JTFRAME
 jtsim -mist -sysname yiear  \

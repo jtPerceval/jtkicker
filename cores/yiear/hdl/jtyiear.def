@@ -2,7 +2,8 @@
 include ../../kicker/hdl/common.def
 
 CORENAME=JTYIEAR
-GAMETOP=jtkicker_game
+GAMETOP=jtyiear_game_sdram
+JTFRAME_SDRAM_BANKS
 
 VIDEO_MODULE=jtyiear_video
 MAIN_MODULE=jtyiear_main

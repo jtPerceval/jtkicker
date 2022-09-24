@@ -123,7 +123,8 @@ jtkicker_scroll #(.BYPASS_PROM(1),.NOSCROLL(1)) u_scroll(
     .rom_ok     ( scr_ok    ),
 
     .prio       (           ),
-    .pxl        ( scr_pxl   )
+    .pxl        ( scr_pxl   ),
+    .debug_bus  ( debug_bus )
 );
 
 jtkicker_obj #(
