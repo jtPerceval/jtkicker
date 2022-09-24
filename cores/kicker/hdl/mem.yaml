@@ -1,0 +1,28 @@
+sdram:
+  preaddr: true
+  noswab: true
+  banks:
+    -
+      buses:
+        -
+          name: scr
+          # 32-bit buses are indexed like
+          # scr_addr[13:1], the LSB (index 0)
+          # is always zero
+          addr_width: 14
+          data_width: 32
+          offset: "`SCR_START >> 1"
+        -
+          name: objrom
+          addr_width: 15
+          data_width: 32
+          offset: "`OBJ_START >> 1"
+        -
+          name: pcm
+          addr_width: 16
+          data_width: 8
+          offset: "`PCM_START >> 1"
+        -
+          name: main
+          addr_width: 16
+          data_width: 8

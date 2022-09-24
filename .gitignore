@@ -12,6 +12,9 @@
 *.lxt
 *.vcd
 *.wav
+*_game_sdram.v
+game_test.v
+test.cpp
 cheat/*.bin
 cheat/*.fmt
 history
