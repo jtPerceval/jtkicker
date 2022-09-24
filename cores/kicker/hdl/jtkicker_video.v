@@ -129,7 +129,8 @@ jtkicker_scroll u_scroll(
     .rom_ok     ( scr_ok    ),
 
     .prio       (           ),
-    .pxl        ( scr_pxl   )
+    .pxl        ( scr_pxl   ),
+    .debug_bus  ( debug_bus )
 );
 
 jtkicker_obj u_obj(
@@ -140,7 +141,7 @@ jtkicker_obj u_obj(
     .pxl_cen    ( pxl_cen   ),
 
     // CPU interface
-    .cpu_addr   ( cpu_addr  ),
+    .cpu_addr   ( cpu_addr[9:0] ),
     .cpu_dout   ( cpu_dout  ),
     .obj1_cs    ( obj1_cs   ),
     .obj2_cs    ( obj2_cs   ),
@@ -166,7 +167,8 @@ jtkicker_obj u_obj(
     .rom_data   ( obj_data  ),
     .rom_ok     ( obj_ok    ),
 
-    .pxl        ( obj_pxl   )
+    .pxl        ( obj_pxl   ),
+    .debug_bus  ( debug_bus )
 );
 
 jtkicker_colmix u_colmix(
@@ -182,7 +184,7 @@ jtkicker_colmix u_colmix(
     .LVBL       ( preLVBL   ),
 
     // PROMs
-    .prog_data  ( prog_data ),
+    .prog_data  (prog_data[3:0]),
     .prog_addr  (prog_addr[7:0]),
     .prog_en    (prom_we[2:0]),
 
