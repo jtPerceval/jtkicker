@@ -14,4 +14,4 @@ game:
       - ../cfg/common.yaml
   - from: sbaskt
     get:
-      - sound.yaml
+      - ../cfg/sound.yaml

@@ -9,4 +9,4 @@ game:
       - ../cfg/sound.yaml
   - from: kicker
     get:
-      - common.yaml
+      - ../cfg/common.yaml
