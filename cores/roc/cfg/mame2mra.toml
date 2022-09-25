@@ -1,6 +1,7 @@
 [global]
 # info = [ {tag="mameversion", value="0229"} ]
 mraauthor=["jotego"]
+platform="jtroc"
 
 [features]
 # debug=true
