@@ -30,7 +30,7 @@ regions = [
     { name="audiocpu" },
     { name="gfx1", no_offset=true, reverse=true, start=$SCR_START },
     { name="gfx2", width=16, no_offset=true, start=$OBJ_START, sort_even=true },
-    { name="proms", start=$PROM_START },
+    { name="proms", start=$JTFRAME_PROM_START },
 ]
 
 order = [

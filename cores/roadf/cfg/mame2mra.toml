@@ -41,7 +41,7 @@ regions = [
     { machine="roadf", name="gfx1", width=16, no_offset=true, start=$OBJ_START },
     { machine="hyperspt", name="gfx1", width=16, no_offset=true, start=$OBJ_START, Name_sort=["c14","c18","c13","c17","c12","c16","c11","c15"] },
     { name="vlm", start=$PCM_START },
-    { name="proms", start=$PROM_START            },
+    { name="proms", start=$JTFRAME_PROM_START },
 ]
 
 order = [

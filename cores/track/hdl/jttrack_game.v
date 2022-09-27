@@ -82,7 +82,7 @@ localparam [21:0] SND_START   =  `SND_START,
                   SCR_START   =  `SCR_START,
                   OBJ_START   =  `OBJ_START,
                   PCM_START   =  `PCM_START;
-localparam [24:0] PROM_START  =  `PROM_START;
+localparam [24:0] PROM_START  =  `JTFRAME_PROM_START;
 
 wire        main_cs, main_ok;
 
