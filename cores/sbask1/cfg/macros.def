@@ -1,3 +1,3 @@
-include ../../sbaskt/cfg/jtsbaskt.def
+include ../../sbaskt/cfg/macros.def
 
 KONAMI1=1
