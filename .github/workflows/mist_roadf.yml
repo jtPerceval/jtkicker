@@ -3,11 +3,6 @@ name: roadf for mist
 
 on:
   push:
-    branches:
-      - build
-      - mist
-      - build_roadf
-      - master
 
   workflow_dispatch:
 
@@ -35,12 +30,5 @@ jobs:
         uses: styfle/cancel-workflow-action@0.9.0
         with:
           access_token: ${{ github.token }}
-      - name: check out
-        uses: actions/checkout@v2
-        with:
-          submodules: true
-          repository: ${{ github.repository }}
-      - name: Get YAML package
-        run: go get gopkg.in/yaml.v2
       - name: compile for mist
         run: /docked_build.sh roadf -mist  
