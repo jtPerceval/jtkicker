@@ -36,10 +36,10 @@ module jtkicker_game(
     input   [ 5:0]  joystick1,
     input   [ 5:0]  joystick2,
     // ROM download interface
-    input           downloading,
     input   [24:0]  ioctl_addr,
     input   [21:0]  pre_addr,
-    output reg [21:0] prog_addr,
+    output reg [21:0] post_addr,
+    input   [21:0]  prog_addr,
     input   [ 7:0]  prog_data,
     input           prog_we,
     input           prom_we,
@@ -108,15 +108,15 @@ assign scr_cs = LVBL;
 assign pcm_cs = 1;
 
 always @(*) begin
-    prog_addr = pre_addr;
+    post_addr = pre_addr;
     if( ioctl_addr[21:0] >= SCR_START && ioctl_addr[21:0]<OBJ_START ) begin
-        prog_addr[0]   = ~pre_addr[3];
-        prog_addr[3:1] =  pre_addr[2:0];
+        post_addr[0]   = ~pre_addr[3];
+        post_addr[3:1] =  pre_addr[2:0];
     end
     if( ioctl_addr[21:0] >= OBJ_START && ioctl_addr[21:0]<PCM_START ) begin
-        prog_addr[0]   = ~pre_addr[3];
-        prog_addr[1]   = ~pre_addr[4];
-        prog_addr[5:2] =  { pre_addr[5], pre_addr[2:0] }; // making [5] explicit for now
+        post_addr[0]   = ~pre_addr[3];
+        post_addr[1]   = ~pre_addr[4];
+        post_addr[5:2] =  { pre_addr[5], pre_addr[2:0] }; // making [5] explicit for now
     end
 end
 
