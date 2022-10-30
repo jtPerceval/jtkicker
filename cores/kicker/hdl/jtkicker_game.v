@@ -35,36 +35,6 @@ module jtkicker_game(
     input   [ 1:0]  coin_input,
     input   [ 5:0]  joystick1,
     input   [ 5:0]  joystick2,
-    // ROM download interface
-    input   [24:0]  ioctl_addr,
-    input   [21:0]  pre_addr,
-    output reg [21:0] post_addr,
-    input   [21:0]  prog_addr,
-    input   [ 7:0]  prog_data,
-    input           prog_we,
-    input           prom_we,
-    // Memory interface
-    output          main_cs,
-    input           main_ok,
-    input    [ 7:0] main_data,
-    output   [15:0] main_addr,
-
-    output          scr_cs,
-    input           scr_ok,
-    input    [31:0] scr_data,
-    output   [13:1] scr_addr,
-
-    output          objrom_cs,
-    output   [13:0] objrom_addr,
-    input    [31:0] objrom_data,
-    input           objrom_ok,
-
-// PCM - used by yiear
-    output   [15:0] pcm_addr,
-    input    [ 7:0] pcm_data,
-    input           pcm_ok,
-    output          pcm_cs,
-
     // DIP switches
     input   [31:0]  status,     // only bits 31:16 are looked at
     input   [31:0]  dipsw,
@@ -82,7 +52,9 @@ module jtkicker_game(
     // Debug
     input   [ 3:0]  gfx_en,
     input   [ 7:0]  debug_bus,
-    output  [ 7:0]  debug_view
+    output  [ 7:0]  debug_view,
+    // Memory ports
+    `include "mem_ports.inc"
 );
 
 // SDRAM offsets
