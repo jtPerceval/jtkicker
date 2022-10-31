@@ -35,24 +35,6 @@ module jtmikie_game(
     input   [ 1:0]  coin_input,
     input   [ 5:0]  joystick1,
     input   [ 5:0]  joystick2,
-    // SDRAM interface
-    input           downloading,
-    output          dwnld_busy,
-    output          sdram_req,
-    output  [21:0]  sdram_addr,
-    input   [15:0]  data_read,
-    input           data_dst,
-    input           data_rdy,
-    input           sdram_ack,
-    // ROM LOAD
-    input   [24:0]  ioctl_addr,
-    input   [ 7:0]  ioctl_dout,
-    input           ioctl_wr,
-    output     [21:0] prog_addr,
-    output reg [ 7:0] prog_data,
-    output   [ 1:0] prog_mask,
-    output          prog_we,
-    output          prog_rd,
     // DIP switches
     input   [31:0]  status,     // only bits 31:16 are looked at
     input   [31:0]  dipsw,
@@ -70,27 +52,17 @@ module jtmikie_game(
     // Debug
     input   [ 3:0]  gfx_en,
     input   [ 7:0]  debug_bus,
-    output  [ 7:0]  debug_view
+    output  [ 7:0]  debug_view,
+    // Memory ports
+    `include "mem_ports.inc"
 );
 
 // SDRAM offsets
 localparam [21:0] SND_START   =  `SND_START,
                   SCR_START   =  `SCR_START,
                   OBJ_START   =  `OBJ_START;
+
 localparam [24:0] PROM_START  =  `JTFRAME_PROM_START;
-
-wire        main_cs, main_ok;
-
-wire [12:0] scr_addr;
-wire [13:0] obj_addr;
-wire [31:0] scr_data, obj_data;
-wire        scr_ok, obj_ok, objrom_cs;
-wire [13:0] snd_addr;
-wire [ 7:0] snd_data;
-wire        snd_ok, snd_cs;
-
-wire [ 7:0] main_data;
-wire [15:0] main_addr;
 
 wire [ 7:0] dipsw_a, dipsw_b;
 wire [ 1:0] dipsw_c;
@@ -99,8 +71,7 @@ wire        V16;
 wire [ 2:0] pal_sel;
 wire        cpu_cen, cpu4_cen, ti1_cen, ti2_cen;
 wire        cpu_rnw, cpu_irqn, cpu_nmin;
-wire        vram_cs, objram_cs,
-            prom_we, flip;
+wire        vram_cs, objram_cs, flip;
 wire [ 7:0] vscr_dout, vram_dout, obj_dout, cpu_dout;
 wire        vsync60;
 wire        snd_cen, psg_cen;
@@ -109,32 +80,29 @@ wire        snd_cen, psg_cen;
 wire [ 7:0] snd_latch;
 
 wire        m2s_on;
-reg  [24:0] dwn_addr;
-wire [ 7:0] nc, pre_data;
 
 assign prog_rd    = 0;
-assign dwnld_busy = downloading;
 assign { dipsw_c, dipsw_b, dipsw_a } = dipsw[17:0];
 assign dip_flip = ~dipsw_c[0];
 assign debug_view = 0;
 
 always @(*) begin
-    prog_data = pre_data;
-    dwn_addr  = ioctl_addr;
+    post_data = prog_data;
+    post_addr  = ioctl_addr;
     if( ioctl_addr[21:0] >= SCR_START && ioctl_addr[21:0]<OBJ_START ) begin
-        prog_data = { pre_data[3:0], pre_data[7:4] };
+        post_data = { prog_data[3:0], prog_data[7:4] };
     end
     if( ioctl_addr[21:0] >= OBJ_START && ioctl_addr<PROM_START ) begin
-        dwn_addr[15]  =  ioctl_addr[0];
-        dwn_addr[14]  =  ioctl_addr[15];
-        dwn_addr[0]   =  ~ioctl_addr[14];
+        post_addr[15]  =  ioctl_addr[0];
+        post_addr[14]  =  ioctl_addr[15];
+        post_addr[0]   =  ~ioctl_addr[14];
         case( ioctl_addr[5:4])
-            0: {dwn_addr[2:1]} = 1;
-            1: {dwn_addr[2:1]} = 2;
-            2: {dwn_addr[2:1]} = 3;
-            3: {dwn_addr[2:1]} = 0;
+            0: {post_addr[2:1]} = 1;
+            1: {post_addr[2:1]} = 2;
+            2: {post_addr[2:1]} = 3;
+            3: {post_addr[2:1]} = 0;
         endcase
-        dwn_addr[6:3] =  { ioctl_addr[6], ioctl_addr[3:1] };
+        post_addr[6:3] =  { ioctl_addr[6], ioctl_addr[3:1] };
     end
 end
 
@@ -282,95 +250,6 @@ jtmikie_video u_video(
     .blue       ( blue      ),
     .gfx_en     ( gfx_en    ),
     .debug_bus  ( debug_bus )
-);
-
-/* verilator tracing_on */
-
-jtframe_dwnld #(.PROM_START(PROM_START),.SWAB(1))
-u_dwnld(
-    .clk            ( clk           ),
-    .downloading    ( downloading   ),
-    .ioctl_addr     ( dwn_addr      ),
-    .ioctl_dout     ( ioctl_dout    ),
-    .ioctl_wr       ( ioctl_wr      ),
-    .prog_addr      ( prog_addr     ),
-    .prog_data      ( {nc,pre_data} ),
-    .prog_mask      ( prog_mask     ), // active low
-    .prog_we        ( prog_we       ),
-    .prom_we        ( prom_we       ),
-    .sdram_ack      ( sdram_ack     ),
-    .header         (               )
-);
-
-
-jtframe_rom #(
-    .SLOT0_AW    ( 14              ),
-    .SLOT0_DW    ( 32              ),
-    .SLOT0_OFFSET( SCR_START>>1    ),
-
-    .SLOT1_AW    ( 15              ),
-    .SLOT1_DW    ( 32              ),
-    .SLOT1_OFFSET( OBJ_START>>1    ),
-
-    .SLOT6_AW    ( 14              ),
-    .SLOT6_DW    (  8              ),
-    .SLOT6_OFFSET( SND_START>>1    ), // Sound CPU
-
-    .SLOT7_AW    ( 16              ),
-    .SLOT7_DW    (  8              ),
-    .SLOT7_OFFSET(  0              )  // Main
-) u_rom (
-    .rst         ( rst           ),
-    .clk         ( clk           ),
-
-    .slot0_cs    ( LVBL          ),
-    .slot1_cs    ( objrom_cs     ),
-    .slot2_cs    ( 1'b0          ),
-    .slot3_cs    ( 1'b0          ),
-    .slot4_cs    ( 1'b0          ),
-    .slot5_cs    ( 1'b0          ),
-    .slot6_cs    ( snd_cs        ),
-    .slot7_cs    ( main_cs       ),
-    .slot8_cs    ( 1'b0          ),
-
-    .slot0_ok    ( scr_ok        ),
-    .slot1_ok    ( obj_ok        ),
-    .slot2_ok    (               ),
-    .slot3_ok    (               ),
-    .slot4_ok    (               ),
-    .slot5_ok    (               ),
-    .slot6_ok    ( snd_ok        ),
-    .slot7_ok    ( main_ok       ),
-    .slot8_ok    (               ),
-
-    .slot0_addr  ({scr_addr,1'b0}),
-    .slot1_addr  ({obj_addr,1'b0}),
-    .slot2_addr  (               ),
-    .slot3_addr  (               ),
-    .slot4_addr  (               ),
-    .slot5_addr  (               ),
-    .slot6_addr  ( snd_addr      ),
-    .slot7_addr  ( main_addr     ),
-    .slot8_addr  (               ),
-
-    .slot0_dout  ( scr_data      ),
-    .slot1_dout  ( obj_data      ),
-    .slot2_dout  (               ),
-    .slot3_dout  (               ),
-    .slot4_dout  (               ),
-    .slot5_dout  (               ),
-    .slot6_dout  ( snd_data      ),
-    .slot7_dout  ( main_data     ),
-    .slot8_dout  (               ),
-
-    // SDRAM interface
-    .sdram_rd    ( sdram_req     ),
-    .sdram_ack   ( sdram_ack     ),
-    .data_dst    ( data_dst      ),
-    .data_rdy    ( data_rdy      ),
-    .downloading ( downloading   ),
-    .sdram_addr  ( sdram_addr    ),
-    .data_read   ( data_read     )
 );
 
 endmodule

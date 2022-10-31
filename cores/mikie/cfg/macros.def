@@ -2,7 +2,8 @@
 include ../../kicker/cfg/common.def
 
 CORENAME=JTMIKIE
-GAMETOP=jtmikie_game
+GAMETOP=jtmikie_game_sdram
+JTFRAME_SDRAM_BANKS
 
 SND_START=0x10000
 SCR_START=0x12000
