@@ -3,16 +3,13 @@ params:
   - { name: OBJ_OFFSET, value: "`OBJ_START >> 1" }
   - { name: PCM_OFFSET, value: "`PCM_START >> 1" }
 sdram:
-  preaddr: true
+  post_addr: true
   noswab: true
   banks:
     -
       buses:
         -
           name: scr
-          # 32-bit buses are indexed like
-          # scr_addr[13:1], the LSB (index 0)
-          # is always zero
           addr_width: 15
           data_width: 32
           offset: SCR_OFFSET

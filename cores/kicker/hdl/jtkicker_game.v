@@ -80,15 +80,15 @@ assign scr_cs = LVBL;
 assign pcm_cs = 1;
 
 always @(*) begin
-    post_addr = pre_addr;
+    post_addr = prog_addr;
     if( ioctl_addr[21:0] >= SCR_START && ioctl_addr[21:0]<OBJ_START ) begin
-        post_addr[0]   = ~pre_addr[3];
-        post_addr[3:1] =  pre_addr[2:0];
+        post_addr[0]   = ~prog_addr[3];
+        post_addr[3:1] =  prog_addr[2:0];
     end
     if( ioctl_addr[21:0] >= OBJ_START && ioctl_addr[21:0]<PCM_START ) begin
-        post_addr[0]   = ~pre_addr[3];
-        post_addr[1]   = ~pre_addr[4];
-        post_addr[5:2] =  { pre_addr[5], pre_addr[2:0] }; // making [5] explicit for now
+        post_addr[0]   = ~prog_addr[3];
+        post_addr[1]   = ~prog_addr[4];
+        post_addr[5:2] =  { prog_addr[5], prog_addr[2:0] }; // making [5] explicit for now
     end
 end
 
