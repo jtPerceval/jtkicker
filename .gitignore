@@ -53,3 +53,4 @@ cores/track/ver/game/waiver
 rom/trackfld
 cores/track/ver/game/defmacros.h
 cores/track/ver/game/test.cpp
+mem_ports.inc

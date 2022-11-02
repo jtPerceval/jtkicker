@@ -81,28 +81,27 @@ wire [ 7:0] snd_latch;
 
 wire        m2s_on;
 
-assign prog_rd    = 0;
 assign { dipsw_c, dipsw_b, dipsw_a } = dipsw[17:0];
 assign dip_flip = ~dipsw_c[0];
 assign debug_view = 0;
 
 always @(*) begin
     post_data = prog_data;
-    post_addr  = ioctl_addr;
+    pre_addr  = ioctl_addr;
     if( ioctl_addr[21:0] >= SCR_START && ioctl_addr[21:0]<OBJ_START ) begin
         post_data = { prog_data[3:0], prog_data[7:4] };
     end
     if( ioctl_addr[21:0] >= OBJ_START && ioctl_addr<PROM_START ) begin
-        post_addr[15]  =  ioctl_addr[0];
-        post_addr[14]  =  ioctl_addr[15];
-        post_addr[0]   =  ~ioctl_addr[14];
+        pre_addr[15]  =  ioctl_addr[0];
+        pre_addr[14]  =  ioctl_addr[15];
+        pre_addr[0]   =  ~ioctl_addr[14];
         case( ioctl_addr[5:4])
-            0: {post_addr[2:1]} = 1;
-            1: {post_addr[2:1]} = 2;
-            2: {post_addr[2:1]} = 3;
-            3: {post_addr[2:1]} = 0;
+            0: {pre_addr[2:1]} = 1;
+            1: {pre_addr[2:1]} = 2;
+            2: {pre_addr[2:1]} = 3;
+            3: {pre_addr[2:1]} = 0;
         endcase
-        post_addr[6:3] =  { ioctl_addr[6], ioctl_addr[3:1] };
+        pre_addr[6:3] =  { ioctl_addr[6], ioctl_addr[3:1] };
     end
 end
 
@@ -235,10 +234,10 @@ jtmikie_video u_video(
     .scr_data   ( scr_data  ),
     .scr_ok     ( scr_ok    ),
     // Objects
-    .obj_addr   ( obj_addr  ),
-    .obj_data   ( obj_data  ),
+    .obj_addr   ( objrom_addr  ),
+    .obj_data   ( objrom_data  ),
     .obj_cs     ( objrom_cs ),
-    .obj_ok     ( obj_ok    ),
+    .obj_ok     ( objrom_ok    ),
 
     .V16        ( V16       ),
     .HS         ( HS        ),

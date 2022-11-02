@@ -2,9 +2,10 @@ params:
   - { name: SCR_OFFSET, value: "`SCR_START >> 1" }
   - { name: OBJ_OFFSET, value: "`OBJ_START >> 1" }
   - { name: PCM_OFFSET, value: "`PCM_START >> 1" }
-sdram:
+download:
   post_addr: true
   noswab: true
+sdram:
   banks:
     -
       buses:
