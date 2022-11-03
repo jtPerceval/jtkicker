@@ -75,21 +75,19 @@ assign { dipsw_c, dipsw_b, dipsw_a } = dipsw[18:0];
 assign dip_flip = flip;
 assign game_led= 0;
 
-reg  [24:0] post_addr;
-wire [ 7:0] nc;
 wire        is_char = ioctl_addr[21:0] >= SCR_START && ioctl_addr[21:0]<OBJ_START;
 wire        is_obj  = ioctl_addr[21:0] >= OBJ_START && ioctl_addr[21:0]<PROM_START[21:0];
 
 always @(*) begin
-    post_addr = ioctl_addr;
+    pre_addr = ioctl_addr;
     if( is_char ) begin
-        post_addr[0]   =  ioctl_addr[3];
-        post_addr[3:1] =  ioctl_addr[2:0]^3'd1;
+        pre_addr[0]   =  ioctl_addr[3];
+        pre_addr[3:1] =  ioctl_addr[2:0]^3'd1;
     end
     if( is_obj ) begin
-        post_addr[0]   = ~ioctl_addr[3];
-        post_addr[1]   = ~ioctl_addr[4];
-        post_addr[5:2] =  { ioctl_addr[5], ioctl_addr[2:0] }; // making [5] explicit for now
+        pre_addr[0]   = ~ioctl_addr[3];
+        pre_addr[1]   = ~ioctl_addr[4];
+        pre_addr[5:2] =  { ioctl_addr[5], ioctl_addr[2:0] }; // making [5] explicit for now
     end
 end
 
@@ -193,10 +191,10 @@ jtpinpon_video u_video(
     .scr_data   ( scr_data  ),
     .scr_ok     ( scr_ok    ),
     // Objects
-    .obj_addr   ( obj_addr  ),
-    .obj_data   ( obj_data  ),
+    .obj_addr   ( objrom_addr),
+    .obj_data   ( objrom_data),
     .obj_cs     ( objrom_cs ),
-    .obj_ok     ( obj_ok    ),
+    .obj_ok     ( objrom_ok ),
 
     .V16        ( V16       ),
     .HS         ( HS        ),
