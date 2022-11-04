@@ -2,7 +2,8 @@
 include ../../kicker/cfg/common.def
 
 CORENAME=JTPINPON
-GAMETOP=jtpinpon_game
+GAMETOP=jtpinpon_game_sdram
+JTFRAME_SDRAM_BANKS
 
 SCR_START=0x08000
 OBJ_START=0xa000

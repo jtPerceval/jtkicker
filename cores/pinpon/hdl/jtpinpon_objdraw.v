@@ -50,7 +50,7 @@ module jtpinpon_objdraw #(
     input               prog_en,
 
     // SDRAM
-    output reg   [11:0] rom_addr,
+    output reg   [12:2] rom_addr,
     input        [31:0] rom_data,
     output reg          rom_cs,
     input               rom_ok,
@@ -84,7 +84,7 @@ always @(posedge clk, posedge rst) begin
         cnt      <= 0;
     end else if( cen2 ) begin
         if( draw && !busy ) begin
-            rom_addr <= { code[6:0], ysub^{4{vflip}}, 1'b0 }; // 7+4+1 = 12
+            rom_addr <= { code[6:0], ysub^{4{vflip}} }; // 7+4 = 11
             rom_cs   <= 1;
             cnt      <= 15;
             buf_a    <= xpos + (hflip ? 8'd15 : 8'h0) + HOFFSET;
