@@ -2,7 +2,8 @@
 include ../../kicker/cfg/common.def
 
 CORENAME=JTROADF
-GAMETOP=jtroadf_game
+GAMETOP=jtroadf_game_sdram
+JTFRAME_SDRAM_BANKS
 
 JTFRAME_BUTTONS=3
 JTFRAME_4PLAYERS

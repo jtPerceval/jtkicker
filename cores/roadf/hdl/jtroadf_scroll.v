@@ -109,7 +109,7 @@ end
 
 always @(posedge clk) if(pxl_cen) begin
     if( heff[2:0]==0 ) begin
-        rom_addr <= { code_msb, code, vf[2:0]^{3{vflip}} }; // 2+8+3=13 bits
+        rom_addr <= { code_msb, code, vf[2:0]^{3{vflip}} }; // 3+8+3=14 bits
         pal_msb  <= attr[3:0];
         hflip    <= attr[4]^flip;
     end
