@@ -49,7 +49,7 @@ module jtpinpon_video(
     input               scr_ok,
 
     // Objects
-    output       [11:0] obj_addr,
+    output       [12:2] obj_addr,
     input        [31:0] obj_data,
     output              obj_cs,
     input               obj_ok,

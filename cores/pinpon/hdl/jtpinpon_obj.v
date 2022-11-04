@@ -43,7 +43,7 @@ module jtpinpon_obj(
     input               prog_en,
 
     // SDRAM
-    output       [11:0] rom_addr,
+    output       [12:2] rom_addr,
     input        [31:0] rom_data,
     output              rom_cs,
     input               rom_ok,

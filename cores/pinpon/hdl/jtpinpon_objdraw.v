@@ -50,7 +50,7 @@ module jtpinpon_objdraw #(
     input               prog_en,
 
     // SDRAM
-    output reg   [11:0] rom_addr,
+    output reg   [12:2] rom_addr,
     input        [31:0] rom_data,
     output reg          rom_cs,
     input               rom_ok,
