@@ -4,7 +4,6 @@ mraauthor=["jotego"]
 
 [features]
 # debug=true
-nvram=$JTFRAME_IOCTL_RD
 
 [parse]
 sourcefile="trackfld.cpp"
