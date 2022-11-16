@@ -141,7 +141,8 @@ jtkicker_scroll #(.LAYOUT(2)) u_scroll(
     .rom_ok     ( scr_ok    ),
 
     .pxl        ( scr_pxl   ),
-    .prio       ( scr_prio  )
+    .prio       ( scr_prio  ),
+    .debug_bus  (           )
 );
 
 jtsbaskt_obj u_obj(

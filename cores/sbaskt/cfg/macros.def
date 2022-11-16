@@ -2,8 +2,9 @@
 include ../../kicker/cfg/common.def
 
 CORENAME=JTSBASKT
-GAMETOP=jtsbaskt_game
+GAMETOP=jtsbaskt_game_sdram
 JTFRAME_VERTICAL
+JTFRAME_SDRAM_BANKS
 
 VIDEO_MODULE=jtsbaskt_video
 MAIN_MODULE=jtsbaskt_main

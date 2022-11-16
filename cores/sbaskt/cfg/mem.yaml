@@ -16,7 +16,7 @@ sdram:
           offset: SCR_OFFSET
           cs: LVBL
         -
-          name: objrom
+          name: obj
           addr_width: 16
           data_width: 32
           offset: OBJ_OFFSET
@@ -28,7 +28,7 @@ sdram:
           cs: "1'b1"
         -
           name: snd
-          addr_width: 13
+          addr_width: 14
           data_width: 8
           offset: SND_OFFSET
         -
